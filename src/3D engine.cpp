@@ -20,21 +20,21 @@ namespace Tools {
 
 #define IS_SET_FLAG(num, flag) num & flag
 
-	template<typename T> class Vec2D {
+	template<typename T> class Point2D {
 		public:
 			T X, Y;
 
-			Vec2D(const T& _X, const T& _Y)
+			Point2D(const T& _X, const T& _Y)
 					:
 						X(_X),
 						Y(_Y) {
 			}
-			Vec2D& operator+=(const Vec2D& v) {
+			Point2D& operator+=(const Point2D& v) {
 				X += v.X;
 				Y += v.Y;
 				return *this;
 			}
-			Vec2D& operator*(const Vec2D& v) {
+			Point2D& operator*(const Point2D& v) {
 				X *= v.X;
 				Y *= v.Y;
 				return *this;
@@ -48,24 +48,24 @@ namespace Tools {
 				this->Y /= length;
 			}
 
-			virtual ~Vec2D() {
+			virtual ~Point2D() {
 			}
 	};
-	template<typename T> class Vec3D : public Vec2D<T> {
+	template<typename T> class Point3D : public Point2D<T> {
 		public:
 			T Z;
 
-			Vec3D(const T& _X, const T& _Y, const T& _Z)
+			Point3D(const T& _X, const T& _Y, const T& _Z)
 					:
-						Vec2D<T>(_X, _Y),
+						Point2D<T>(_X, _Y),
 						Z(_Z) {
 			}
-			Vec3D& operator+=(const Vec3D& v) {
-				Vec2D<T>::operator +=(static_cast<Vec2D<T>>(v));
+			Point3D& operator+=(const Point3D& v) {
+				Point2D<T>::operator +=(static_cast<Point2D<T>>(v));
 				Z += v.Z;
 				return *this;
 			}
-			Vec3D& operator*(const Vec2D<T>& v) {
+			Point3D& operator*(const Point2D<T>& v) {
 				this->X *= v.X;
 				this->Y *= v.Y;
 				return *this;
@@ -80,13 +80,13 @@ namespace Tools {
 				this->Z /= length;
 			}
 	};
-	template<typename T> class Rect : public Vec2D<T> {
+	template<typename T> class Rect : public Point2D<T> {
 		public:
 			T W, H;
 
 			Rect(const T& _X, const T& _Y, const T& _W, const T& _H)
 					:
-						Vec2D<T>(_X, _Y),
+						Point2D<T>(_X, _Y),
 						W(_W),
 						H(_H) {
 			}
@@ -134,6 +134,7 @@ namespace Graphics {
 	struct ByteColor {
 			char R, G, B, A;
 	};
+
 	template<UINT rows, UINT cols> struct Matrix {
 			static const UINT ROWS = rows, COLS = cols;
 			GLfloat matrix[rows * cols];
@@ -166,35 +167,106 @@ namespace Graphics {
 				memcpy(this->matrix, temp, sizeof(temp));
 				return *this;
 			}
-			template<UINT _rows = rows, UINT _cols = cols>
-			Matrix<rows, cols>& operator+=(const Matrix<_rows, _cols>& matrix) {
+			template<UINT _rows, UINT _cols>
+			Matrix<rows, cols>& operator+=(
+					const Matrix<_rows, _cols>& matrix) {
 				for (UINT i = 0; i < rows; ++i)
 					for (UINT j = 0, index = 0; j < cols;
 							++j, index = i * cols + j)
 						this->matrix[index] += matrix.matrix[index];
 				return *this;
 			}
+			template<UINT _rows, UINT _cols>
+			inline Matrix<rows, cols>& operator=(
+					const Matrix<_rows, cols>& matrix) {
+				memcpy(this->matrix, matrix.matrix, sizeof(this->matrix));
+				return *this;
+			}
 
 			GLfloat& operator[](UINT i) {
 				return matrix[i];
 			}
-			GLint getLength() {
+			inline GLint getLength() const {
 				return sizeof(matrix) / sizeof(GLfloat);
 			}
 	};
-	class MatMatrix {
+	using Mat4 = Matrix<4, 4>;
+	using Mat3 = Matrix<3, 3>;
+	using Mat2 = Matrix<2, 2>;
+
+	using Vec4 = Matrix<4, 1>;
+	using Vec3 = Matrix<3, 1>;
+	using Vec2 = Matrix<2, 1>;
+
+	template<UINT rows> class MatMatrix {
 		public:
-			/** Rotacja macierzy [ x, y, z, w ] razy kąt */
-			static void translate(Matrix<1, 4>& matrix,
-					const Vec3D<GLfloat>& v) {
-				matrix *= Matrix<4, 4>( {
+			/** Operacje na macierzy macierzy [ x, y, z, w ] */
+			static Mat4 identity() {
+				return Mat4( {
+						1, 0, 0, 0,
+						0, 1, 0, 0,
+						0, 0, 1, 0,
+						0, 0, 0, 1
+				});
+			}
+			static inline void identity(Matrix<rows, 4>& matrix) {
+				matrix = identity();
+			}
+
+			static Mat4 translate(const Point3D<GLfloat>& v) {
+				return Mat4( {
 						1, 0, 0, 0,
 						0, 1, 0, 0,
 						0, 0, 1, 0,
 						v.X, v.Y, v.Z, 1
 				});
 			}
+			static inline void translate(Matrix<rows, 4>& matrix,
+					const Point3D<GLfloat>& v) {
+				matrix *= translate(v);
+			}
+
+			static Mat4 scale(const Point3D<GLfloat>& scale) {
+				return Mat4( {
+						scale.X, 0, 0, 0,
+						0, scale.Y, 0, 0,
+						0, 0, scale.Z, 0,
+						0, 0, 0, 1
+				});
+			}
+			static inline void scale(Matrix<rows, 4>& matrix,
+					const Point3D<GLfloat>& _scale) {
+				matrix *= scale(_scale);
+			}
+
+			static Mat4 rotate(GLfloat theta, const Point3D<GLfloat>& axis) {
+				float c = cosf(theta), s = sinf(theta), m_c = 1.0 - c;
+				return Mat4( {
+						// Wers 1
+						(float) pow(axis.X, 2) * m_c + c,
+						axis.X * axis.Y * m_c - axis.Z * s,
+						axis.X * axis.Z * m_c + axis.Y * s,
+						0,
+						// Wers 2
+						axis.X * axis.Y * m_c + axis.Z * s,
+						(float) pow(axis.Y, 2) * m_c + c,
+						axis.Y * axis.Z * m_c - axis.X * s,
+						0,
+						// Wers 3
+						axis.X * axis.Z * m_c - axis.Y * s,
+						axis.Y * axis.Z * m_c + axis.X * s,
+						(float) pow(axis.Z, 2) * m_c + c,
+						0,
+						// Wers 4
+						0, 0, 0, 1
+				});
+			}
+			static inline void rotate(Matrix<rows, 4>& matrix, GLfloat theta,
+					const Point3D<GLfloat>& axis) {
+				matrix *= rotate(theta, axis);
+			}
 	};
+
 	class Shader {
 		public:
 			GLint program = 0;
@@ -236,6 +308,31 @@ namespace Graphics {
 		}
 		return shader;
 	}
+
+	class Drawable {
+		public:
+			void draw();
+	};
+	GLint genGLBuffer(GLfloat* data, GLint type) {
+		GLuint buffer = 0;
+
+		glGenBuffers(1, &buffer);
+		glBindBuffer(type, buffer);
+		glBufferData(type, sizeof(data), data, GL_STATIC_DRAW);
+		delete[] data;
+
+		return buffer;
+	}
+	class VBO {
+		public:
+			GLuint vertices, indices;
+
+			VBO(GLfloat* _vertices, GLfloat* _indices)
+					:
+						vertices(genGLBuffer(_vertices, GL_ARRAY_BUFFER)),
+						indices(genGLBuffer(_indices, GL_ELEMENT_ARRAY_BUFFER)) {
+			}
+	};
 }
 namespace Window {
 	using namespace Tools;
@@ -243,7 +340,7 @@ namespace Window {
 	class Window {
 		private:
 			SDL_Window* window;
-			Vec2D<int> bounds;
+			Point2D<int> bounds;
 
 			enum Flags {
 				STOP = 0,
@@ -252,7 +349,7 @@ namespace Window {
 			UINT flags = Flags::RUNNING;
 
 		public:
-			Window(const Vec2D<int>& _bounds)
+			Window(const Point2D<int>& _bounds)
 					:
 						bounds(_bounds) {
 				if (initialize())
@@ -306,11 +403,11 @@ namespace Window {
 }
 int main() {
 	try {
-		Graphics::Matrix<1, 4> d = {
-				-2, -3, 1, 1
-		};
-		Graphics::MatMatrix::translate(d, { 2, 13, 3 });
-		cout << d[1] << endl;
+		Graphics::Mat4 d = { -2, -3, 1, 1, 4, 4, 4 };
+		Graphics::MatMatrix<4>::rotate(d, 2.f, { 2, 2, 2 });
+		Graphics::MatMatrix<4>::identity(d);
+
+		cout << d[4] << endl;
 
 		Window::Window wnd( { 400, 400 });
 	} catch (const string& ex) {
