@@ -12,6 +12,9 @@
 
 #include <sstream>
 #include <fstream>
+#include <stdio.h>
+
+#include <boost/scoped_ptr.hpp>
 
 using namespace std;
 
@@ -108,6 +111,10 @@ namespace Tools {
 			static deque<Log> logs;
 	};
 	deque<Log> Log::logs;
+
+	template<class T> inline UINT getArrayLength(T* ptr) {
+		return sizeof(ptr) / sizeof(T);
+	}
 }
 namespace IO {
 	using namespace Tools;
@@ -130,11 +137,19 @@ namespace IO {
 }
 namespace Graphics {
 	using namespace IO;
+	using namespace boost;
 
 	struct ByteColor {
 			char R, G, B, A;
 	};
 
+	/**
+	 * Specjalizacje szablonu są
+	 * szybsze nieżeli ciągłe
+	 * kasowanie i tworzenie
+	 * dynamicznie alokowanych
+	 * tablic w tymczasowych macierzach
+	 */
 	template<UINT rows, UINT cols> struct Matrix {
 			static const UINT ROWS = rows, COLS = cols;
 			GLfloat matrix[rows * cols];
@@ -187,7 +202,7 @@ namespace Graphics {
 				return matrix[i];
 			}
 			inline GLint getLength() const {
-				return sizeof(matrix) / sizeof(GLfloat);
+				return getArrayLength(matrix);
 			}
 	};
 	using Mat4 = Matrix<4, 4>;
@@ -198,6 +213,11 @@ namespace Graphics {
 	using Vec3 = Matrix<3, 1>;
 	using Vec2 = Matrix<2, 1>;
 
+	/**
+	 * Żeby nie pakować wszystkiego
+	 * do matrixa to jest oddzielona
+	 * klasa do przekształceń
+	 */
 	template<UINT rows> class MatMatrix {
 		public:
 			/** Operacje na macierzy macierzy [ x, y, z, w ] */
@@ -267,6 +287,12 @@ namespace Graphics {
 			}
 	};
 
+	/**
+	 * Rendering brył
+	 * Atrybut:
+	 * 0 = in_Position
+	 * 1 = in_Color
+	 */
 	class Shader {
 		public:
 			GLint program = 0;
@@ -279,12 +305,25 @@ namespace Graphics {
 								Shader::compileShader(geo, GL_GEOMETRY_SHADER) });
 			}
 
+			inline void begin() const {
+				glUseProgram(program);
+			}
+			inline void end() const {
+				glUseProgram(program);
+			}
+
+			~Shader() {
+				glDeleteProgram(program);
+			}
+
 		private:
 			void linkShader(initializer_list<GLint> shaders) {
 				program = glCreateProgram();
 				for (GLint shader : shaders)
 					if (shader != 0)
 						glAttachShader(program, shader);
+				glBindAttribLocation(program, 0, "in_Position");
+				glBindAttribLocation(program, 1, "in_Color");
 				glLinkProgram(program);
 			}
 
@@ -297,9 +336,12 @@ namespace Graphics {
 
 		GLint shader = glCreateShader(type);
 		GLint result, length = source.length();
+		char* buffer = allocString(source);
 
-		glShaderSource(shader, 1, (const char **) allocString(source), &length);
+		glShaderSource(shader, 1, (const GLchar**) &buffer, &length);
 		glCompileShader(shader);
+
+		delete[] buffer;
 
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 		if (result == GL_FALSE) {
@@ -311,26 +353,76 @@ namespace Graphics {
 
 	class Drawable {
 		public:
-			void draw();
+			virtual void draw(GLint)=0;
+			virtual ~Drawable() {
+			}
 	};
-	GLint genGLBuffer(GLfloat* data, GLint type) {
+
+	struct Vertex {
+			GLfloat x, y, z;
+			GLfloat r, g, b, a;
+	};
+	template<typename T> GLint genGLBuffer(const T* data, GLuint len,
+			GLint type) {
 		GLuint buffer = 0;
+		if (data == nullptr)
+			return buffer;
 
 		glGenBuffers(1, &buffer);
 		glBindBuffer(type, buffer);
-		glBufferData(type, sizeof(data), data, GL_STATIC_DRAW);
-		delete[] data;
+		glBufferData(type, len * sizeof(T), data, GL_STATIC_DRAW);
 
 		return buffer;
 	}
-	class VBO {
+	class Shape : public Drawable {
 		public:
-			GLuint vertices, indices;
+			GLuint vao = 0, vbo = 0;
 
-			VBO(GLfloat* _vertices, GLfloat* _indices)
-					:
-						vertices(genGLBuffer(_vertices, GL_ARRAY_BUFFER)),
-						indices(genGLBuffer(_indices, GL_ELEMENT_ARRAY_BUFFER)) {
+			Shape(Vertex* buffer, GLint len) {
+				create(buffer, len);
+			}
+
+			void draw(GLint mode) {
+				static Shader shader(
+						getFileContents("shaders/fragment_shader.txt"),
+						getFileContents("shaders/vertex_shader.txt"),
+						"");
+				shader.begin();
+
+				glBindVertexArray(vao);
+				glDrawArrays(mode, 0, 3);
+				glBindVertexArray(0);
+
+				shader.end();
+			}
+
+			~Shape() {
+				glDeleteBuffers(1, &vbo);
+			}
+		private:
+			void create(Vertex* buffer, GLint len) {
+				glGenVertexArrays(1, &vao);
+				glBindVertexArray(vao);
+
+				// Generowanie bufora
+				vbo = genGLBuffer<Vertex>(
+						buffer,
+						len,
+						GL_ARRAY_BUFFER);
+
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+
+				// Vertex
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+						sizeof(Vertex), 0);
+				glEnableVertexAttribArray(0);
+
+				// Color
+				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE,
+						sizeof(Vertex),
+						BUFFER_OFFSET(3 * sizeof(GLfloat)));
+				glEnableVertexAttribArray(1);
+				glBindVertexArray(0);
 			}
 	};
 }
@@ -347,6 +439,8 @@ namespace Window {
 				RUNNING = 1 << 0
 			};
 			UINT flags = Flags::RUNNING;
+
+			Graphics::Shape* vbo;
 
 		public:
 			Window(const Point2D<int>& _bounds)
@@ -379,12 +473,24 @@ namespace Window {
 			void initContext() {
 				glewExperimental = GL_TRUE;
 				glewInit();
+
+				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
+				SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+				SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 			}
 			void run() {
 				SDL_GLContext gl = SDL_GL_CreateContext(window);
 				SDL_Event event;
 
 				initContext();
+
+				Graphics::Vertex p[] = {
+						{ -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.f },
+						{ 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.f },
+						{ 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.f } };
+				vbo = new Graphics::Shape(p, 21);
 				while (IS_SET_FLAG(flags, Flags::RUNNING)) {
 					while (SDL_PollEvent(&event))
 						switch (event.type) {
@@ -395,6 +501,8 @@ namespace Window {
 					glClearColor(0, 0, 0, 1);
 					glClear(GL_COLOR_BUFFER_BIT);
 
+					vbo->draw(GL_TRIANGLES);
+
 					SDL_GL_SwapWindow(window);
 				}
 				SDL_GL_DeleteContext(gl);
@@ -403,12 +511,6 @@ namespace Window {
 }
 int main() {
 	try {
-		Graphics::Mat4 d = { -2, -3, 1, 1, 4, 4, 4 };
-		Graphics::MatMatrix<4>::rotate(d, 2.f, { 2, 2, 2 });
-		Graphics::MatMatrix<4>::identity(d);
-
-		cout << d[4] << endl;
-
 		Window::Window wnd( { 400, 400 });
 	} catch (const string& ex) {
 		cout << ex;
