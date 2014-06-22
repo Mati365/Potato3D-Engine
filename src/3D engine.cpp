@@ -6,9 +6,9 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include <initializer_list>
 #include <math.h>
 #include <deque>
-#include <initializer_list>
 
 #include <sstream>
 #include <fstream>
@@ -97,6 +97,16 @@ namespace Tools {
 				return this->X * this->Y;
 			}
 	};
+	template<typename T> void safe_delete(T*& ptr, bool arr) {
+		if (ptr == nullptr)
+			return;
+
+		if (arr)
+			delete[] ptr;
+		else
+			delete ptr;
+		ptr = nullptr;
+	}
 
 	struct Log {
 			enum Flag {
@@ -139,89 +149,117 @@ namespace Graphics {
 	using namespace IO;
 	using namespace boost;
 
-	struct ByteColor {
-			char R, G, B, A;
-	};
+	template<typename T> class Matrix {
+		public:
+			T* matrix = nullptr;
+			UINT cols = 0,
+					rows = 0;
 
-	/**
-	 * Specjalizacje szablonu są
-	 * szybsze nieżeli ciągłe
-	 * kasowanie i tworzenie
-	 * dynamicznie alokowanych
-	 * tablic w tymczasowych macierzach
-	 */
-	template<UINT rows, UINT cols> struct Matrix {
-			static const UINT ROWS = rows, COLS = cols;
-			GLfloat matrix[rows * cols];
-
-			Matrix() {
-				memset(&matrix, 0, sizeof(matrix));
+			Matrix(UINT _cols, UINT _rows)
+					:
+						cols(_cols),
+						rows(_rows) {
+				matrix = new T[rows * cols];
+				memset(matrix, 0, rows * cols * sizeof(GLfloat));
 			}
-			Matrix(initializer_list<GLfloat> array) {
+			Matrix(UINT _cols, UINT _rows, const initializer_list<T>& array)
+					:
+						Matrix<T>(_cols, _rows) {
 				for (UINT i = 0; i < array.size(); ++i)
 					matrix[i] = *(array.begin() + i);
 			}
 
+			void print() const {
+				for (UINT i = 0; i < rows; ++i) {
+					for (UINT j = 0; j < cols; ++j)
+						cout << matrix[i * cols + j] << " ";
+					cout << endl;
+				}
+			}
+
 			/** Operacje na macierzach */
-			Matrix<rows, cols>& operator*=(GLfloat k) {
-				for (GLfloat& a : matrix)
-					a *= k;
+			Matrix<T>& operator*=(T k) {
+				for (UINT i = 0; i < rows * cols; ++i)
+					matrix[i] *= k;
 				return *this;
 			}
-			template<UINT _rows, UINT _cols>
-			Matrix<rows, cols>& operator*=(const Matrix<_rows, _cols>& matrix) {
-				GLfloat temp[rows * cols];
-				for (UINT i = 0; i < rows; ++i)
-					for (UINT j = 0; j < cols; ++j) {
-						GLfloat sum = 0.f;
+			Matrix<T>& operator*=(const Matrix<T>& matrix) {
+				T* temp = new T[rows * matrix.cols];
+				for (UINT i = 0; i < matrix.cols; ++i)
+					for (UINT j = 0; j < rows; ++j) {
+						T sum = 0;
 						for (UINT k = 0; k < cols; ++k)
-							sum += (*this)[i * cols + k]
-									* matrix.matrix[k * _cols + j];
-						temp[i * cols + j] = sum;
+							sum += this->matrix[j * cols + k]
+									* matrix.matrix[k * matrix.cols + i];
+						temp[j * matrix.cols + i] = sum;
 					}
-				memcpy(this->matrix, temp, sizeof(temp));
+
+				safe_delete<GLfloat>(this->matrix, true);
+
+				cols = matrix.cols;
+				this->matrix = temp;
+
 				return *this;
 			}
-			template<UINT _rows, UINT _cols>
-			Matrix<rows, cols>& operator+=(
-					const Matrix<_rows, _cols>& matrix) {
+			Matrix<T>& operator+=(const Matrix<T>& matrix) {
 				for (UINT i = 0; i < rows; ++i)
 					for (UINT j = 0, index = 0; j < cols;
 							++j, index = i * cols + j)
-						this->matrix[index] += matrix.matrix[index];
+						this->matrix[index] += *matrix.matrix[index];
 				return *this;
 			}
-			template<UINT _rows, UINT _cols>
-			inline Matrix<rows, cols>& operator=(
-					const Matrix<_rows, cols>& matrix) {
-				memcpy(this->matrix, matrix.matrix, sizeof(this->matrix));
+			Matrix<T>& operator=(const Matrix<T>& matrix) {
+				rows = matrix.rows;
+				cols = matrix.cols;
+
+				safe_delete<GLfloat>(this->matrix, true);
+				this->matrix = new T[rows * cols];
+
+				memcpy(this->matrix, matrix.matrix,
+						rows * cols * sizeof(GLfloat));
+
 				return *this;
 			}
 
-			GLfloat& operator[](UINT i) {
+			T* get(UINT x, UINT y) {
+				return matrix[y * cols + x];
+			}
+			T* operator[](UINT i) {
 				return matrix[i];
 			}
 			inline GLint getLength() const {
-				return getArrayLength(matrix);
+				return rows * cols;
+			}
+
+			~Matrix() {
+				safe_delete(matrix, true);
 			}
 	};
-	using Mat4 = Matrix<4, 4>;
-	using Mat3 = Matrix<3, 3>;
-	using Mat2 = Matrix<2, 2>;
+	template<typename T, UINT COLS, UINT ROWS> class t_Matrix : public Matrix<T> {
+		public:
+			t_Matrix()
+					:
+						Matrix<T>(COLS, ROWS) {
+			}
+			t_Matrix(const initializer_list<T>& array)
+					:
+						Matrix<T>(COLS, ROWS, array) {
+			}
+	};
 
-	using Vec4 = Matrix<4, 1>;
-	using Vec3 = Matrix<3, 1>;
-	using Vec2 = Matrix<2, 1>;
+	using Mat4 = t_Matrix<GLfloat, 4, 4>;
+	using Mat3 = t_Matrix<GLfloat, 3, 3>;
+	using Mat2 = t_Matrix<GLfloat, 2, 2>;
 
-	/**
-	 * Żeby nie pakować wszystkiego
-	 * do matrixa to jest oddzielona
-	 * klasa do przekształceń
-	 */
-	template<UINT rows> class MatMatrix {
+	using Vec4 = t_Matrix<GLfloat, 4, 1>;
+	using Vec3 = t_Matrix<GLfloat, 3, 1>;
+	using Vec2 = t_Matrix<GLfloat, 2, 1>;
+
+#define FMAT_MATH Graphics::MatMatrix<GLfloat>
+	template<typename T> class MatMatrix {
 		public:
 			/** Operacje na macierzy macierzy [ x, y, z, w ] */
-			static Mat4 identity() {
+			static constexpr Mat4 identity() {
 				return Mat4( {
 						1, 0, 0, 0,
 						0, 1, 0, 0,
@@ -229,7 +267,7 @@ namespace Graphics {
 						0, 0, 0, 1
 				});
 			}
-			static inline void identity(Matrix<rows, 4>& matrix) {
+			static inline void identity(Matrix<T>& matrix) {
 				matrix = identity();
 			}
 
@@ -241,7 +279,7 @@ namespace Graphics {
 						v.X, v.Y, v.Z, 1
 				});
 			}
-			static inline void translate(Matrix<rows, 4>& matrix,
+			static inline void translate(Matrix<T>& matrix,
 					const Point3D<GLfloat>& v) {
 				matrix *= translate(v);
 			}
@@ -254,12 +292,13 @@ namespace Graphics {
 						0, 0, 0, 1
 				});
 			}
-			static inline void scale(Matrix<rows, 4>& matrix,
+			static inline void scale(Matrix<T>& matrix,
 					const Point3D<GLfloat>& _scale) {
 				matrix *= scale(_scale);
 			}
 
-			static Mat4 rotate(GLfloat theta, const Point3D<GLfloat>& axis) {
+			static Mat4 rotate(GLfloat theta,
+					const Point3D<GLfloat>& axis) {
 				float c = cosf(theta), s = sinf(theta), m_c = 1.0 - c;
 				return Mat4( {
 						// Wers 1
@@ -281,7 +320,7 @@ namespace Graphics {
 						0, 0, 0, 1
 				});
 			}
-			static inline void rotate(Matrix<rows, 4>& matrix, GLfloat theta,
+			static inline void rotate(Matrix<T>& matrix, GLfloat theta,
 					const Point3D<GLfloat>& axis) {
 				matrix *= rotate(theta, axis);
 			}
@@ -359,8 +398,7 @@ namespace Graphics {
 	};
 
 	struct Vertex {
-			GLfloat x, y, z;
-			GLfloat r, g, b, a;
+			GLfloat x, y, z, w, r, g, b, a;
 	};
 	template<typename T> GLint genGLBuffer(const T* data, GLuint len,
 			GLint type) {
@@ -413,14 +451,14 @@ namespace Graphics {
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 				// Vertex
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+				glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE,
 						sizeof(Vertex), 0);
 				glEnableVertexAttribArray(0);
 
 				// Color
 				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE,
 						sizeof(Vertex),
-						BUFFER_OFFSET(3 * sizeof(GLfloat)));
+						BUFFER_OFFSET(4 * sizeof(GLfloat)));
 				glEnableVertexAttribArray(1);
 				glBindVertexArray(0);
 			}
@@ -487,10 +525,10 @@ namespace Window {
 				initContext();
 
 				Graphics::Vertex p[] = {
-						{ -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.f },
-						{ 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.f },
-						{ 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.f } };
-				vbo = new Graphics::Shape(p, 21);
+						{ -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.f },
+						{ 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.f },
+						{ 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.f } };
+				vbo = new Graphics::Shape(p, 24);
 				while (IS_SET_FLAG(flags, Flags::RUNNING)) {
 					while (SDL_PollEvent(&event))
 						switch (event.type) {
@@ -511,6 +549,10 @@ namespace Window {
 }
 int main() {
 	try {
+		Graphics::Mat4 m( { 1, 1, 1, 1 });
+		FMAT_MATH::identity(m);
+		m.print();
+
 		Window::Window wnd( { 400, 400 });
 	} catch (const string& ex) {
 		cout << ex;
