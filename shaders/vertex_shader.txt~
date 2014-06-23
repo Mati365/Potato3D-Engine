@@ -3,9 +3,10 @@ in  vec3 in_Position;
 in  vec4 in_Color;
 
 out vec4 ex_Color;
+uniform mat4x4 mvp;
+
 void main(void) {
 	vec4 p = vec4(in_Position, 1);
-	p.x += 0.1;
-	gl_Position = p;
+	gl_Position = p * mvp;
 	ex_Color = in_Color;
 }

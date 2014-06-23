@@ -21,7 +21,9 @@ using namespace std;
 namespace Tools {
 	typedef unsigned short int UINT;
 
-#define IS_SET_FLAG(num, flag) num & flag
+#define IS_SET_FLAG(num, flag) (num & flag)
+#define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
+#define TO_RAD(angle) (angle * 180.0 / 3.145)
 
 	template<typename T> class Point2D {
 		public:
@@ -32,16 +34,22 @@ namespace Tools {
 						X(_X),
 						Y(_Y) {
 			}
-			Point2D& operator+=(const Point2D& v) {
+			Point2D<T>& operator+=(const Point2D<T>& v) {
 				X += v.X;
 				Y += v.Y;
 				return *this;
 			}
-			Point2D& operator*(const Point2D& v) {
+			Point2D<T>& operator-=(const Point2D<T>& v) {
+				X -= v.X;
+				Y -= v.Y;
+				return *this;
+			}
+			Point2D<T>& operator*=(const Point2D<T>& v) {
 				X *= v.X;
 				Y *= v.Y;
 				return *this;
 			}
+
 			virtual inline T getVecLength() const {
 				return sqrt(pow(X, 2) + pow(Y, 2));
 			}
@@ -68,11 +76,17 @@ namespace Tools {
 				Z += v.Z;
 				return *this;
 			}
+			Point3D& operator-=(const Point3D& v) {
+				Point2D<T>::operator -=(static_cast<Point2D<T>>(v));
+				Z -= v.Z;
+				return *this;
+			}
 			Point3D& operator*(const Point2D<T>& v) {
 				this->X *= v.X;
 				this->Y *= v.Y;
 				return *this;
 			}
+
 			inline T getVecLength() const {
 				return sqrt(pow(this->X, 2) + pow(this->Y, 2) + pow(this->Z, 2));
 			}
@@ -83,6 +97,10 @@ namespace Tools {
 				this->Z /= length;
 			}
 	};
+
+	using FPoint2D = Point2D<GLfloat>;
+	using FPoint3D = Point3D<GLfloat>;
+
 	template<typename T> class Rect : public Point2D<T> {
 		public:
 			T W, H;
@@ -122,9 +140,13 @@ namespace Tools {
 	};
 	deque<Log> Log::logs;
 
-	template<class T> inline UINT getArrayLength(T* ptr) {
-		return sizeof(ptr) / sizeof(T);
-	}
+	template<typename T> class Singleton {
+		public:
+			static T& getInstance() {
+				static T t;
+				return t;
+			}
+	};
 }
 namespace IO {
 	using namespace Tools;
@@ -168,7 +190,6 @@ namespace Graphics {
 				for (UINT i = 0; i < array.size(); ++i)
 					matrix[i] = *(array.begin() + i);
 			}
-
 			void print() const {
 				for (UINT i = 0; i < rows; ++i) {
 					for (UINT j = 0; j < cols; ++j)
@@ -351,6 +372,26 @@ namespace Graphics {
 				glUseProgram(program);
 			}
 
+			/** Uniformy */
+#define UNIFORM_LOC(variable) glGetUniformLocation(program, variable)
+			void setUniform(const char* variable, float value) {
+				glProgramUniform1f(program,
+						UNIFORM_LOC(variable),
+						value);
+			}
+			void setUniform(const char* variable, int value) {
+				glProgramUniform1i(program,
+						UNIFORM_LOC(variable),
+						value);
+			}
+			void setUniform(const char* variable, const Mat4& value) {
+				glProgramUniformMatrix4fv(program,
+						UNIFORM_LOC(variable),
+						1,
+						GL_FALSE,
+						value.matrix);
+			}
+
 			~Shader() {
 				glDeleteProgram(program);
 			}
@@ -392,14 +433,14 @@ namespace Graphics {
 
 	class Drawable {
 		public:
-			virtual void draw(GLint)=0;
+			virtual void draw(GLint, const Mat4&)=0;
 			virtual ~Drawable() {
 			}
 	};
-
 	struct Vertex {
 			GLfloat x, y, z, w, r, g, b, a;
 	};
+
 	template<typename T> GLint genGLBuffer(const T* data, GLuint len,
 			GLint type) {
 		GLuint buffer = 0;
@@ -419,13 +460,16 @@ namespace Graphics {
 			Shape(Vertex* buffer, GLint len) {
 				create(buffer, len);
 			}
-
-			void draw(GLint mode) {
+			void draw(GLint mode, const Mat4& mvp) {
 				static Shader shader(
 						getFileContents("shaders/fragment_shader.txt"),
 						getFileContents("shaders/vertex_shader.txt"),
 						"");
+				static float angle = 0.f;
+				angle += 0.000001;
+
 				shader.begin();
+				shader.setUniform("mvp", FMAT_MATH::rotate(TO_RAD(angle), { 0.0, 0.0, 1.0 }));
 
 				glBindVertexArray(vao);
 				glDrawArrays(mode, 0, 3);
@@ -461,6 +505,26 @@ namespace Graphics {
 						BUFFER_OFFSET(4 * sizeof(GLfloat)));
 				glEnableVertexAttribArray(1);
 				glBindVertexArray(0);
+			}
+	};
+}
+namespace Engine {
+	using namespace Graphics;
+
+#define MAT_STACK Engine::MatrixStack::getInstance()
+	class MatrixStack : public Singleton<MatrixStack> {
+		public:
+			Mat4 projection, view, model;
+	};
+	class GlobalRenderer : public Drawable {
+		public:
+			/**
+			 * Reimplementacja z:
+			 * http://msdn.microsoft.com/en-us/library/windows/desktop/bb281710(v=vs.85).aspx
+			 */
+			static Mat4 lookAt(const FPoint3D& cam_pos,
+					const FPoint3D& target_pos, const FPoint3D& up_vector) {
+				//zaxis = normal(cameraTarget - cameraPosition)
 			}
 	};
 }
@@ -539,7 +603,7 @@ namespace Window {
 					glClearColor(0, 0, 0, 1);
 					glClear(GL_COLOR_BUFFER_BIT);
 
-					vbo->draw(GL_TRIANGLES);
+					vbo->draw(GL_TRIANGLES, MAT_STACK.projection);
 
 					SDL_GL_SwapWindow(window);
 				}
@@ -549,10 +613,6 @@ namespace Window {
 }
 int main() {
 	try {
-		Graphics::Mat4 m( { 1, 1, 1, 1 });
-		FMAT_MATH::identity(m);
-		m.print();
-
 		Window::Window wnd( { 400, 400 });
 	} catch (const string& ex) {
 		cout << ex;
