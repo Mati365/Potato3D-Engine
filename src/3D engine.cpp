@@ -25,79 +25,87 @@ namespace Tools {
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
 #define TO_RAD(angle) (angle * 180.0 / 3.145)
 
-	template<typename T> class Point2D {
+	template<typename T> class Point3D {
 		public:
-			T X, Y;
+			T X = 0,
+					Y = 0,
+					Z = 0;
 
-			Point2D(const T& _X, const T& _Y)
-					:
-						X(_X),
-						Y(_Y) {
+			Point3D() {
 			}
-			Point2D<T>& operator+=(const Point2D<T>& v) {
-				X += v.X;
-				Y += v.Y;
-				return *this;
-			}
-			Point2D<T>& operator-=(const Point2D<T>& v) {
-				X -= v.X;
-				Y -= v.Y;
-				return *this;
-			}
-			Point2D<T>& operator*=(const Point2D<T>& v) {
-				X *= v.X;
-				Y *= v.Y;
-				return *this;
-			}
-
-			virtual inline T getVecLength() const {
-				return sqrt(pow(X, 2) + pow(Y, 2));
-			}
-			virtual void normalize() {
-				T length = getVecLength();
-				this->X /= length;
-				this->Y /= length;
-			}
-
-			virtual ~Point2D() {
-			}
-	};
-	template<typename T> class Point3D : public Point2D<T> {
-		public:
-			T Z;
-
 			Point3D(const T& _X, const T& _Y, const T& _Z)
 					:
-						Point2D<T>(_X, _Y),
+						X(_X),
+						Y(_Y),
 						Z(_Z) {
 			}
-			Point3D& operator+=(const Point3D& v) {
-				Point2D<T>::operator +=(static_cast<Point2D<T>>(v));
+			Point3D<T>& operator+=(const Point3D<T>& v) {
+				X += v.X;
+				Y += v.Y;
 				Z += v.Z;
 				return *this;
 			}
-			Point3D& operator-=(const Point3D& v) {
-				Point2D<T>::operator -=(static_cast<Point2D<T>>(v));
+			Point3D<T>& operator-=(const Point3D<T>& v) {
+				X -= v.X;
+				Y -= v.Y;
 				Z -= v.Z;
 				return *this;
 			}
-			Point3D& operator*(const Point2D<T>& v) {
+			Point3D<T>& operator*=(const Point3D<T>& v) {
 				this->X *= v.X;
 				this->Y *= v.Y;
+				this->Z *= v.Z;
 				return *this;
 			}
 
 			inline T getVecLength() const {
 				return sqrt(pow(this->X, 2) + pow(this->Y, 2) + pow(this->Z, 2));
 			}
-			void normalize() {
+			Point3D<T>& normalize() {
 				T length = getVecLength();
 				this->X /= length;
 				this->Y /= length;
 				this->Z /= length;
+				return *this;
 			}
 	};
 
+#define VEC_OVERLOAD(oper) \
+	template<typename T> Point3D<T> operator oper (const Point3D<T>& l, \
+			const Point3D<T>& p) { \
+		Point3D<T> _l = l; \
+		_l oper##= p; \
+		return _l; \
+	}
+	VEC_OVERLOAD(+)
+	VEC_OVERLOAD(-)
+	VEC_OVERLOAD(*)
+
+	template<typename T> inline Point3D<T> normalize(const Point3D<T>& _p) {
+		return Point3D<T>(_p).normalize();
+	}
+	template<typename T> Point3D<T> cross(const Point3D<T>& a,
+			const Point3D<T>& b) {
+		return {
+			a.Y * b.Z - a.Z * b.Y,
+			a.Z * b.X - a.X * b.Z,
+			a.X * b.Y - a.Y * b.X
+		};
+	}
+	template<typename T> inline T dot(const Point3D<T>& a,
+			const Point3D<T>& b) {
+		return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+	}
+
+	template<typename T> class Point2D : public Point3D<T> {
+		public:
+			Point2D(const T& _X, const T& _Y)
+					:
+						Point3D<T>(_X, _Y, 0) {
+			}
+	};
+
+	using IPoint2D = Point2D<GLint>;
 	using FPoint2D = Point2D<GLfloat>;
 	using FPoint3D = Point3D<GLfloat>;
 
@@ -177,6 +185,9 @@ namespace Graphics {
 			UINT cols = 0,
 					rows = 0;
 
+			Matrix(const Matrix<T>& matrix) {
+				*this = matrix;
+			}
 			Matrix(UINT _cols, UINT _rows)
 					:
 						cols(_cols),
@@ -230,15 +241,15 @@ namespace Graphics {
 				return *this;
 			}
 			Matrix<T>& operator=(const Matrix<T>& matrix) {
-				rows = matrix.rows;
-				cols = matrix.cols;
+				if (rows != matrix.rows && cols != matrix.cols) {
+					rows = matrix.rows;
+					cols = matrix.cols;
 
-				safe_delete<GLfloat>(this->matrix, true);
-				this->matrix = new T[rows * cols];
-
+					safe_delete<GLfloat>(this->matrix, true);
+					this->matrix = new T[rows * cols];
+				}
 				memcpy(this->matrix, matrix.matrix,
 						rows * cols * sizeof(GLfloat));
-
 				return *this;
 			}
 
@@ -256,6 +267,11 @@ namespace Graphics {
 				safe_delete(matrix, true);
 			}
 	};
+	template<typename T> Matrix<T> operator*(const Matrix<T>& l, const Matrix<T>& r) {
+		Matrix<T> temp = l;
+		temp *= r;
+		return temp;
+	}
 	template<typename T, UINT COLS, UINT ROWS> class t_Matrix : public Matrix<T> {
 		public:
 			t_Matrix()
@@ -276,9 +292,17 @@ namespace Graphics {
 	using Vec3 = t_Matrix<GLfloat, 3, 1>;
 	using Vec2 = t_Matrix<GLfloat, 2, 1>;
 
+	/** TODO:
+	 *  Macierze powinny być predefiniowane
+	 *  a nie tworzone na nowo
+	 */
 #define FMAT_MATH Graphics::MatMatrix<GLfloat>
 	template<typename T> class MatMatrix {
 		public:
+			static inline GLfloat cotan(GLfloat rad) {
+				return 1.f / tan(rad);
+			}
+
 			/** Operacje na macierzy macierzy [ x, y, z, w ] */
 			static constexpr Mat4 identity() {
 				return Mat4( {
@@ -292,7 +316,7 @@ namespace Graphics {
 				matrix = identity();
 			}
 
-			static Mat4 translate(const Point3D<GLfloat>& v) {
+			static Mat4 translate(const FPoint3D& v) {
 				return Mat4( {
 						1, 0, 0, 0,
 						0, 1, 0, 0,
@@ -301,11 +325,11 @@ namespace Graphics {
 				});
 			}
 			static inline void translate(Matrix<T>& matrix,
-					const Point3D<GLfloat>& v) {
+					const FPoint3D& v) {
 				matrix *= translate(v);
 			}
 
-			static Mat4 scale(const Point3D<GLfloat>& scale) {
+			static Mat4 scale(const FPoint3D& scale) {
 				return Mat4( {
 						scale.X, 0, 0, 0,
 						0, scale.Y, 0, 0,
@@ -314,12 +338,12 @@ namespace Graphics {
 				});
 			}
 			static inline void scale(Matrix<T>& matrix,
-					const Point3D<GLfloat>& _scale) {
+					const FPoint3D& _scale) {
 				matrix *= scale(_scale);
 			}
 
 			static Mat4 rotate(GLfloat theta,
-					const Point3D<GLfloat>& axis) {
+					const FPoint3D& axis) {
 				float c = cosf(theta), s = sinf(theta), m_c = 1.0 - c;
 				return Mat4( {
 						// Wers 1
@@ -342,17 +366,57 @@ namespace Graphics {
 				});
 			}
 			static inline void rotate(Matrix<T>& matrix, GLfloat theta,
-					const Point3D<GLfloat>& axis) {
+					const FPoint3D& axis) {
 				matrix *= rotate(theta, axis);
+			}
+
+			/**
+			 * Obiliczenia dla MVP
+			 * Wzory:
+			 * http://www.3dcpptutorials.sk/index.php?id=2
+			 */
+			static Mat4 perspective(GLfloat angle, GLfloat aspect, GLfloat near,
+					GLfloat far) {
+				GLfloat c = cotan(angle / 2.0);
+				return Mat4(
+						{
+								c / aspect, 0, 0, 0,
+								0, c, 0, 0,
+								0, 0, (far + near) / (near - far), (2 * far
+										* near) / (near - far),
+								0, 0, -1, 0
+						});
+			}
+			static Mat4 lookAt(const FPoint3D& _eye,
+					const FPoint3D& _target,
+					const FPoint3D& _dir) {
+				FPoint3D z_c = normalize(_eye - _target);
+				FPoint3D y_c = normalize(_dir);
+				FPoint3D x_c = normalize(cross(y_c, z_c));
+				y_c = cross(z_c, x_c);
+
+				return Mat4( {
+						x_c.X, x_c.Y, x_c.Z, -dot(x_c, _eye),
+						y_c.X, y_c.Y, y_c.Z, -dot(y_c, _eye),
+						z_c.X, z_c.Y, z_c.Z, -dot(z_c, _eye),
+						0, 0, 0, 1
+				});
 			}
 	};
 
-	/**
-	 * Rendering brył
-	 * Atrybut:
-	 * 0 = in_Position
-	 * 1 = in_Color
-	 */
+#define MAT_STACK MatrixStack::getInstance()
+	class MatrixStack : public Singleton<MatrixStack> {
+		public:
+			Mat4 projection, view, model;
+
+			MatrixStack() {
+				projection = FMAT_MATH::perspective(90.f, 4.0 / 3.0, 1.f, 100.f);
+				view = FMAT_MATH::lookAt(
+						{	3,0,-1},
+						{	0,0,0},
+						{	0,1,0});
+			}
+		};
 	class Shader {
 		public:
 			GLint program = 0;
@@ -384,12 +448,71 @@ namespace Graphics {
 						UNIFORM_LOC(variable),
 						value);
 			}
-			void setUniform(const char* variable, const Mat4& value) {
-				glProgramUniformMatrix4fv(program,
+			void setUniform(const char* variable,
+					const Matrix<GLfloat>& value) {
+				GLint loc = UNIFORM_LOC(variable);
+				if (value.rows == value.cols) {
+					UINT size = value.rows * value.cols;
+					switch (size) {
+						/** Matrix 4x4 */
+						case 16:
+							glProgramUniformMatrix4fv(program,
+									loc,
+									1,
+									GL_FALSE,
+									value.matrix);
+							break;
+							/** Matrix3x3 */
+						case 9:
+							glProgramUniformMatrix3fv(program,
+									loc,
+									1,
+									GL_FALSE,
+									value.matrix);
+							break;
+
+							/** Matrix2x2 */
+						case 4:
+							glProgramUniformMatrix2fv(program,
+									loc,
+									1,
+									GL_FALSE,
+									value.matrix);
+							break;
+					}
+				} else if (value.rows == 1) {
+					switch (value.cols) {
+						/** Vec4 */
+						case 4:
+							glProgramUniform4fv(program, loc, 1, value.matrix);
+							break;
+							/** Vec3 */
+						case 3:
+							glProgramUniform3fv(program, loc, 1, value.matrix);
+							break;
+							/** Vec2 */
+						case 2:
+							glProgramUniform2fv(program, loc, 1, value.matrix);
+							break;
+					}
+				}
+			}
+			void setUniform(const char* variable,
+					const FPoint2D& vec) {
+				glProgramUniform2f(
+						program,
 						UNIFORM_LOC(variable),
-						1,
-						GL_FALSE,
-						value.matrix);
+						vec.X,
+						vec.Y);
+			}
+			void setUniform(const char* variable,
+					const FPoint3D& vec) {
+				glProgramUniform3f(
+						program,
+						UNIFORM_LOC(variable),
+						vec.X,
+						vec.Y,
+						vec.Z);
 			}
 
 			~Shader() {
@@ -433,7 +556,7 @@ namespace Graphics {
 
 	class Drawable {
 		public:
-			virtual void draw(GLint, const Mat4&)=0;
+			virtual void draw(GLint)=0;
 			virtual ~Drawable() {
 			}
 	};
@@ -460,16 +583,22 @@ namespace Graphics {
 			Shape(Vertex* buffer, GLint len) {
 				create(buffer, len);
 			}
-			void draw(GLint mode, const Mat4& mvp) {
+			void draw(GLint mode) {
 				static Shader shader(
 						getFileContents("shaders/fragment_shader.txt"),
 						getFileContents("shaders/vertex_shader.txt"),
 						"");
 				static float angle = 0.f;
-				angle += 0.000001;
+				angle += 0.0001;
 
 				shader.begin();
-				shader.setUniform("mvp", FMAT_MATH::rotate(TO_RAD(angle), { 0.0, 0.0, 1.0 }));
+
+				//Matrix<float> mat = FMAT_MATH::rotate(TO_RAD(angle), {0.0, 0.0, 1.0}) * FMAT_MATH::scale({0.5, 0.5, 1.0});
+				shader.setUniform("mvp",
+				MAT_STACK.projection *
+				MAT_STACK.view *
+				FMAT_MATH::rotate(angle, {1, 0, 0.0}) *
+				FMAT_MATH::scale( {0.5, 0.5, 1.0}));
 
 				glBindVertexArray(vao);
 				glDrawArrays(mode, 0, 3);
@@ -511,21 +640,8 @@ namespace Graphics {
 namespace Engine {
 	using namespace Graphics;
 
-#define MAT_STACK Engine::MatrixStack::getInstance()
-	class MatrixStack : public Singleton<MatrixStack> {
-		public:
-			Mat4 projection, view, model;
-	};
 	class GlobalRenderer : public Drawable {
 		public:
-			/**
-			 * Reimplementacja z:
-			 * http://msdn.microsoft.com/en-us/library/windows/desktop/bb281710(v=vs.85).aspx
-			 */
-			static Mat4 lookAt(const FPoint3D& cam_pos,
-					const FPoint3D& target_pos, const FPoint3D& up_vector) {
-				//zaxis = normal(cameraTarget - cameraPosition)
-			}
 	};
 }
 namespace Window {
@@ -534,7 +650,7 @@ namespace Window {
 	class Window {
 		private:
 			SDL_Window* window;
-			Point2D<int> bounds;
+			IPoint2D bounds;
 
 			enum Flags {
 				STOP = 0,
@@ -545,7 +661,7 @@ namespace Window {
 			Graphics::Shape* vbo;
 
 		public:
-			Window(const Point2D<int>& _bounds)
+			Window(const IPoint2D& _bounds)
 					:
 						bounds(_bounds) {
 				if (initialize())
@@ -581,6 +697,9 @@ namespace Window {
 
 				SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 				SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+				glEnable(GL_DEPTH_TEST);
+				glDepthFunc(GL_LESS);
 			}
 			void run() {
 				SDL_GLContext gl = SDL_GL_CreateContext(window);
@@ -601,9 +720,9 @@ namespace Window {
 								break;
 						}
 					glClearColor(0, 0, 0, 1);
-					glClear(GL_COLOR_BUFFER_BIT);
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-					vbo->draw(GL_TRIANGLES, MAT_STACK.projection);
+					vbo->draw(GL_TRIANGLES);
 
 					SDL_GL_SwapWindow(window);
 				}
