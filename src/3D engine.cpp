@@ -288,6 +288,11 @@ namespace Graphics {
                     :
                       Matrix<T>(COLS, ROWS, array) {
             }
+
+            t_Matrix<T, COLS, ROWS>& operator=(const Matrix<T>& matrix) {
+                Matrix<T>::operator =(matrix);
+                return *this;
+            }
     };
 
     using Mat4 = t_Matrix<GLfloat, 4, 4>;
@@ -413,14 +418,23 @@ namespace Graphics {
 #define MAT_STACK MatrixStack::getInstance()
     class MatrixStack : public Singleton<MatrixStack> {
         public:
-            Mat4 projection, view, model;
+            Mat4 projection,
+                    view,
+                    model,
+                    vp_matrix; // cache z mnożenia view * projection
 
             MatrixStack() {
                 projection = FMAT_MATH::perspective(90.f, 4.0 / 3.0, 1.f, 100.f);
-                view = FMAT_MATH::lookAt(
+                setCamera(
                         {   0,0,-2.5},
-                        {   0,0,0},
+                        {   0,0,0});
+            }
+            void setCamera(const FPoint3D& pos, const FPoint3D& target) {
+                view = FMAT_MATH::lookAt(
+                        pos,
+                        target,
                         {   0,1,0});
+                vp_matrix = projection * view;
             }
         };
     class Shader {
@@ -606,7 +620,7 @@ namespace Graphics {
                 shader.begin();
                 shader.setUniform(
                         "mvp",
-                        MAT_STACK.projection * MAT_STACK.view *
+                        MAT_STACK.vp_matrix *
                 FMAT_MATH::rotate(angle, {1, 0, 0.0}) *
                 FMAT_MATH::scale( {0.5, 0.5, 1.0}));
 
