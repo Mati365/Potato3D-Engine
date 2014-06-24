@@ -267,7 +267,8 @@ namespace Graphics {
 				safe_delete(matrix, true);
 			}
 	};
-	template<typename T> Matrix<T> operator*(const Matrix<T>& l, const Matrix<T>& r) {
+	template<typename T> Matrix<T> operator*(const Matrix<T>& l,
+			const Matrix<T>& r) {
 		Matrix<T> temp = l;
 		temp *= r;
 		return temp;
@@ -412,7 +413,7 @@ namespace Graphics {
 			MatrixStack() {
 				projection = FMAT_MATH::perspective(90.f, 4.0 / 3.0, 1.f, 100.f);
 				view = FMAT_MATH::lookAt(
-						{	3,0,-1},
+						{	2,0,-0.5},
 						{	0,0,0},
 						{	0,1,0});
 			}
@@ -561,7 +562,10 @@ namespace Graphics {
 			}
 	};
 	struct Vertex {
-			GLfloat x, y, z, w, r, g, b, a;
+			GLfloat pos[4];
+			GLfloat col[4];
+			GLfloat normal[3];
+			GLfloat uv[2];
 	};
 
 	template<typename T> GLint genGLBuffer(const T* data, GLuint len,
@@ -578,10 +582,11 @@ namespace Graphics {
 	}
 	class Shape : public Drawable {
 		public:
-			GLuint vao = 0, vbo = 0;
+			GLuint vao = 0,
+					vbo = 0;
 
-			Shape(Vertex* buffer, GLint len) {
-				create(buffer, len);
+			Shape(Vertex* buffer, GLint vertices) {
+				create(buffer, vertices);
 			}
 			void draw(GLint mode) {
 				static Shader shader(
@@ -611,28 +616,26 @@ namespace Graphics {
 				glDeleteBuffers(1, &vbo);
 			}
 		private:
-			void create(Vertex* buffer, GLint len) {
+			void create(Vertex* buffer, GLint vertices) {
 				glGenVertexArrays(1, &vao);
 				glBindVertexArray(vao);
 
 				// Generowanie bufora
 				vbo = genGLBuffer<Vertex>(
 						buffer,
-						len,
+						vertices * sizeof(Graphics::Vertex) / sizeof(GLfloat),
 						GL_ARRAY_BUFFER);
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
+#define VERTEX_ATTR_PTR(loc, count, strip) \
+	glVertexAttribPointer(loc, count, GL_FLOAT, GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(strip * sizeof(GLfloat))); \
+	glEnableVertexAttribArray(loc)
 
-				// Vertex
-				glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE,
-						sizeof(Vertex), 0);
-				glEnableVertexAttribArray(0);
+				VERTEX_ATTR_PTR(0, 4, 0); // Vertex
+				VERTEX_ATTR_PTR(1, 4, 4); // Colors
+				VERTEX_ATTR_PTR(2, 3, 8); // Normals
+				VERTEX_ATTR_PTR(3, 2, 11); // UVs
 
-				// Color
-				glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE,
-						sizeof(Vertex),
-						BUFFER_OFFSET(4 * sizeof(GLfloat)));
-				glEnableVertexAttribArray(1);
 				glBindVertexArray(0);
 			}
 	};
@@ -708,10 +711,26 @@ namespace Window {
 				initContext();
 
 				Graphics::Vertex p[] = {
-						{ -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.f },
-						{ 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.f },
-						{ 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.f } };
-				vbo = new Graphics::Shape(p, 24);
+						{
+								-1.0f, -1.0f, 0.0f, 1.0f, //pos
+								0.0f, 0.0f, 1.0f, 1.f, // col
+								1.f, 1.f, 1.f, // normal
+								0.f, 0.f // UV
+						},
+						{
+								1.0f, -1.0f, 0.0f, 1.0f,
+								0.0f, 1.0f, 0.0f, 1.f,
+								1.f, 1.f, 1.f,
+								0.f, 0.f
+						},
+						{
+								0.0f, 1.0f, 0.0f, 1.0f,
+								1.0f, 0.0f, 0.0f, 1.f,
+								1.f, 1.f, 1.f,
+								0.f, 0.f
+						}
+				};
+				vbo = new Graphics::Shape(p, 3);
 				while (IS_SET_FLAG(flags, Flags::RUNNING)) {
 					while (SDL_PollEvent(&event))
 						switch (event.type) {
