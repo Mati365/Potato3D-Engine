@@ -100,7 +100,6 @@ namespace Tools {
             const Point3D<T>& b) {
         return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
     }
-
     template<typename T> class Point2D : public Point3D<T> {
         public:
             Point2D(const T& _X, const T& _Y)
@@ -112,6 +111,21 @@ namespace Tools {
     using IPoint2D = Point2D<GLint>;
     using FPoint2D = Point2D<GLfloat>;
     using FPoint3D = Point3D<GLfloat>;
+
+#define BOX_DEFINE(dimensions) \
+    template<typename T> class Box##dimensions##D { \
+        public: \
+            Point##dimensions##D<T> pos, \
+                    size; \
+            Box##dimensions##D() {} \
+            Box##dimensions##D(const Point##dimensions##D<T>& _pos, const Point##dimensions##D<T>& _size) \
+                    : \
+                      pos(_pos), \
+                      size(_size) { \
+            } \
+    }
+    BOX_DEFINE(2);
+    BOX_DEFINE(3);
 
     template<typename T> class Rect : public Point2D<T> {
         public:
@@ -142,7 +156,7 @@ namespace Tools {
             enum Flag {
                 CRITICAL,
                 WARNING,
-                ERRO
+                ERROR
             };
 
             Flag flag;
@@ -156,7 +170,6 @@ namespace Tools {
         while ((err = glGetError()) != GL_NO_ERROR)
             cout << "OpenGL error: " << err << endl;
     }
-
     template<typename T> class Singleton {
         public:
             static T& getInstance() {
@@ -267,14 +280,14 @@ namespace Graphics {
                 return *this;
             }
 
-            operator Point3D<T>() {
+            operator Point3D<T>() const {
                 return {
                     matrix[0],
                     matrix[1],
                     matrix[2]
                 };
             }
-            operator Point2D<T>() {
+            operator Point2D<T>() const {
                 return {
                     matrix[0],
                     matrix[1]
@@ -445,15 +458,11 @@ namespace Graphics {
      * nie wykonuje operacji matematycznych
      * tym zajmuje się MatMatrix
      */
-    class MatrixStack : public Singleton<MatrixStack> {
-        private:
-            friend class Singleton<MatrixStack> ;
-            MatrixStack() {
-                projection = FMAT_MATH::perspective(90.f, 1.f / 1.f, 1.f,
-                        100.f);
-                model = FMAT_MATH::identity();
-            }
-
+    struct Camera {
+            Vec4 pos = { 0.f, 0.f, 2.5f, 1.f };
+            Vec4 target = { 0.f, 0.f, 0.f, 1.f };
+    };
+    class MatrixStack {
         public:
             Mat4 projection,
                     view,
@@ -465,10 +474,15 @@ namespace Graphics {
             };
             list<M_STACK_ARRAY> stack;
 
-            void setCameraCoords(const FPoint3D& pos, const FPoint3D& target) {
+            MatrixStack() {
+                projection = FMAT_MATH::perspective(90.f, 1.f / 1.f, 1.f,
+                        100.f);
+                model = FMAT_MATH::identity();
+            }
+            void setCameraCoords(const Camera& camera) {
                 view = FMAT_MATH::lookAt(
-                        pos,
-                        target,
+                        camera.pos,
+                        camera.target,
                         { 0, 1, 0 });
                 vp_matrix = projection * view;
             }
@@ -485,24 +499,6 @@ namespace Graphics {
                 stack.pop_back();
             }
     };
-    MatrixStack& MAT_STACK = MatrixStack::getInstance();
-
-    class Camera : public Singleton<Camera> {
-        private:
-            friend class Singleton<Camera>;
-            Camera() {
-                update();
-            }
-
-        public:
-            Vec4 pos = { 0.f, 0.f, 2.5f, 1.f };
-            Vec4 target = { 0.f, 0.f, 0.f, 1.f };
-
-            void update() {
-                MAT_STACK.setCameraCoords(pos, target);
-            }
-    };
-    Camera& cam = Camera::getInstance();
 
     class Shader {
         public:
@@ -643,7 +639,7 @@ namespace Graphics {
 
     class Drawable {
         public:
-            virtual void draw(GLint)=0;
+            virtual void draw(MatrixStack&, GLint)=0;
             virtual ~Drawable() {
             }
     };
@@ -679,14 +675,14 @@ namespace Graphics {
                     GLint indices) {
                 create(buffer, vertices, i_buffer, indices);
             }
-            void draw(GLint mode) {
+            void draw(MatrixStack& matrix, GLint mode) {
                 static Shader shader(
                         getFileContents("shaders/fragment_shader.txt"),
                         getFileContents("shaders/vertex_shader.txt"),
                         "");
 
                 shader.begin();
-                shader.setUniform("mvp", MAT_STACK.vp_matrix * MAT_STACK.model);
+                shader.setUniform("mvp", matrix.vp_matrix * matrix.model);
                 {
                     glBindVertexArray(vao);
                     if (!indices)
@@ -741,22 +737,15 @@ namespace Graphics {
 }
 namespace Engine {
     using namespace Graphics;
-
-    class GlobalRenderer : public Drawable, public Singleton<GlobalRenderer> {
+    /** Rendering prymitywów */
+    class Primitives {
         public:
-            enum Flags {
-                DRAW_AXIS = 1 << 1
-            };
-            UINT flags = 0;
+            static Shape* genAxis(GLfloat size) {
+                if (!size % 2)
+                    return nullptr;
 
-            const FPoint2D AXIS_CELL_SIZE = { 1.f, 1.f };
-            const GLfloat AXIS_CELL_COLOR[4] = { .5f, .5f, .5f, 1.f };
-
-            void init() {
-                // Generowanie siatki
                 vector<Vertex> sheet;
-                float size = 17.f;
-                float start_pos = floor(sqrt(size));
+                GLfloat start_pos = floor(sqrt(size));
                 for (GLint i = 0; i < (GLint) size; ++i) {
                     sheet.push_back( {
                             { i * .5f - start_pos, 0.f, -start_pos, 1.f },
@@ -783,36 +772,75 @@ namespace Engine {
                             { 0.f, 0.f }
                     });
                 }
-                axis = new Shape(&sheet[0], sheet.size(), nullptr, 0);
+                return new Shape(&sheet[0], sheet.size(), nullptr, 0);
             }
-            void draw(GLint) {
-                MAT_STACK.pushTransform();
-                {
-                    axis->draw(GL_LINES);
-                }
-                MAT_STACK.popTransform();
+    };
+
+    /**
+     * Zastosowanie kompozycji,
+     * dziedziczenie odpada bo
+     * w trakcie życia meshu
+     * będzie można zmieniać mu
+     * siatki
+     */
+    class Mesh : public Drawable {
+        public:
+            Shape* shape = nullptr;
+            FPoint3D pos;
+            Mat4 rotation;
+
+    };
+
+    class Renderer {
+        public:
+            virtual void init() = 0;
+            virtual void render() = 0;
+            virtual ~Renderer() {
+            }
+    };
+    class GL3Renderer : public Renderer {
+        private:
+            enum Flags {
+                DRAW_AXIS = 1 << 1
+            };
+            UINT flags = 0;
+
+            MatrixStack matrix;
+            Camera cam;
+
+        public:
+            void init() {
+                axis = Primitives::genAxis(17);
+
+                cam.pos[1] += 3.f;
+                matrix.setCameraCoords(cam);
+            }
+            void render() {
+                if (axis != nullptr)
+                    axis->draw(matrix, GL_LINES);
             }
 
         private:
             Shape* axis = nullptr;
     };
-
-#define GL3_RENDERER GlobalRenderer::getInstance()
 }
 namespace Window {
     using namespace Tools;
     using namespace Engine;
 
     class Window {
-        private:
-            SDL_Window* window;
-            IPoint2D bounds;
-
+        public:
             enum Flags {
                 STOP = 0,
                 RUNNING = 1 << 0
             };
+
+        private:
             UINT flags = Flags::RUNNING;
+
+            SDL_Window* window;
+            IPoint2D bounds;
+            Renderer* renderer = nullptr;
 
             Graphics::Shape* vbo;
 
@@ -820,11 +848,20 @@ namespace Window {
             Window(const IPoint2D& _bounds)
                     :
                       bounds(_bounds) {
-                if (initialize())
-                    run();
-                else
+                if (!initialize())
                     throw "Nie mogłem otworzyć okna!";
             }
+
+            void open() {
+                run();
+            }
+            void setRenderer(Renderer* renderer) {
+                this->renderer = renderer;
+            }
+            Renderer* getRenderer() {
+                return renderer;
+            }
+
             ~Window() {
                 SDL_DestroyWindow(window);
                 SDL_Quit();
@@ -862,75 +899,25 @@ namespace Window {
                 SDL_Event event;
 
                 initContext();
+                renderer->init();
 
-                Graphics::Vertex p[] = {
-                        // lewy przedni róg
-                        {
-                                -1.0f, 0.0f, 0.0f, 1.0f, //pos
-                                0.0f, 1.0f, 0.0f, 1.f, // col
-                                1.f, 1.f, 1.f, // normal
-                                0.f, 0.f // UV
-                        },
-                        // prawy przedni róg
-                        {
-                                1.0f, 0.0f, 0.0f, 1.0f, //pos
-                                1.0f, 0.0f, 0.0f, 1.f, // col
-                                1.f, 1.f, 1.f, // normal
-                                0.f, 0.f // UV
-                        },
-                        // czubek
-                        {
-                                0.5f, 1.0f, -.5f, 1.0f, //pos
-                                0.0f, 1.0f, 0.0f, 1.f, // col
-                                1.f, 1.f, 1.f, // normal
-                                0.f, 0.f // UV
-                        },
-                        // lewy tylny róg
-                        {
-                                -1.0f, 0.0f, -1.0f, 1.0f, //pos
-                                0.0f, 0.0f, 1.0f, 1.f, // col
-                                1.f, 1.f, 1.f, // normal
-                                0.f, 0.f // UV
-                        },
-                        // prawy tylny róg
-                        {
-                                1.0f, 0.0f, -1.0f, 1.0f, //pos
-                                0.0f, 0.0f, 1.0f, 1.f, // col
-                                1.f, 1.f, 1.f, // normal
-                                0.f, 0.f // UV
-                        },
-                };
-                GLushort indices[] = {
-                        0, 2, 1, // przód
-                        1, 2, 4, // prawo,
-                        3, 2, 4, // tył
-                        3, 2, 0 // lewo
-                        };
-                vbo = new Graphics::Shape(p, 5, indices, 12);
-
-                GL3_RENDERER.init();
                 while (IS_SET_FLAG(flags, Flags::RUNNING)) {
                     while (SDL_PollEvent(&event))
                         switch (event.type) {
                             case SDL_KEYDOWN:
                                 switch (event.key.keysym.sym) {
                                     case SDLK_LEFT:
-                                        cam.pos.matrix[0] -= 0.1f;
                                         break;
 
                                     case SDLK_RIGHT:
-                                        cam.pos.matrix[0] += 0.1f;
                                         break;
 
                                     case SDLK_UP:
-                                        cam.pos.matrix[1] += 0.1f;
                                         break;
 
                                     case SDLK_DOWN:
-                                        cam.pos.matrix[1] -= 0.1f;
                                         break;
                                 }
-                                cam.update();
                                 break;
 
                             case SDL_QUIT:
@@ -940,17 +927,8 @@ namespace Window {
                     glClearColor(0, 0, 0, 1);
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                    MAT_STACK.pushTransform();
-                    {
-                        static float angle = 0.0f;
-                        angle += 0.00001;
-                        FMAT_MATH::rotate(MAT_STACK.model, TO_RAD(angle), { 0.f,
-                                1.f, 0.f });
-                        vbo->draw(GL_TRIANGLE_STRIP);
-                    }
-                    MAT_STACK.popTransform();
-
-                    GL3_RENDERER.draw(0);
+                    if (renderer != nullptr)
+                        renderer->render();
 
                     SDL_GL_SwapWindow(window);
                 }
@@ -961,6 +939,10 @@ namespace Window {
 int main() {
     try {
         Window::Window wnd( { 400, 400 });
+        boost::scoped_ptr<Engine::GL3Renderer> renderer(
+                new Engine::GL3Renderer());
+        wnd.setRenderer(renderer.get());
+        wnd.open();
     } catch (const string& ex) {
         cout << ex;
     }
