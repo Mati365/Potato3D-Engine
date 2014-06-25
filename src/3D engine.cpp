@@ -446,6 +446,14 @@ namespace Graphics {
      * tym zajmuje się MatMatrix
      */
     class MatrixStack : public Singleton<MatrixStack> {
+        private:
+            friend class Singleton<MatrixStack> ;
+            MatrixStack() {
+                projection = FMAT_MATH::perspective(90.f, 1.f / 1.f, 1.f,
+                        100.f);
+                model = FMAT_MATH::identity();
+            }
+
         public:
             Mat4 projection,
                     view,
@@ -457,11 +465,6 @@ namespace Graphics {
             };
             list<M_STACK_ARRAY> stack;
 
-            MatrixStack() {
-                projection = FMAT_MATH::perspective(90.f, 1.f, 1.f,
-                        100.f);
-                model = FMAT_MATH::identity();
-            }
             void setCameraCoords(const FPoint3D& pos, const FPoint3D& target) {
                 view = FMAT_MATH::lookAt(
                         pos,
@@ -485,13 +488,16 @@ namespace Graphics {
     MatrixStack& MAT_STACK = MatrixStack::getInstance();
 
     class Camera : public Singleton<Camera> {
+        private:
+            friend class Singleton<Camera>;
+            Camera() {
+                update();
+            }
+
         public:
             Vec4 pos = { 0.f, 0.f, 2.5f, 1.f };
             Vec4 target = { 0.f, 0.f, 0.f, 1.f };
 
-            Camera() {
-                update();
-            }
             void update() {
                 MAT_STACK.setCameraCoords(pos, target);
             }
@@ -749,27 +755,29 @@ namespace Engine {
             void init() {
                 // Generowanie siatki
                 vector<Vertex> sheet;
-                for (GLint i = 0; i < 17; ++i) {
+                float size = 17.f;
+                float start_pos = floor(sqrt(size));
+                for (GLint i = 0; i < (GLint) size; ++i) {
                     sheet.push_back( {
-                            { i * .5f - 4.f, 0.f, -4.f, 1.f },
+                            { i * .5f - start_pos, 0.f, -start_pos, 1.f },
                             { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
                     });
                     sheet.push_back( {
-                            { i * .5f - 4.f, 0.f, 4.f, 1.f },
+                            { i * .5f - start_pos, 0.f, start_pos, 1.f },
                             { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
                     });
                     sheet.push_back( {
-                            { -4.f, 0.f, -4.f + i * .5f, 1.f },
+                            { start_pos, 0.f, -start_pos + i * .5f, 1.f },
                             { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
                     });
                     sheet.push_back( {
-                            { 4.f, 0.f, -4.f + i * .5f, 1.f },
+                            { -start_pos, 0.f, -start_pos + i * .5f, 1.f },
                             { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
@@ -932,7 +940,16 @@ namespace Window {
                     glClearColor(0, 0, 0, 1);
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                    vbo->draw(GL_TRIANGLE_STRIP);
+                    MAT_STACK.pushTransform();
+                    {
+                        static float angle = 0.0f;
+                        angle += 0.00001;
+                        FMAT_MATH::rotate(MAT_STACK.model, TO_RAD(angle), { 0.f,
+                                1.f, 0.f });
+                        vbo->draw(GL_TRIANGLE_STRIP);
+                    }
+                    MAT_STACK.popTransform();
+
                     GL3_RENDERER.draw(0);
 
                     SDL_GL_SwapWindow(window);
