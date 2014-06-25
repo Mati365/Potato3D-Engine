@@ -170,6 +170,7 @@ namespace Tools {
         while ((err = glGetError()) != GL_NO_ERROR)
             cout << "OpenGL error: " << err << endl;
     }
+
     template<typename T> class Singleton {
         public:
             static T& getInstance() {
@@ -783,12 +784,14 @@ namespace Engine {
      * będzie można zmieniać mu
      * siatki
      */
+    Shape* loadOBJ(const char* path) {
+        return nullptr;
+    }
     class Mesh : public Drawable {
         public:
             Shape* shape = nullptr;
             FPoint3D pos;
             Mat4 rotation;
-
     };
 
     class Renderer {
@@ -808,16 +811,23 @@ namespace Engine {
             MatrixStack matrix;
             Camera cam;
 
+            Shape* model = nullptr;
+
         public:
             void init() {
                 axis = Primitives::genAxis(17);
 
-                cam.pos[1] += 3.f;
+                cam.pos[1] += 2.f;
+                cam.pos[0] += 3.f;
                 matrix.setCameraCoords(cam);
+
+                model = loadOBJ("model.obj");
             }
             void render() {
                 if (axis != nullptr)
                     axis->draw(matrix, GL_LINES);
+                if(model != nullptr)
+                    axis->draw(matrix, GL_TRIANGLES);
             }
 
         private:
@@ -841,8 +851,6 @@ namespace Window {
             SDL_Window* window;
             IPoint2D bounds;
             Renderer* renderer = nullptr;
-
-            Graphics::Shape* vbo;
 
         public:
             Window(const IPoint2D& _bounds)
