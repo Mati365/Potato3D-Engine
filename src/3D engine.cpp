@@ -7,8 +7,11 @@
 #include <GL/glu.h>
 
 #include <initializer_list>
-#include <math.h>
 #include <deque>
+#include <list>
+#include <vector>
+
+#include <math.h>
 
 #include <sstream>
 #include <fstream>
@@ -39,6 +42,7 @@ namespace Tools {
                       Y(_Y),
                       Z(_Z) {
             }
+
             Point3D<T>& operator+=(const Point3D<T>& v) {
                 X += v.X;
                 Y += v.Y;
@@ -257,11 +261,30 @@ namespace Graphics {
                         rows * cols * sizeof(GLfloat));
                 return *this;
             }
+            Matrix<T>& operator=(const T* dynamic_array) {
+                safe_delete<GLfloat>(this->matrix, true);
+                this->matrix = dynamic_array;
+                return *this;
+            }
+
+            operator Point3D<T>() {
+                return {
+                    matrix[0],
+                    matrix[1],
+                    matrix[2]
+                };
+            }
+            operator Point2D<T>() {
+                return {
+                    matrix[0],
+                    matrix[1]
+                };
+            }
 
             T* get(UINT x, UINT y) {
                 return matrix[y * cols + x];
             }
-            T* operator[](UINT i) {
+            T& operator[](UINT i) {
                 return matrix[i];
             }
             inline GLint getLength() const {
@@ -307,7 +330,6 @@ namespace Graphics {
      *  Macierze powinny być predefiniowane
      *  a nie tworzone na nowo
      */
-#define FMAT_MATH Graphics::MatMatrix<GLfloat>
     template<typename T> class MatMatrix {
         public:
             static inline GLfloat cotan(GLfloat rad) {
@@ -415,7 +437,14 @@ namespace Graphics {
             }
     };
 
-#define MAT_STACK MatrixStack::getInstance()
+    using FMAT_MATH = Graphics::MatMatrix<GLfloat>;
+    using IMAT_MATH = Graphics::MatMatrix<GLint>;
+
+    /**
+     * MatrixStack zarządza stosem OGla,
+     * nie wykonuje operacji matematycznych
+     * tym zajmuje się MatMatrix
+     */
     class MatrixStack : public Singleton<MatrixStack> {
         public:
             Mat4 projection,
@@ -423,20 +452,52 @@ namespace Graphics {
                     model,
                     vp_matrix; // cache z mnożenia view * projection
 
+            struct M_STACK_ARRAY {
+                    GLfloat array[16];
+            };
+            list<M_STACK_ARRAY> stack;
+
             MatrixStack() {
-                projection = FMAT_MATH::perspective(90.f, 4.0 / 3.0, 1.f, 100.f);
-                setCamera(
-                        {   0,0,-2.5},
-                        {   0,0,0});
+                projection = FMAT_MATH::perspective(90.f, 1.f, 1.f,
+                        100.f);
+                model = FMAT_MATH::identity();
             }
-            void setCamera(const FPoint3D& pos, const FPoint3D& target) {
+            void setCameraCoords(const FPoint3D& pos, const FPoint3D& target) {
                 view = FMAT_MATH::lookAt(
                         pos,
                         target,
-                        {   0,1,0});
+                        { 0, 1, 0 });
                 vp_matrix = projection * view;
             }
-        };
+
+            void pushTransform() {
+                M_STACK_ARRAY array;
+                memcpy(array.array, model.matrix, 16 * sizeof(GLfloat));
+                stack.push_back(array);
+            }
+            void popTransform() {
+                if (stack.empty())
+                    return;
+                memcpy(model.matrix, stack.back().array, 16 * sizeof(GLfloat));
+                stack.pop_back();
+            }
+    };
+    MatrixStack& MAT_STACK = MatrixStack::getInstance();
+
+    class Camera : public Singleton<Camera> {
+        public:
+            Vec4 pos = { 0.f, 0.f, 2.5f, 1.f };
+            Vec4 target = { 0.f, 0.f, 0.f, 1.f };
+
+            Camera() {
+                update();
+            }
+            void update() {
+                MAT_STACK.setCameraCoords(pos, target);
+            }
+    };
+    Camera& cam = Camera::getInstance();
+
     class Shader {
         public:
             GLint program = 0;
@@ -603,9 +664,12 @@ namespace Graphics {
         public:
             GLuint vao = 0,
                     vbo = 0,
-                    indices = 0;
+                    indices = 0,
+                    vertices_count = 0,
+                    indices_count = 0;
 
-            Shape(const Vertex* buffer, GLint vertices, const GLshort* i_buffer,
+            Shape(const Vertex* buffer, GLint vertices,
+                    const GLushort* i_buffer,
                     GLint indices) {
                 create(buffer, vertices, i_buffer, indices);
             }
@@ -614,43 +678,46 @@ namespace Graphics {
                         getFileContents("shaders/fragment_shader.txt"),
                         getFileContents("shaders/vertex_shader.txt"),
                         "");
-                static float angle = 0.f;
-                angle += 0.001;
 
                 shader.begin();
-                shader.setUniform(
-                        "mvp",
-                        MAT_STACK.vp_matrix *
-                FMAT_MATH::rotate(angle, {1, 0, 0.0}) *
-                FMAT_MATH::scale( {0.5, 0.5, 1.0}));
-
-                glBindVertexArray(vao);
-                glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, nullptr);
-                glBindVertexArray(0);
-
+                shader.setUniform("mvp", MAT_STACK.vp_matrix * MAT_STACK.model);
+                {
+                    glBindVertexArray(vao);
+                    if (!indices)
+                        glDrawArrays(mode, 0, vertices_count);
+                    else
+                        glDrawElements(mode, indices_count, GL_UNSIGNED_SHORT,
+                                nullptr);
+                    glBindVertexArray(0);
+                }
                 shader.end();
             }
             ~Shape() {
                 glDeleteBuffers(1, &vbo);
             }
+
         private:
             void create(const Vertex* buffer, GLint vertices,
-                    const GLshort* i_buffer,
+                    const GLushort* i_buffer,
                     GLint indices) {
                 glGenVertexArrays(1, &vao);
                 glBindVertexArray(vao);
 
                 // Generowani bufora indeksow
-                this->indices = genGLBuffer<GLshort>(
-                        i_buffer,
-                        indices,
-                        GL_ELEMENT_ARRAY_BUFFER);
+                if (i_buffer != nullptr) {
+                    this->indices = genGLBuffer<GLushort>(
+                            i_buffer,
+                            indices,
+                            GL_ELEMENT_ARRAY_BUFFER);
+                    this->indices_count = indices;
+                }
 
                 // Generowanie bufora wierzcholkow
                 vbo = genGLBuffer<Vertex>(
                         buffer,
                         vertices * sizeof(Graphics::Vertex) / sizeof(GLfloat),
                         GL_ARRAY_BUFFER);
+                this->vertices_count = vertices;
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 #define VERTEX_ATTR_PTR(loc, count, strip) \
@@ -669,12 +736,64 @@ namespace Graphics {
 namespace Engine {
     using namespace Graphics;
 
-    class GlobalRenderer : public Drawable {
+    class GlobalRenderer : public Drawable, public Singleton<GlobalRenderer> {
         public:
+            enum Flags {
+                DRAW_AXIS = 1 << 1
+            };
+            UINT flags = 0;
+
+            const FPoint2D AXIS_CELL_SIZE = { 1.f, 1.f };
+            const GLfloat AXIS_CELL_COLOR[4] = { .5f, .5f, .5f, 1.f };
+
+            void init() {
+                // Generowanie siatki
+                vector<Vertex> sheet;
+                for (GLint i = 0; i < 17; ++i) {
+                    sheet.push_back( {
+                            { i * .5f - 4.f, 0.f, -4.f, 1.f },
+                            { .25f, .25f, .25f, 1.f },
+                            { 1.f, 1.f, 1.f },
+                            { 0.f, 0.f }
+                    });
+                    sheet.push_back( {
+                            { i * .5f - 4.f, 0.f, 4.f, 1.f },
+                            { .25f, .25f, .25f, 1.f },
+                            { 1.f, 1.f, 1.f },
+                            { 0.f, 0.f }
+                    });
+                    sheet.push_back( {
+                            { -4.f, 0.f, -4.f + i * .5f, 1.f },
+                            { .25f, .25f, .25f, 1.f },
+                            { 1.f, 1.f, 1.f },
+                            { 0.f, 0.f }
+                    });
+                    sheet.push_back( {
+                            { 4.f, 0.f, -4.f + i * .5f, 1.f },
+                            { .25f, .25f, .25f, 1.f },
+                            { 1.f, 1.f, 1.f },
+                            { 0.f, 0.f }
+                    });
+                }
+                axis = new Shape(&sheet[0], sheet.size(), nullptr, 0);
+            }
+            void draw(GLint) {
+                MAT_STACK.pushTransform();
+                {
+                    axis->draw(GL_LINES);
+                }
+                MAT_STACK.popTransform();
+            }
+
+        private:
+            Shape* axis = nullptr;
     };
+
+#define GL3_RENDERER GlobalRenderer::getInstance()
 }
 namespace Window {
     using namespace Tools;
+    using namespace Engine;
 
     class Window {
         private:
@@ -737,31 +856,75 @@ namespace Window {
                 initContext();
 
                 Graphics::Vertex p[] = {
+                        // lewy przedni róg
                         {
-                                -1.0f, -1.0f, 0.0f, 1.0f, //pos
+                                -1.0f, 0.0f, 0.0f, 1.0f, //pos
+                                0.0f, 1.0f, 0.0f, 1.f, // col
+                                1.f, 1.f, 1.f, // normal
+                                0.f, 0.f // UV
+                        },
+                        // prawy przedni róg
+                        {
+                                1.0f, 0.0f, 0.0f, 1.0f, //pos
+                                1.0f, 0.0f, 0.0f, 1.f, // col
+                                1.f, 1.f, 1.f, // normal
+                                0.f, 0.f // UV
+                        },
+                        // czubek
+                        {
+                                0.5f, 1.0f, -.5f, 1.0f, //pos
+                                0.0f, 1.0f, 0.0f, 1.f, // col
+                                1.f, 1.f, 1.f, // normal
+                                0.f, 0.f // UV
+                        },
+                        // lewy tylny róg
+                        {
+                                -1.0f, 0.0f, -1.0f, 1.0f, //pos
                                 0.0f, 0.0f, 1.0f, 1.f, // col
                                 1.f, 1.f, 1.f, // normal
                                 0.f, 0.f // UV
                         },
+                        // prawy tylny róg
                         {
-                                1.0f, -1.0f, 0.0f, 1.0f,
-                                0.0f, 1.0f, 0.0f, 1.f,
-                                1.f, 1.f, 1.f,
-                                0.f, 0.f
+                                1.0f, 0.0f, -1.0f, 1.0f, //pos
+                                0.0f, 0.0f, 1.0f, 1.f, // col
+                                1.f, 1.f, 1.f, // normal
+                                0.f, 0.f // UV
                         },
-                        {
-                                0.0f, 1.0f, 0.0f, 1.0f,
-                                1.0f, 0.0f, 0.0f, 1.f,
-                                1.f, 1.f, 1.f,
-                                0.f, 0.f
-                        }
                 };
-                GLshort indices[] = { 2, 1, 0 };
-                vbo = new Graphics::Shape(p, 3, indices, 3);
+                GLushort indices[] = {
+                        0, 2, 1, // przód
+                        1, 2, 4, // prawo,
+                        3, 2, 4, // tył
+                        3, 2, 0 // lewo
+                        };
+                vbo = new Graphics::Shape(p, 5, indices, 12);
 
+                GL3_RENDERER.init();
                 while (IS_SET_FLAG(flags, Flags::RUNNING)) {
                     while (SDL_PollEvent(&event))
                         switch (event.type) {
+                            case SDL_KEYDOWN:
+                                switch (event.key.keysym.sym) {
+                                    case SDLK_LEFT:
+                                        cam.pos.matrix[0] -= 0.1f;
+                                        break;
+
+                                    case SDLK_RIGHT:
+                                        cam.pos.matrix[0] += 0.1f;
+                                        break;
+
+                                    case SDLK_UP:
+                                        cam.pos.matrix[1] += 0.1f;
+                                        break;
+
+                                    case SDLK_DOWN:
+                                        cam.pos.matrix[1] -= 0.1f;
+                                        break;
+                                }
+                                cam.update();
+                                break;
+
                             case SDL_QUIT:
                                 flags = Flags::STOP;
                                 break;
@@ -769,7 +932,8 @@ namespace Window {
                     glClearColor(0, 0, 0, 1);
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                    vbo->draw(GL_TRIANGLES);
+                    vbo->draw(GL_TRIANGLE_STRIP);
+                    GL3_RENDERER.draw(0);
 
                     SDL_GL_SwapWindow(window);
                 }
