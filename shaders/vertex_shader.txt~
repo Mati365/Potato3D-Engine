@@ -1,12 +1,16 @@
 #version 330
 layout(location = 0) in  vec4 in_Position;
-layout(location = 1) in  vec4 in_Color;
+layout(location = 1) in  vec3 in_Normal;
+layout(location = 2) in  vec2 in_UV;
 
 out vec4 ex_Color;
+out vec2 uv;
+
 uniform mat4x4 mvp;
+uniform vec4 col;
 
 void main(void) {
 	vec4 p = in_Position;
 	gl_Position = p * mvp;
-	ex_Color = in_Color;
+	ex_Color = col;
 }

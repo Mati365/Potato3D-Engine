@@ -1,7 +1,14 @@
 #version 330
 in vec4 ex_Color;
+in vec2 uv;
 out vec4 gl_FragColor;
  
+uniform sampler2D texture;
+
 void main(void) {
-    gl_FragColor = vec4(1, 1, 1, 1);
+    gl_FragColor = mix(
+                     ex_Color,
+                     texture2D(texture, uv),
+                     0.5
+                  );
 }

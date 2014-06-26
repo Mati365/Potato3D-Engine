@@ -5,11 +5,13 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <SOIL/SOIL.h>
 
 #include <initializer_list>
 #include <deque>
 #include <list>
 #include <vector>
+#include <array>
 
 #include <math.h>
 
@@ -26,7 +28,6 @@ namespace Tools {
 
 #define IS_SET_FLAG(num, flag) (num & flag)
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
-#define TO_RAD(angle) (angle * 180.0 / 3.145)
 
     template<typename T> class Point3D {
         public:
@@ -60,6 +61,11 @@ namespace Tools {
                 this->Y *= v.Y;
                 this->Z *= v.Z;
                 return *this;
+            }
+
+            typedef T (&array)[3];
+            operator array() const {
+                return {X,Y,Z};
             }
 
             inline T getVecLength() const {
@@ -102,6 +108,8 @@ namespace Tools {
     }
     template<typename T> class Point2D : public Point3D<T> {
         public:
+            Point2D() {
+            }
             Point2D(const T& _X, const T& _Y)
                     :
                       Point3D<T>(_X, _Y, 0) {
@@ -127,20 +135,6 @@ namespace Tools {
     BOX_DEFINE(2);
     BOX_DEFINE(3);
 
-    template<typename T> class Rect : public Point2D<T> {
-        public:
-            T W, H;
-
-            Rect(const T& _X, const T& _Y, const T& _W, const T& _H)
-                    :
-                      Point2D<T>(_X, _Y),
-                      W(_W),
-                      H(_H) {
-            }
-            inline T getSize() const {
-                return this->X * this->Y;
-            }
-    };
     template<typename T> void safe_delete(T*& ptr, bool arr) {
         if (ptr == nullptr)
             return;
@@ -346,6 +340,9 @@ namespace Graphics {
      */
     template<typename T> class MatMatrix {
         public:
+            static inline GLfloat toRad(GLfloat deg) {
+                return deg * 180.0 / 3.145;
+            }
             static inline GLfloat cotan(GLfloat rad) {
                 return 1.f / tan(rad);
             }
@@ -459,10 +456,33 @@ namespace Graphics {
      * nie wykonuje operacji matematycznych
      * tym zajmuje się MatMatrix
      */
+    struct Color {
+            GLfloat r = 0.f,
+                    g = 0.f,
+                    b = 0.f,
+                    a = 1.f;
+
+            Color() {
+            }
+            Color(const GLfloat& _r, const GLfloat& _g, const GLfloat& _b,
+                    const GLfloat& _a)
+                    :
+                      r(_r),
+                      g(_g),
+                      b(_b),
+                      a(_a) {
+            }
+    };
+    struct Vertex {
+            GLfloat pos[4];
+            GLfloat normal[3];
+            GLfloat uv[2];
+    };
     struct Camera {
             Vec4 pos = { 0.f, 0.f, 2.5f, 1.f };
             Vec4 target = { 0.f, 0.f, 0.f, 1.f };
     };
+
     class MatrixStack {
         public:
             Mat4 projection,
@@ -476,7 +496,7 @@ namespace Graphics {
             list<M_STACK_ARRAY> stack;
 
             MatrixStack() {
-                projection = FMAT_MATH::perspective(90.f, 1.f / 1.f, 1.f,
+                projection = FMAT_MATH::perspective(45.f, 1.f / 1.f, 1.f,
                         100.f);
                 model = FMAT_MATH::identity();
             }
@@ -500,7 +520,6 @@ namespace Graphics {
                 stack.pop_back();
             }
     };
-
     class Shader {
         public:
             GLint program = 0;
@@ -522,81 +541,85 @@ namespace Graphics {
 
             /** Uniformy */
 #define UNIFORM_LOC(variable) glGetUniformLocation(program, variable)
-            void setUniform(const char* variable, float value) {
+            void setUniform(const GLchar* variable, float value) {
                 glProgramUniform1f(program,
                         UNIFORM_LOC(variable),
                         value);
             }
-            void setUniform(const char* variable, int value) {
+            void setUniform(const GLchar* variable, int value) {
                 glProgramUniform1i(program,
                         UNIFORM_LOC(variable),
                         value);
             }
-            void setUniform(const char* variable,
+            void setUniform(const GLchar* variable,
+                    const array<GLfloat, 4>& array,
+                    UINT len) {
+                GLint loc = UNIFORM_LOC(variable);
+
+#define ARRAY_UNIFORM(len) \
+        glProgramUniform##len##fv(program, loc, 1, &array[0])
+
+                switch (len) {
+                    case 2:
+                        ARRAY_UNIFORM(2);
+                        break;
+                    case 3:
+                        ARRAY_UNIFORM(3);
+                        break;
+                    case 4:
+                        ARRAY_UNIFORM(4);
+                        break;
+                }
+            }
+
+            void setUniform(const GLchar* variable,
                     const Matrix<GLfloat>& value) {
                 GLint loc = UNIFORM_LOC(variable);
                 if (value.rows == value.cols) {
                     UINT size = value.rows * value.cols;
-                    switch (size) {
-                        /** Matrix 4x4 */
-                        case 16:
-                            glProgramUniformMatrix4fv(program,
-                                    loc,
-                                    1,
-                                    GL_FALSE,
-                                    value.matrix);
-                            break;
-                            /** Matrix3x3 */
-                        case 9:
-                            glProgramUniformMatrix3fv(program,
-                                    loc,
-                                    1,
-                                    GL_FALSE,
-                                    value.matrix);
-                            break;
 
-                            /** Matrix2x2 */
+#define MATRIX_UNIFORM(r) \
+                  glProgramUniformMatrix##r##fv(program, \
+                              loc, \
+                              1, \
+                              GL_FALSE, \
+                              value.matrix)
+
+                    switch (size) {
+                        case 16:
+                            MATRIX_UNIFORM(4);
+                            break;
+                        case 9:
+                            MATRIX_UNIFORM(3);
+                            break;
                         case 4:
-                            glProgramUniformMatrix2fv(program,
-                                    loc,
-                                    1,
-                                    GL_FALSE,
-                                    value.matrix);
+                            MATRIX_UNIFORM(2);
                             break;
                     }
                 } else if (value.rows == 1) {
+#define MATRIX_ARRAY_UNIFORM(len) \
+                  glProgramUniform##len##fv(program, loc, 1, value.matrix)
+
                     switch (value.cols) {
-                        /** Vec4 */
                         case 4:
-                            glProgramUniform4fv(program, loc, 1, value.matrix);
+                            MATRIX_ARRAY_UNIFORM(4);
                             break;
-                            /** Vec3 */
                         case 3:
-                            glProgramUniform3fv(program, loc, 1, value.matrix);
+                            MATRIX_ARRAY_UNIFORM(3);
                             break;
-                            /** Vec2 */
                         case 2:
-                            glProgramUniform2fv(program, loc, 1, value.matrix);
+                            MATRIX_ARRAY_UNIFORM(2);
                             break;
                     }
                 }
             }
-            void setUniform(const char* variable,
-                    const FPoint2D& vec) {
-                glProgramUniform2f(
-                        program,
-                        UNIFORM_LOC(variable),
-                        vec.X,
-                        vec.Y);
+            inline void setUniform(const GLchar* variable, const FPoint3D& p) {
+                glProgramUniform4f(program, UNIFORM_LOC(variable), p.X, p.Y,
+                        p.Z, 1.f);
             }
-            void setUniform(const char* variable,
-                    const FPoint3D& vec) {
-                glProgramUniform3f(
-                        program,
-                        UNIFORM_LOC(variable),
-                        vec.X,
-                        vec.Y,
-                        vec.Z);
+            inline void setUniform(const GLchar* variable, const Color& p) {
+                glProgramUniform4f(program, UNIFORM_LOC(variable), p.r, p.g,
+                        p.b, p.a);
             }
 
             ~Shader() {
@@ -610,7 +633,8 @@ namespace Graphics {
                     if (shader != 0)
                         glAttachShader(program, shader);
                 glBindAttribLocation(program, 0, "in_Position");
-                glBindAttribLocation(program, 1, "in_Color");
+                glBindAttribLocation(program, 1, "in_Normal");
+                glBindAttribLocation(program, 2, "in_UV");
                 glLinkProgram(program);
             }
 
@@ -638,19 +662,7 @@ namespace Graphics {
         return shader;
     }
 
-    class Drawable {
-        public:
-            virtual void draw(MatrixStack&, GLint)=0;
-            virtual ~Drawable() {
-            }
-    };
-    struct Vertex {
-            GLfloat pos[4];
-            GLfloat col[4];
-            GLfloat normal[3];
-            GLfloat uv[2];
-    };
-
+    /** Tekstury */
     template<typename T> GLint genGLBuffer(const T* data, GLuint len,
             GLint type) {
         GLuint buffer = 0;
@@ -663,6 +675,63 @@ namespace Graphics {
 
         return buffer;
     }
+
+    class Texture {
+        private:
+            GLuint handle;
+            IPoint2D size;
+
+        public:
+            Texture(const string& path) {
+                handle = SOIL_load_OGL_texture
+                        (
+                                path.c_str(),
+                                SOIL_LOAD_AUTO,
+                                SOIL_CREATE_NEW_ID,
+                                SOIL_FLAG_MIPMAPS |
+                                        SOIL_FLAG_NTSC_SAFE_RGB |
+                                        SOIL_FLAG_COMPRESS_TO_DXT
+                                        );
+                configure();
+            }
+
+            GLuint getHandle() const {
+                return handle;
+            }
+            IPoint2D& getSize() {
+                return size;
+            }
+
+            ~Texture() {
+                glDeleteTextures(1, &handle);
+            }
+
+        private:
+            void configure() {
+                glBindTexture(GL_TEXTURE_2D, handle);
+
+                glTexParameteri(GL_TEXTURE_2D,
+                GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                GL_LINEAR_MIPMAP_LINEAR);
+                glGenerateMipmap(GL_TEXTURE_2D);
+
+                glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,
+                        &size.X);
+                glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT,
+                        &size.Y);
+            }
+    };
+    class Drawable {
+        public:
+            virtual void draw(MatrixStack&, GLint)=0;
+            virtual ~Drawable() {
+            }
+    };
     class Shape : public Drawable {
         public:
             GLuint vao = 0,
@@ -670,11 +739,26 @@ namespace Graphics {
                     indices = 0,
                     vertices_count = 0,
                     indices_count = 0;
+            Color col;
 
-            Shape(const Vertex* buffer, GLint vertices,
+            Shape(const Vertex* buffer,
+                    GLint vertices,
+                    const GLushort* i_buffer,
+                    GLint indices,
+                    const Color& _col)
+                    :
+                      col(_col) {
+                create(buffer, vertices, i_buffer, indices);
+            }
+            Shape(const Vertex* buffer,
+                    GLint vertices,
                     const GLushort* i_buffer,
                     GLint indices) {
                 create(buffer, vertices, i_buffer, indices);
+            }
+
+            void setColor(const Color& col) {
+                this->col = col;
             }
             void draw(MatrixStack& matrix, GLint mode) {
                 static Shader shader(
@@ -684,6 +768,7 @@ namespace Graphics {
 
                 shader.begin();
                 shader.setUniform("mvp", matrix.vp_matrix * matrix.model);
+                shader.setUniform("col", { col.r, col.g, col.b, col.a }, 4);
                 {
                     glBindVertexArray(vao);
                     if (!indices)
@@ -695,6 +780,7 @@ namespace Graphics {
                 }
                 shader.end();
             }
+
             ~Shape() {
                 glDeleteBuffers(1, &vbo);
             }
@@ -728,9 +814,8 @@ namespace Graphics {
 	glEnableVertexAttribArray(loc)
 
                 VERTEX_ATTR_PTR(0, 4, 0); // Vertex
-                VERTEX_ATTR_PTR(1, 4, 4); // Colors
-                VERTEX_ATTR_PTR(2, 3, 8); // Normals
-                VERTEX_ATTR_PTR(3, 2, 11); // UVs
+                VERTEX_ATTR_PTR(1, 3, 4); // Normals
+                VERTEX_ATTR_PTR(2, 2, 7); // UVs
 
                 glBindVertexArray(0);
             }
@@ -750,30 +835,31 @@ namespace Engine {
                 for (GLint i = 0; i < (GLint) size; ++i) {
                     sheet.push_back( {
                             { i * .5f - start_pos, 0.f, -start_pos, 1.f },
-                            { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
                     });
                     sheet.push_back( {
                             { i * .5f - start_pos, 0.f, start_pos, 1.f },
-                            { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
                     });
                     sheet.push_back( {
                             { start_pos, 0.f, -start_pos + i * .5f, 1.f },
-                            { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
                     });
                     sheet.push_back( {
                             { -start_pos, 0.f, -start_pos + i * .5f, 1.f },
-                            { .25f, .25f, .25f, 1.f },
                             { 1.f, 1.f, 1.f },
                             { 0.f, 0.f }
                     });
                 }
-                return new Shape(&sheet[0], sheet.size(), nullptr, 0);
+                return new Shape(
+                        &sheet[0],
+                        sheet.size(),
+                        nullptr,
+                        0,
+                        Color(.25f, .25f, .25f, 1.f));
             }
     };
 
@@ -785,6 +871,11 @@ namespace Engine {
      * siatki
      */
     Shape* loadOBJ(const char* path) {
+        FILE* fp = fopen(path, "r");
+        while(feof(fp) == nullptr) {
+            char header[3];
+            fscanf(fp, "%s", &header);
+        }
         return nullptr;
     }
     class Mesh : public Drawable {
@@ -811,14 +902,15 @@ namespace Engine {
             MatrixStack matrix;
             Camera cam;
 
-            Shape* model = nullptr;
+            Shape *axis = nullptr,
+                    *model = nullptr;
 
         public:
             void init() {
                 axis = Primitives::genAxis(17);
 
-                cam.pos[1] += 2.f;
-                cam.pos[0] += 3.f;
+                cam.pos[1] += 1.f;
+                cam.pos[0] += 2.f;
                 matrix.setCameraCoords(cam);
 
                 model = loadOBJ("model.obj");
@@ -826,12 +918,9 @@ namespace Engine {
             void render() {
                 if (axis != nullptr)
                     axis->draw(matrix, GL_LINES);
-                if(model != nullptr)
-                    axis->draw(matrix, GL_TRIANGLES);
+                if (model != nullptr)
+                    model->draw(matrix, GL_LINE_STRIP);
             }
-
-        private:
-            Shape* axis = nullptr;
     };
 }
 namespace Window {
