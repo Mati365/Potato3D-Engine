@@ -1,4 +1,4 @@
-src/3D\ engine.d: ../src/3D\ engine.cpp \
+src/GL3Engine/Window/Window.d: ../src/GL3Engine/Window/Window.cpp \
  ../src/GL3Engine/Window/Window.hpp \
  ../src/GL3Engine/Window/../Graphics/GL3Engine.hpp \
  ../src/GL3Engine/Window/../Graphics/../IO.hpp \
