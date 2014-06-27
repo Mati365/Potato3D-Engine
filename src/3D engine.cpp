@@ -1,8 +1,3 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <boost/scoped_ptr.hpp>
-
 #include "GL3Engine/Window/Window.hpp"
 
 using namespace std;
