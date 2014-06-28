@@ -8,10 +8,14 @@ namespace IO {
         return ifstream(path, ios::binary | ios::ate).tellg();
     }
     string getFileContents(const string& path) {
-        ifstream t(path);
-        stringstream buffer;
-        buffer << t.rdbuf();
-        return buffer.str();
+        ifstream f(path);
+        return getFileContents(f, '\n');
+    }
+    string getFileContents(ifstream& t, char separate) {
+        string line, out;
+        while(getline(t, line))
+            out += line + separate;
+        return out;
     }
     char* allocString(const string& str) {
         char* buf = new char[str.length()];

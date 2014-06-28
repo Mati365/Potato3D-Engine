@@ -36,6 +36,6 @@ namespace GL3Engine {
                 sheet.size(),
                 nullptr,
                 0,
-                Color(.25f, .25f, .25f, 1.f));
+                Color(.45f, .45f, .45f, 1.f));
     }
 }

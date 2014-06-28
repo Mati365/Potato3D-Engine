@@ -1,7 +1,10 @@
 #ifndef DIMENSIONS_HPP_
 #define DIMENSIONS_HPP_
+#include <array>
 
 namespace GL3Engine {
+    using namespace std;
+
     template<typename T> class Point3D {
         public:
             T X = 0,
@@ -36,9 +39,20 @@ namespace GL3Engine {
                 return *this;
             }
 
-            typedef T (&array)[3];
-            operator array() const {
-                return {X,Y,Z};
+            inline array<T, 3> toArray() {
+                return {X, Y, Z};
+            }
+            void copyTo3DArray(T array[3]) {
+                std::template array<T, 3> v = toArray();
+                copy(v.begin(), v.end(), array);
+            }
+            void copyTo2DArray(T array[2]) {
+                std::template array<T, 3> v = toArray();
+                copy(v.begin(), v.end() - 1, array);
+            }
+
+            T operator[](GLint i) const {
+                return i == 0 ? X : (i == 1 ? Y : Z);
             }
 
             inline T getVecLength() const {
@@ -50,6 +64,9 @@ namespace GL3Engine {
                 this->Y /= length;
                 this->Z /= length;
                 return *this;
+            }
+
+            virtual ~Point3D() {
             }
     };
 

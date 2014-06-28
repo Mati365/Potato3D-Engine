@@ -15,6 +15,7 @@ namespace GL3Engine {
         shader.begin();
         shader.setUniform("mvp", matrix.vp_matrix * matrix.model);
         shader.setUniform("col", { col.r, col.g, col.b, col.a }, 4);
+        shader.setUniform("cam", matrix.cam.pos);
         {
             glBindVertexArray(vao);
             if (!indices)

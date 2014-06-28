@@ -7,6 +7,8 @@ namespace IO {
 
     extern size_t getFileLength(const string&);
     extern string getFileContents(const string&);
+    extern string getFileContents(ifstream&, char);
+
     extern char* allocString(const string&);
 }
 

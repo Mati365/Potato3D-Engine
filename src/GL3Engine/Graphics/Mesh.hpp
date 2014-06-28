@@ -4,10 +4,13 @@
 #include <functional>
 #include <memory>
 #include <stdio.h>
+#include <fstream>
 
 #include "GL3Engine.hpp"
 
 namespace GL3Engine {
+    using namespace std;
+
     template<typename T> GLint genGLBuffer(const T* data, GLuint len,
             GLint type) {
         GLuint buffer = 0;
@@ -95,7 +98,7 @@ namespace GL3Engine {
             Mat4 matrix;
     };
 
-    using LOADER_FUNC = function<Shape*(FILE*)>;
+    using LOADER_FUNC = function<Shape*(ifstream&)>;
     class MeshLoader : public Singleton<MeshLoader> {
         private:
             map<string, LOADER_FUNC> loaders;

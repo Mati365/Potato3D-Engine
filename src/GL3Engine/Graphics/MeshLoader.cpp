@@ -1,69 +1,77 @@
 #include <vector>
+#include <algorithm>
+#include <sstream>
+#include <map>
 
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    Shape* loadOBJ(FILE* fp) {
+    using namespace std;
+
+    using LOADER_ITERATOR = vector<string>::iterator;
+
+    FPoint3D getVec3D(LOADER_ITERATOR& iter) {
+        FPoint3D v;
+        sscanf((*iter + " " + *(iter + 1) + " " + *(iter + 2)).c_str(),
+                "%f %f %f",
+                &v.X, &v.Y, &v.Z
+                );
+        iter += 2;
+        return v;
+    }
+    FPoint2D getVec2D(LOADER_ITERATOR& iter) {
+        FPoint2D v;
+        sscanf((*iter + " " + *(iter + 1)).c_str(),
+                "%f %f",
+                &v.X, &v.Y
+                );
+        iter += 1;
+        return v;
+    }
+    Shape* loadOBJ(ifstream& fp) {
         if (fp == nullptr)
             return nullptr;
+        // Parsowanie
+        using TEMP_STACK = vector<FPoint3D>;
+        TEMP_STACK normals, vertices, uv, faces;
+        TEMP_STACK* active_stack = nullptr;
 
-        enum Header {
-            VERTEX = 1,
-            NORMAL,
-            UV,
-            FACE
-        };
-        map<string, Header> headers;
-        headers["v"] = VERTEX;
-        headers["vn"] = NORMAL;
-        headers["vt"] = UV;
-        headers["f"] = FACE;
+        // Obsługiwane typy
+        map<string, TEMP_STACK*> temps;
+        temps["v"] = &vertices;
+        temps["vn"] = &normals;
+        temps["vt"] = &uv;
+        temps["f"] = &faces;
 
-        vector<FPoint3D> vertices, normals;
-        vector<FPoint2D> uv;
+        // Parsowanie
+        vector<Vertex> vertex_array;
+        vector<string> tokens = tokenize(IO::getFileContents(fp, ' '), ' ');
+        for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+            if (temps.find(*it) != temps.end())
+                active_stack = temps[*it];
 
-        vector<Vertex> vertex;
-        while (!feof(fp)) {
-            char header[2];
-            fscanf(fp, "%3s", header);
+            else if ((*it)[0] != '-' && !isdigit((*it)[0]))
+                active_stack = nullptr;
 
-            Header type = headers[string(header)];
-            switch (type) {
-                case NORMAL:
-                    case VERTEX: {
-                    FPoint3D v;
-                    fscanf(fp, "%f %f %f\n", &v.X, &v.Y, &v.Z);
-                    vertices.push_back(v);
-                }
-                    break;
+            else if (active_stack == &uv)
+                active_stack->push_back(getVec2D(it));
+            else if (active_stack == &vertices)
+                active_stack->push_back(getVec3D(it));
+            else if (active_stack == &faces) {
+                Vertex vertex;
 
-                case FACE: {
-                    GLuint v[3];
-                    fscanf(fp, "%d %d %d\n", &v[0], &v[1], &v[2]);
-                    for (GLint i = 0; i < 3; ++i)
-                        vertex.push_back(
-                                {
-                                        {
-                                                vertices[v[i] - 1].X,
-                                                vertices[v[i] - 1].Y,
-                                                vertices[v[i] - 1].Z
-                                        },
-                                        { 1.f, 1.f, 1.f },
-                                        { 1.f, 1.f }
-                                });
-                }
-                    break;
+                arrayToRaw<GLfloat, 3>(
+                        vertices[stringTo<GLint>(*it) - 1].toArray(),
+                        vertex.pos);
 
-                default:
-                    break;
+                vertex_array.push_back(vertex);
             }
         }
-        fclose(fp);
-        return new Shape(&vertex[0],
-                vertex.size(),
+        return new Shape(&vertex_array[0],
+                vertex_array.size(),
                 nullptr,
                 0,
-                { 1.f, 0.f, 0.f, 1.f });
+                { 1.f, 0.f, .5f, 1.f });
     }
 
     MeshLoader::MeshLoader() {
@@ -73,7 +81,10 @@ namespace GL3Engine {
         string extension = path.substr(path.find('.') + 1);
         if (!IS_IN_MAP(loaders, "obj"))
             throw "Unsupported mesh file!";
-        return loaders[extension](fopen(path.c_str(), "r"));
+        ifstream file(path);
+        if (!file.is_open())
+            throw "File not found!";
+        return loaders[extension](file);
     }
 }
 

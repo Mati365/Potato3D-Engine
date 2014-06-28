@@ -1,8 +1,12 @@
 #ifndef TYPES_HPP_
 #define TYPES_HPP_
+#include <initializer_list>
+
 #include "Matrix.hpp"
 
 namespace GL3Engine {
+    using namespace std;
+
     struct Color {
             GLfloat r = 0.f,
                     g = 0.f,
@@ -24,10 +28,6 @@ namespace GL3Engine {
             GLfloat pos[3];
             GLfloat normal[3];
             GLfloat uv[2];
-    };
-    struct Camera {
-            Vec4 pos = { 0.f, 0.f, 2.5f, 1.f };
-            Vec4 target = { 0.f, 0.f, 0.f, 1.f };
     };
 }
 

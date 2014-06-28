@@ -5,12 +5,12 @@ namespace GL3Engine {
         projection = FMAT_MATH::perspective(45.f, 1.f / 1.f, 1.f,
                 100.f);
         model = FMAT_MATH::identity();
+        updateCameraCoords();
     }
-    void MatrixStack::setCameraCoords(const FPoint3D& pos,
-            const FPoint3D& target) {
+    void MatrixStack::updateCameraCoords() {
         view = FMAT_MATH::lookAt(
-                pos,
-                target,
+                cam.pos,
+                cam.target,
                 { 0, 1, 0 });
         vp_matrix = projection * view;
     }

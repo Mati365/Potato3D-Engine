@@ -7,10 +7,13 @@ out vec4 ex_Color;
 out vec2 uv;
 
 uniform mat4x4 mvp;
+uniform vec4 cam;
 uniform vec4 col;
 
 void main(void) {
-	vec4 p = in_Position;
-	gl_Position = p * mvp;
-	ex_Color = col;
+	uv = in_UV;
+	gl_Position = in_Position * mvp;
+
+	float dist = max(0, 1 - distance(gl_Position, vec4(0,0,0,1)) / 13);
+	ex_Color = col * dist;
 }

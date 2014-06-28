@@ -3,22 +3,21 @@
 namespace GL3Engine {
     void GL3Renderer::init() {
         axis = unique_ptr < Shape > (Primitives::genAxis(17));
-
-        cam.pos[1] += 1.f;
-        cam.pos[0] += 2.f;
-        matrix.setCameraCoords(cam.pos, cam.target);
-
         model = unique_ptr < Shape
-                > (MeshLoader::getInstance().loadMesh("model.obj"));
+                > (MeshLoader::getInstance().loadMesh("untitled.obj"));
     }
     void GL3Renderer::render() {
         if (axis != nullptr)
             axis->draw(matrix, GL_LINES);
         if (model != nullptr) {
-            matrix.pushTransform();
-            matrix.model *= FMAT_MATH::scale( { 17.f, 17.f, 17.f });
+            static GLfloat angle = 0.f;
+            angle += 0.000005f;
 
-            model->draw(matrix, GL_LINES);
+            matrix.pushTransform();
+            matrix.model *= FMAT_MATH::scale({ .5f, .5f, .5f });
+            matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), { 0.f, 1.f, 0.f });
+
+            model->draw(matrix, GL_TRIANGLES);
             matrix.popTransform();
         }
     }

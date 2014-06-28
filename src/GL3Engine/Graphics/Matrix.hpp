@@ -59,7 +59,7 @@ namespace GL3Engine {
                         temp[j * matrix.cols + i] = sum;
                     }
 
-                safe_delete<GLfloat>(this->matrix, true);
+                safeDelete<GLfloat>(this->matrix, true);
 
                 cols = matrix.cols;
                 this->matrix = temp;
@@ -78,7 +78,7 @@ namespace GL3Engine {
                     rows = matrix.rows;
                     cols = matrix.cols;
 
-                    safe_delete<GLfloat>(this->matrix, true);
+                    safeDelete<GLfloat>(this->matrix, true);
                     this->matrix = new T[rows * cols];
                 }
                 memcpy(this->matrix, matrix.matrix,
@@ -86,7 +86,7 @@ namespace GL3Engine {
                 return *this;
             }
             Matrix<T>& operator=(const T* dynamic_array) {
-                safe_delete<GLfloat>(this->matrix, true);
+                safeDelete<GLfloat>(this->matrix, true);
                 this->matrix = dynamic_array;
                 return *this;
             }
@@ -116,7 +116,7 @@ namespace GL3Engine {
             }
 
             ~Matrix() {
-                safe_delete(matrix, true);
+                safeDelete(matrix, true);
             }
     };
     template<typename T> Matrix<T> operator*(const Matrix<T>& l,
@@ -152,12 +152,17 @@ namespace GL3Engine {
     using Vec2 = t_Matrix<GLfloat, 2, 1>;
 
     /** Stos */
+    struct Camera {
+            Vec4 pos = { 2.f, 1.f, 2.5f, 1.f };
+            Vec4 target = { 0.f, 0.f, 0.f, 1.f };
+    };
     class MatrixStack {
         public:
             Mat4 projection,
                     view,
                     model,
                     vp_matrix; // cache z mnożenia view * projection
+            Camera cam;
 
             struct M_STACK_ARRAY {
                     GLfloat array[16];
@@ -165,7 +170,7 @@ namespace GL3Engine {
             list<M_STACK_ARRAY> stack;
 
             MatrixStack();
-            void setCameraCoords(const FPoint3D&, const FPoint3D&);
+            void updateCameraCoords();
 
             void pushTransform();
             void popTransform();
