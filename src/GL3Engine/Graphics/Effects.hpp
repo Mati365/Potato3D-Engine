@@ -5,6 +5,7 @@
 #include "GL3Engine.hpp"
 
 namespace GL3Engine {
+    class Material;
     class Shader {
 #define UNIFORM_LOC(variable) glGetUniformLocation(program, variable)
         public:
@@ -49,6 +50,8 @@ namespace GL3Engine {
             inline void setUniform(const GLchar* variable, const Color& p) {
                 setUniform<4>(variable, p.toArray());
             }
+
+            void setUniform(const GLchar*, const Material&);
 
             ~Shader() {
                 glDeleteProgram(program);

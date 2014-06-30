@@ -1,4 +1,6 @@
 #include "Effects.hpp"
+#include "Mesh.hpp"
+
 #include "../IO.hpp"
 
 namespace GL3Engine {
@@ -95,6 +97,9 @@ namespace GL3Engine {
                     break;
             }
         }
+    }
+    void Shader::setUniform(const GLchar* variable, const Material& material) {
+
     }
 }
 

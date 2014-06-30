@@ -5,6 +5,7 @@ layout(location = 2) in  vec2 in_UV;
 
 out vec4 ex_Color;
 out vec2 uv;
+out vec2 normal;
 
 uniform mat4x4 mvp;
 uniform vec4 cam;
@@ -14,6 +15,6 @@ void main(void) {
 	uv = in_UV;
 	gl_Position = in_Position * mvp;
 
-	float dist = max(0, 1 - distance(gl_Position, vec4(0,0,0,1)) / 13);
+	float dist = max(0, 1 - distance(gl_Position, vec4(0,0,0,1)) / 12);
 	ex_Color = col * dist;
 }

@@ -66,6 +66,18 @@ namespace GL3Engine {
             };
             Color col[SPECULAR + 1];
             Texture* tex[BUMP + 1];
+
+            Material() {
+            }
+            Material(const Material& mat) {
+                name = mat.name;
+                transparent = mat.transparent;
+                shine = mat.shine;
+                illum_model = mat.illum_model;
+
+                memcpy(col, mat.col, sizeof(col));
+                memcpy(tex, mat.tex, sizeof(tex));
+            }
     };
 
     class Drawable {
