@@ -4,6 +4,12 @@
 
 namespace GL3Engine {
     Texture::Texture(const string& path) {
+        loadTexture(path);
+        configure();
+    }
+    void Texture::loadTexture(const string& path) {
+        if (handle != 0)
+            glDeleteTextures(1, &handle);
         handle = SOIL_load_OGL_texture
                 (
                         path.c_str(),
@@ -13,7 +19,6 @@ namespace GL3Engine {
                                 SOIL_FLAG_NTSC_SAFE_RGB |
                                 SOIL_FLAG_COMPRESS_TO_DXT
                                 );
-        configure();
     }
     void Texture::configure() {
         glBindTexture(GL_TEXTURE_2D, handle);

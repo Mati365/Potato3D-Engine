@@ -20,6 +20,7 @@ namespace GL3Engine {
         glBindAttribLocation(program, 0, "in_Position");
         glBindAttribLocation(program, 1, "in_Normal");
         glBindAttribLocation(program, 2, "in_UV");
+        glBindAttribLocation(program, 3, "in_Material_ID");
         glLinkProgram(program);
     }
     GLint Shader::compileShader(const string& source, GLint type) {
@@ -44,7 +45,6 @@ namespace GL3Engine {
     }
 
     /** UNIFORMY */
-#define UNIFORM_LOC(variable) glGetUniformLocation(program, variable)
     void Shader::setUniform(const GLchar* variable, float value) {
         glProgramUniform1f(program,
                 UNIFORM_LOC(variable),
@@ -55,27 +55,6 @@ namespace GL3Engine {
                 UNIFORM_LOC(variable),
                 value);
     }
-    void Shader::setUniform(const GLchar* variable,
-            const array<GLfloat, 4>& array,
-            GLuint len) {
-        GLint loc = UNIFORM_LOC(variable);
-
-#define ARRAY_UNIFORM(len) \
-glProgramUniform##len##fv(program, loc, 1, &array[0])
-
-        switch (len) {
-            case 2:
-                ARRAY_UNIFORM(2);
-                break;
-            case 3:
-                ARRAY_UNIFORM(3);
-                break;
-            case 4:
-                ARRAY_UNIFORM(4);
-                break;
-        }
-    }
-
     void Shader::setUniform(const GLchar* variable,
             const Matrix<GLfloat>& value) {
         GLint loc = UNIFORM_LOC(variable);
@@ -116,14 +95,6 @@ glProgramUniform##len##fv(program, loc, 1, &array[0])
                     break;
             }
         }
-    }
-    void Shader::setUniform(const GLchar* variable, const FPoint3D& p) {
-        glProgramUniform4f(program, UNIFORM_LOC(variable), p.X, p.Y,
-                p.Z, 1.f);
-    }
-    void Shader::setUniform(const GLchar* variable, const Color& p) {
-        glProgramUniform4f(program, UNIFORM_LOC(variable), p.r, p.g,
-                p.b, p.a);
     }
 }
 

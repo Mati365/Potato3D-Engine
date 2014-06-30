@@ -104,6 +104,10 @@ namespace GL3Engine {
                     :
                       Point3D<T>(_X, _Y, 0) {
             }
+
+            inline array<T, 2> toArray() {
+                return {this->X, this->Y};
+            }
     };
 
     using IPoint2D = Point2D<GLint>;

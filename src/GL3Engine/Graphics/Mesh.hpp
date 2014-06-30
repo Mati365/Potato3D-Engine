@@ -26,11 +26,15 @@ namespace GL3Engine {
 
     class Texture {
         private:
-            GLuint handle;
+            GLuint handle = 0;
             IPoint2D size;
 
         public:
+            Texture() {
+            }
             Texture(const string&);
+
+            void loadTexture(const string&);
 
             GLuint getHandle() const {
                 return handle;
@@ -45,6 +49,23 @@ namespace GL3Engine {
 
         private:
             void configure();
+    };
+    struct Material {
+            string name;
+            GLfloat transparent = 0.f,
+                    shine = 0.f;
+            GLbyte illum_model = 0;
+
+            enum TEX_TYPE
+                : GLint {
+                    AMBIENT,
+                DIFFUSE,
+                SPECULAR,
+                ALPHA,
+                BUMP
+            };
+            Color col[SPECULAR + 1];
+            Texture* tex[BUMP + 1];
     };
 
     class Drawable {
@@ -98,19 +119,33 @@ namespace GL3Engine {
             Mat4 matrix;
     };
 
-    using LOADER_FUNC = function<Shape*(ifstream&)>;
+    template<typename T>
+    class Loader {
+        public:
+            virtual T* load(ifstream&) = 0;
+            virtual ~Loader() {
+            }
+    };
     class MeshLoader : public Singleton<MeshLoader> {
         private:
-            map<string, LOADER_FUNC> loaders;
+            map<string, unique_ptr<Loader<Shape>> > loaders;
 
         public:
             MeshLoader();
 
-            inline void putLoader(const string& extension,
-                    const LOADER_FUNC& func) {
-                loaders[extension] = func;
+            template<typename T> inline void putExtension(
+                    const string& extension) {
+                loaders[extension] = unique_ptr<T>(new T);
             }
-            Shape* loadMesh(const string&) throw (string);
+            template<typename T> T* load(const string& path) throw (string) {
+                string extension = path.substr(path.find('.') + 1);
+                if (!IS_IN_MAP(loaders, "obj"))
+                    throw "Unsupported mesh file!";
+                ifstream file(path);
+                if (!file.is_open())
+                    throw "File not found!";
+                return loaders[extension]->load(file);
+            }
     };
 }
 

@@ -8,6 +8,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <memory>
+
 namespace Tools {
     using namespace std;
 
@@ -59,6 +61,7 @@ namespace Tools {
             string message;
 
             static deque<Log> logs;
+            static void putLog(Flag, const string&);
     };
     extern void showGLErrors();
 

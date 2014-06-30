@@ -17,7 +17,7 @@ CPP_DEPS += \
 src/3D\ engine.o: ../src/3D\ engine.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -DGLEW_STATIC -I/usr/include -I/usr/local/include -O0 -g3 -Wall -c -fmessage-length=0 -std=c++0x -std=c++11 -MMD -MP -MF"src/3D engine.d" -MT"src/3D\ engine.d" -o "$@" "$<"
+	g++ -DGLEW_STATIC -I/usr/include -I/usr/local/include -O0 -g3 -Wall -c -fmessage-length=0 -std=c++0x -std=c++11 -std=c++1y -MMD -MP -MF"src/3D engine.d" -MT"src/3D\ engine.d" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

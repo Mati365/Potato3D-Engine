@@ -4,7 +4,7 @@ namespace GL3Engine {
     void GL3Renderer::init() {
         axis = unique_ptr < Shape > (Primitives::genAxis(17));
         model = unique_ptr < Shape
-                > (MeshLoader::getInstance().loadMesh("untitled.obj"));
+                > (MeshLoader::getInstance().load<Shape>("untitled.obj"));
     }
     void GL3Renderer::render() {
         if (axis != nullptr)
