@@ -6,10 +6,10 @@
 namespace GL3Engine {
     using namespace IO;
 
-    Shader::Shader(const string& frag, const string& vertex,
-            const string& geo) {
+    Shader::Shader(c_str& frag, c_str& vertex, c_str& geo) {
         linkShader(
-                { Shader::compileShader(frag, GL_FRAGMENT_SHADER),
+                {
+                        Shader::compileShader(frag, GL_FRAGMENT_SHADER),
                         Shader::compileShader(vertex, GL_VERTEX_SHADER),
                         Shader::compileShader(geo, GL_GEOMETRY_SHADER) });
     }
@@ -22,16 +22,16 @@ namespace GL3Engine {
         glBindAttribLocation(program, 0, "in_Position");
         glBindAttribLocation(program, 1, "in_Normal");
         glBindAttribLocation(program, 2, "in_UV");
-        glBindAttribLocation(program, 3, "in_Material_ID");
+        glBindAttribLocation(program, 3, "in_MTL_index");
         glLinkProgram(program);
     }
-    GLint Shader::compileShader(const string& source, GLint type) {
+    GLint Shader::compileShader(c_str& source, GLint type) {
         if (source.empty())
             return 0;
 
         GLint shader = glCreateShader(type);
         GLint result, length = source.length();
-        char* buffer = allocString(source);
+        GLchar* buffer = allocString(source);
 
         glShaderSource(shader, 1, (const GLchar**) &buffer, &length);
         glCompileShader(shader);
@@ -40,6 +40,10 @@ namespace GL3Engine {
 
         glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
         if (result == GL_FALSE) {
+            char buffer[512];
+            glGetShaderInfoLog(shader, 512, nullptr, buffer);
+            cout << buffer << std::endl;
+
             glDeleteShader(shader);
             return 0;
         }
@@ -47,17 +51,17 @@ namespace GL3Engine {
     }
 
     /** UNIFORMY */
-    void Shader::setUniform(const GLchar* variable, float value) {
+    void Shader::setUniform(c_str variable, GLfloat value) {
         glProgramUniform1f(program,
                 UNIFORM_LOC(variable),
                 value);
     }
-    void Shader::setUniform(const GLchar* variable, int value) {
+    void Shader::setUniform(c_str variable, GLint value) {
         glProgramUniform1i(program,
                 UNIFORM_LOC(variable),
                 value);
     }
-    void Shader::setUniform(const GLchar* variable,
+    void Shader::setUniform(c_str variable,
             const Matrix<GLfloat>& value) {
         GLint loc = UNIFORM_LOC(variable);
         if (value.rows == value.cols) {
@@ -98,8 +102,28 @@ namespace GL3Engine {
             }
         }
     }
-    void Shader::setUniform(const GLchar* variable, const Material& material) {
 
+    void Shader::setUniformTexture(c_str tex, GLint flag, GLuint handle) {
+        glProgramUniform1i(program, UNIFORM_LOC(tex), flag - GL_TEXTURE0);
+        glActiveTexture(flag);
+        glBindTexture(GL_TEXTURE_2D, handle);
+    }
+    void Shader::setUniform(c_str variable, const MATERIALS& material) {
+        // TODO: Reszta tekstur
+        for (GLuint i = 0; i < material.size(); ++i) {
+            Material* mtl = material[i];
+            char array_variable[50];
+            sprintf(array_variable, "%s[%u]", variable.c_str(), i);
+
+#define MATERIAL_PARAM(param) (array_variable + string(param))
+
+            setUniform(MATERIAL_PARAM(".transparent"), mtl->transparent);
+            setUniformTexture(
+                    MATERIAL_PARAM(".dtex"),
+                    GL_TEXTURE0 + i,
+                    mtl->tex[Material::DIFFUSE] ? mtl->tex[Material::DIFFUSE]->getHandle() :
+                                                  0);
+        }
     }
 }
 

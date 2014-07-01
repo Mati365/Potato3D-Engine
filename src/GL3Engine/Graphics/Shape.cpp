@@ -8,13 +8,17 @@ namespace GL3Engine {
 
     void Shape::draw(MatrixStack& matrix, GLint mode) {
         static Shader shader(
-                getFileContents("shaders/fragment_shader.txt"),
-                getFileContents("shaders/vertex_shader.txt"),
+                getFileContents("shaders/fragment_shader.glsl"),
+                getFileContents("shaders/vertex_shader.glsl"),
                 "");
 
         shader.begin();
-        shader.setUniform("mvp", matrix.vp_matrix * matrix.model);
-        shader.setUniform("col", col);
+        shader.setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
+        if (materials.empty())
+            shader.setUniform("col", col);
+        else
+            shader.setUniform("material", materials);
+
         shader.setUniform("cam", matrix.cam.pos);
         {
             glBindVertexArray(vao);
@@ -56,7 +60,8 @@ namespace GL3Engine {
 
         VERTEX_ATTR_PTR(0, 3, 0); // Vertex
         VERTEX_ATTR_PTR(1, 3, 3); // Normals
-        VERTEX_ATTR_PTR(2, 2, 7); // UVs
+        VERTEX_ATTR_PTR(2, 2, 6); // UVs
+        VERTEX_ATTR_PTR(3, 1, 8); // MTL
 
         glBindVertexArray(0);
     }

@@ -7,11 +7,12 @@
 namespace GL3Engine {
     class Material;
     class Shader {
-#define UNIFORM_LOC(variable) glGetUniformLocation(program, variable)
+#define UNIFORM_LOC(variable) glGetUniformLocation(program, variable.c_str())
+
         public:
             GLint program = 0;
 
-            Shader(const string&, const string&, const string&);
+            Shader(c_str, c_str, c_str);
 
             inline void begin() const {
                 glUseProgram(program);
@@ -21,9 +22,12 @@ namespace GL3Engine {
             }
 
             /** Uniformy */
-            void setUniform(const GLchar*, float);
-            void setUniform(const GLchar*, int);
-            template<GLuint len> void setUniform(const GLchar* variable,
+            void setUniformTexture(c_str, GLint, GLuint);
+            void setUniform(c_str, const vector<Material*>&);
+
+            void setUniform(c_str, GLfloat);
+            void setUniform(c_str, GLint);
+            template<GLuint len> void setUniform(c_str variable,
                     const array<GLfloat, len>& array) {
                 GLint loc = UNIFORM_LOC(variable);
 #define ARRAY_UNIFORM(len) \
@@ -42,16 +46,14 @@ namespace GL3Engine {
                 }
             }
 
-            void setUniform(const GLchar*, const Matrix<GLfloat>&);
-            inline void setUniform(const GLchar* variable, const FPoint3D& p) {
+            void setUniform(c_str, const Matrix<GLfloat>&);
+            inline void setUniform(c_str variable, const FPoint3D& p) {
                 glProgramUniform4f(program, UNIFORM_LOC(variable), p.X, p.Y,
                         p.Z, 1.f);
             }
-            inline void setUniform(const GLchar* variable, const Color& p) {
+            inline void setUniform(c_str variable, const Color& p) {
                 setUniform<4>(variable, p.toArray());
             }
-
-            void setUniform(const GLchar*, const Material&);
 
             ~Shader() {
                 glDeleteProgram(program);
@@ -61,7 +63,7 @@ namespace GL3Engine {
             void linkShader(initializer_list<GLint>);
 
         public:
-            static GLint compileShader(const string&, GLint);
+            static GLint compileShader(c_str&, GLint);
     };
 }
 

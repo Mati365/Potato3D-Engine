@@ -9,7 +9,7 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 0.000000
 illum 2
-map_Kd ./Truck_glass_D.tga
+#map_Kd ./Truck_glass_D.tga
 
 newmtl TruckMat1
 Ns 92.156863
@@ -29,4 +29,4 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd ./Truck_mat2_D.tga
+#map_Kd ./Truck_mat2_D.tga

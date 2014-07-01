@@ -43,7 +43,7 @@ namespace GL3Engine {
             GLfloat pos[3];
             GLfloat normal[3];
             GLfloat uv[2];
-            GLuint  mtl;
+            GLint mtl; // domyślnie solid color wyłączony!
     };
 }
 

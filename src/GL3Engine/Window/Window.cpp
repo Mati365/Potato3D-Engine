@@ -26,6 +26,9 @@ namespace GL3Engine {
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     void Window::run() {
         SDL_GLContext gl = SDL_GL_CreateContext(window);
@@ -67,6 +70,7 @@ namespace GL3Engine {
         }
         SDL_GL_DeleteContext(gl);
     }
+
     Window::~Window() {
         SDL_DestroyWindow(window);
         SDL_Quit();

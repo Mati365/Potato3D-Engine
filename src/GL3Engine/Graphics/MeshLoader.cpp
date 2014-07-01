@@ -11,8 +11,7 @@ namespace GL3Engine {
 
     using LOADER_ITERATOR = vector<string>::iterator;
 
-    template<typename T>
-    class ASCIIloader : public Loader<T> {
+    template<typename T> class ASCIIloader : public Loader<T> {
         protected:
             map<string, GLint> headers;
 
@@ -74,7 +73,7 @@ namespace GL3Engine {
             virtual ~ASCIIloader() {
             }
     };
-    class MTLloader : public ASCIIloader<Material> {
+    class MTLloader : public ASCIIloader<MATERIALS> {
         private:
             enum HEADER
                 : GLint {
@@ -120,19 +119,20 @@ namespace GL3Engine {
             void onNewHeader(GLint, vector<string>&) {
             }
             void onHeaderArgument(GLint active_header, LOADER_ITERATOR& it) {
-                Material* mtl = this->mtl.empty() ? nullptr : this->mtl.back();
+                Material* material =
+                        this->mtl.empty() ? nullptr : this->mtl.back();
                 if (active_header == NAME) {
                     this->mtl.push_back(new Material);
-                    mtl = this->mtl.back();
-                    mtl->name = *it;
+                    material = this->mtl.back();
+                    material->name = *it;
                 }
 
 #define DEFINE_3DVEC(header_type, mtl_type) \
-        if(active_header==header_type)mtl->mtl_type = getVec3D(it);
+        if(active_header==header_type)material->mtl_type = getVec3D(it);
 #define DEFINE_F_1DVEC(header_type, mtl_type) \
-        if(active_header==header_type)mtl->mtl_type = stringTo<GLfloat>(*it);
+        if(active_header==header_type)material->mtl_type = stringTo<GLfloat>(*it);
 #define DEFINE_1DTEX(header_type, tex_type) \
-        if(active_header==header_type)mtl->tex[tex_type] = new Texture(*it);
+        if(active_header==header_type)material->tex[tex_type] = new Texture(*it);
 
                 // Parametry
                 DEFINE_F_1DVEC(SHINE, shine);
@@ -155,8 +155,8 @@ namespace GL3Engine {
             GLuint getSize() {
                 return mtl.size();
             }
-            Material* createObject() {
-                return new Material(*(mtl.back()));
+            MATERIALS* createObject() {
+                return new MATERIALS(mtl);
             }
 
             void releaseMemory() {
@@ -196,7 +196,7 @@ namespace GL3Engine {
 
             // Dane z pliku *.mtl
             unique_ptr<MTLloader> mtl_loader;
-            vector<Material*> materials;
+            MATERIALS materials;
             GLint used_material = -1;
 
         public:
@@ -211,12 +211,11 @@ namespace GL3Engine {
                               { "usemtl", USE_MATERIAL } }) {
                 mtl_loader.reset(new MTLloader);
             }
+
             void onNewHeader(GLint, vector<string>&) {
                 if (polygon.empty())
                     return;
-                vertex_array.insert(vertex_array.end(),
-                        polygon.begin(), polygon.end());
-                polygon.clear();
+                finalizePolygon();
             }
             void onHeaderArgument(GLint active_header, LOADER_ITERATOR& it) {
                 switch (active_header) {
@@ -226,9 +225,9 @@ namespace GL3Engine {
                         if (!fp.is_open())
                             return;
 
-                        Material* ptr = mtl_loader->load(fp);
-                        for (GLuint i = 0; i < mtl_loader->getSize(); ++i)
-                            materials.push_back(ptr + i);
+                        MATERIALS* ptr = mtl_loader->load(fp);
+                        for (Material* mat : *ptr)
+                            materials.push_back(mat);
                     }
                         break;
                     case USE_MATERIAL: {
@@ -262,11 +261,12 @@ namespace GL3Engine {
             }
 
             Shape* createObject() {
+                finalizePolygon();
                 return new Shape(&vertex_array[0],
                         vertex_array.size(),
                         nullptr,
                         0,
-                        { 0.f, .3f, .9f, 1.f });
+                        materials);
             }
             void releaseMemory() {
                 indices.clear();
@@ -277,6 +277,11 @@ namespace GL3Engine {
             }
 
         private:
+            void finalizePolygon() {
+                vertex_array.insert(vertex_array.end(),
+                        polygon.begin(), polygon.end());
+                polygon.clear();
+            }
             Vertex getVertex(LOADER_ITERATOR& iter) {
                 Vertex v;
                 string param = *iter;

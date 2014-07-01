@@ -51,11 +51,6 @@ namespace GL3Engine {
             void configure();
     };
     struct Material {
-            string name;
-            GLfloat transparent = 0.f,
-                    shine = 0.f;
-            GLbyte illum_model = 0;
-
             enum TEX_TYPE
                 : GLint {
                     AMBIENT,
@@ -64,8 +59,17 @@ namespace GL3Engine {
                 ALPHA,
                 BUMP
             };
+
+            GLfloat transparent = 1.f,
+                    shine = 1.f;
+            GLbyte illum_model = 0;
             Color col[SPECULAR + 1];
-            Texture* tex[BUMP + 1];
+            Texture* tex[BUMP + 1] = {
+                    nullptr, nullptr,
+                    nullptr, nullptr,
+                    nullptr
+            };
+            string name;
 
             Material() {
             }
@@ -78,7 +82,12 @@ namespace GL3Engine {
                 memcpy(col, mat.col, sizeof(col));
                 memcpy(tex, mat.tex, sizeof(tex));
             }
+            Material(const Color& diffuse_color) {
+                col[DIFFUSE] = diffuse_color;
+            }
     };
+
+    using MATERIALS = vector<Material*>;
 
     class Drawable {
         public:
@@ -94,7 +103,17 @@ namespace GL3Engine {
                     vertices_count = 0,
                     indices_count = 0;
             Color col;
+            MATERIALS materials;
 
+            Shape(const Vertex* buffer,
+                    GLint vertices,
+                    const GLushort* i_buffer,
+                    GLint indices,
+                    const MATERIALS& _materials)
+                    :
+                      materials(_materials) {
+                create(buffer, vertices, i_buffer, indices);
+            }
             Shape(const Vertex* buffer,
                     GLint vertices,
                     const GLushort* i_buffer,
@@ -111,9 +130,6 @@ namespace GL3Engine {
                 create(buffer, vertices, i_buffer, indices);
             }
 
-            void setColor(const Color& col) {
-                this->col = col;
-            }
             void draw(MatrixStack&, GLint);
 
             ~Shape() {
@@ -123,7 +139,6 @@ namespace GL3Engine {
         private:
             void create(const Vertex*, GLint, const GLushort*, GLint);
     };
-
     class Mesh : public Drawable {
         public:
             Shape* shape = nullptr;
@@ -131,8 +146,7 @@ namespace GL3Engine {
             Mat4 matrix;
     };
 
-    template<typename T>
-    class Loader {
+    template<typename T> class Loader {
         public:
             virtual T* load(ifstream&) = 0;
             virtual ~Loader() {
