@@ -10,6 +10,7 @@ Ni 1.000000
 d 0.000000
 illum 2
 map_Kd ./Truck_glass_D.tga
+bump ./Truck_glass_N.tga
 
 newmtl TruckMat1
 Ns 92.156863
@@ -20,6 +21,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd ./Truck_mat1_D.tga
+bump ./Truck_mat1_N.tga
 
 newmtl TruckMat2
 Ns 92.156863
@@ -30,3 +32,4 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd ./Truck_mat2_D.tga
+bump ./Truck_mat2_N.tga

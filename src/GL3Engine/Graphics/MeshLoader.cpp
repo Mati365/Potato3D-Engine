@@ -107,8 +107,9 @@ namespace GL3Engine {
                               { "map_Ka", AMBIENT_TEX },
                               { "map_Kd", DIFFUSE_TEX },
                               { "map_Ks", SPECULAR_TEX },
-                              { "map_d", BUMP_TEX },
-                              { "map_bump", ALPHA_TEX },
+                              { "map_d", ALPHA_TEX },
+                              { "map_bump", BUMP_TEX },
+                              { "bump", BUMP_TEX },
 
                               { "Ns", SHINE },
                               { "D", TRANSPARENT },

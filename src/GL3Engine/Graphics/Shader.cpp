@@ -104,13 +104,14 @@ namespace GL3Engine {
     }
 
     void Shader::setUniformTexture(c_str tex, GLint flag, GLuint handle) {
-        glProgramUniform1i(program, UNIFORM_LOC(tex), flag - GL_TEXTURE0);
-        glActiveTexture(flag);
+        glActiveTexture(GL_TEXTURE0 + flag);
         glBindTexture(GL_TEXTURE_2D, handle);
+        glProgramUniform1i(program, UNIFORM_LOC(tex), flag);
     }
     void Shader::setUniform(c_str variable, const MATERIALS& material) {
         // TODO: Reszta tekstur
-        for (GLuint i = 0; i < material.size(); ++i) {
+        for (GLuint i = 0, tex_index = 0; i < material.size(); ++i, tex_index +=
+                2) {
             Material* mtl = material[i];
             char array_variable[50];
             sprintf(array_variable, "%s[%u]", variable.c_str(), i);
@@ -119,10 +120,15 @@ namespace GL3Engine {
 
             setUniform(MATERIAL_PARAM(".transparent"), mtl->transparent);
             setUniformTexture(
-                    MATERIAL_PARAM(".dtex"),
-                    GL_TEXTURE0 + i,
+                    MATERIAL_PARAM(".diffuse_tex"),
+                    tex_index,
                     mtl->tex[Material::DIFFUSE] ? mtl->tex[Material::DIFFUSE]->getHandle() :
                                                   0);
+            setUniformTexture(
+                    MATERIAL_PARAM(".bump_tex"),
+                    tex_index + 1,
+                    mtl->tex[Material::BUMP] ? mtl->tex[Material::BUMP]->getHandle() :
+                                               0);
         }
     }
 }
