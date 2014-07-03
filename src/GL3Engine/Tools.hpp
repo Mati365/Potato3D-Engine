@@ -14,6 +14,7 @@ namespace Tools {
     using namespace std;
 
     using c_str = const string&;
+    using GLuchar = unsigned char;
 
 #define IS_SET_FLAG(num, flag) (num & flag)
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))

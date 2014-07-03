@@ -22,7 +22,7 @@ namespace GL3Engine {
             }
 
             /** Uniformy */
-            void setUniformTexture(c_str, GLint, GLuint);
+            void setUniform(GLint, c_str, GLint, GLuint);
             void setUniform(c_str, const vector<Material*>&);
 
             void setUniform(c_str, GLfloat);

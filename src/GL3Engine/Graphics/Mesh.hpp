@@ -50,6 +50,26 @@ namespace GL3Engine {
         private:
             void configure();
     };
+    class TextureArray {
+        private:
+            GLuint handle = 0;
+            vector<string> textures;
+
+        public:
+            TextureArray() {
+            }
+            TextureArray(const vector<string>&);
+
+            void create();
+
+            inline void addTexture(c_str str) {
+                textures.push_back(str);
+            }
+            GLuint getHandle() const {
+                return handle;
+            }
+    };
+
     struct Material {
             enum TEX_TYPE
                 : GLint {
@@ -64,12 +84,10 @@ namespace GL3Engine {
                     shine = 1.f;
             GLbyte illum_model = 0;
             Color col[SPECULAR + 1];
-            Texture* tex[BUMP + 1] = {
-                    nullptr, nullptr,
-                    nullptr, nullptr,
-                    nullptr
-            };
+
+            string tex[BUMP + 1];
             string name;
+            GLuint tex_array_handle = 0; // handle wspóldzielony ze wszystkimi materialami w meshu
 
             Material() {
             }

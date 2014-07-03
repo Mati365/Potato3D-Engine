@@ -15,7 +15,7 @@ uniform Matrix	matrix;
 
 void main(void) {
 	gl_Position = Position * matrix.mvp;
-	dist = max(0, 1 - distance(gl_Position, vec4(0,0,0,1)) / 12);
+	dist = max(0, 1 - distance(gl_Position, vec4(0,0,0,1)) / 9);
 	frag_uv = UV;
 	mtl = MTL_index;
 }

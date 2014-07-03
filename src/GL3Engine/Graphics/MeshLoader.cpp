@@ -1,8 +1,6 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
-#include <map>
-#include <functional>
 
 #include "Mesh.hpp"
 
@@ -68,9 +66,16 @@ namespace GL3Engine {
                         onHeaderArgument(active_header, it);
                 }
                 fp.close();
-                return createObject();
+                return selfCreateObject();
             }
             virtual ~ASCIIloader() {
+            }
+
+        private:
+            T* selfCreateObject() {
+                T* obj = createObject();
+                releaseMemory();
+                return obj;
             }
     };
     class MTLloader : public ASCIIloader<MATERIALS> {
@@ -93,6 +98,7 @@ namespace GL3Engine {
                 BUMP_TEX
             };
             vector<Material*> mtl;
+            vector<string> textures;
 
         public:
             MTLloader()
@@ -133,7 +139,7 @@ namespace GL3Engine {
 #define DEFINE_F_1DVEC(header_type, mtl_type) \
         if(active_header==header_type)material->mtl_type = stringTo<GLfloat>(*it);
 #define DEFINE_1DTEX(header_type, tex_type) \
-        if(active_header==header_type)material->tex[tex_type] = new Texture(*it);
+        if(active_header==header_type) material->tex[tex_type] = *it;
 
                 // Parametry
                 DEFINE_F_1DVEC(SHINE, shine);
@@ -157,11 +163,25 @@ namespace GL3Engine {
                 return mtl.size();
             }
             MATERIALS* createObject() {
+                packTextures();
                 return new MATERIALS(mtl);
             }
 
             void releaseMemory() {
                 mtl.clear();
+                textures.clear();
+            }
+
+
+        private:
+            void packTextures() {
+                vector<string> textures;
+                for (Material* material : mtl)
+                    for (string& str : material->tex)
+                        textures.push_back(str);
+                for (Material* material : mtl)
+                    material->tex_array_handle =
+                            TextureArray(textures).getHandle();
             }
     };
     class OBJloader : public ASCIIloader<Shape> {
@@ -283,6 +303,7 @@ namespace GL3Engine {
                         polygon.begin(), polygon.end());
                 polygon.clear();
             }
+
             Vertex getVertex(LOADER_ITERATOR& iter) {
                 Vertex v;
                 string param = *iter;

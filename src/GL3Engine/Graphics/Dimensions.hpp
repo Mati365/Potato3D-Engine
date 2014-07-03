@@ -39,6 +39,13 @@ namespace GL3Engine {
                 return *this;
             }
 
+            GLboolean operator>(const Point3D<T>& p) {
+                return X + Y + Z > p.X + p.Y + p.Z;
+            }
+            GLboolean operator<(const Point3D<T>& p) {
+                return !(this > p);
+            }
+
             inline array<T, 3> toArray() {
                 return {X, Y, Z};
             }

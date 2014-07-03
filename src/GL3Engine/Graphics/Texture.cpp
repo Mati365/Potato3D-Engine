@@ -6,7 +6,6 @@ namespace GL3Engine {
     Texture::Texture(const string& path) {
         loadTexture(path);
     }
-
     void Texture::loadTexture(const string& path) {
         if (handle != 0)
             glDeleteTextures(1, &handle);
@@ -35,6 +34,50 @@ namespace GL3Engine {
                 &size.X);
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT,
                 &size.Y);
+    }
+
+    TextureArray::TextureArray(const vector<string>& _textures)
+            :
+              textures(_textures) {
+        create();
+    }
+    void TextureArray::create() {
+        struct _TEX {
+                const GLuchar* data = nullptr;
+                IPoint2D size;
+                GLint mipmaps;
+        };
+        _TEX* data = new _TEX[textures.size()];
+        IPoint2D biggest;
+
+        for (GLuint i = 0; i < textures.size(); ++i) {
+            _TEX tex;
+            {
+                tex.data = SOIL_load_image(textures[i].c_str(), &tex.size.X,
+                        &tex.size.Y,
+                        &tex.mipmaps,
+                        SOIL_LOAD_RGBA);
+            }
+            data[i] = tex;
+            if (tex.size > biggest)
+                biggest = tex.size;
+        }
+        glGenTextures(1, &handle);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, handle);
+        {
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER,
+            GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER,
+            GL_LINEAR);
+        }
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, biggest.X, biggest.Y,
+                textures.size());
+        for (GLuint i = 0; i < textures.size(); ++i)
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, data[i].size.X,
+                    data[i].size.Y, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+                    data[i].data);
+
+        safeDelete(data, true);
     }
 }
 
