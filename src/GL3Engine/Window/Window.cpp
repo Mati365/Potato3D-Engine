@@ -9,8 +9,8 @@ namespace GL3Engine {
                 SDL_WINDOWPOS_UNDEFINED,
                 bounds.X,
                 bounds.Y,
-                SDL_WINDOW_OPENGL
-                );
+                SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
+                        );
 
         return window != nullptr;
     }

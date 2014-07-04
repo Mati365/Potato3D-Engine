@@ -132,6 +132,10 @@ namespace GL3Engine {
                     :
                       Matrix<T>(COLS, ROWS) {
             }
+            t_Matrix(const Matrix<T>& matrix)
+                    :
+                      Matrix<T>(matrix) {
+            }
             t_Matrix(const initializer_list<T>& array)
                     :
                       Matrix<T>(COLS, ROWS, array) {
@@ -284,6 +288,47 @@ namespace GL3Engine {
                         z_c.X, z_c.Y, z_c.Z, -dot(z_c, _eye),
                         0, 0, 0, 1
                 });
+            }
+
+            /** Obliczenia dla normal matrix */
+            static void transpose(const Matrix<T>& matrix, T* array) {
+                for (GLint i = 0; i < matrix.cols; ++i)
+                    for (GLint j = 0; j < matrix.rows; ++j)
+                        array[i * matrix.rows + j] = matrix.matrix[j
+                                * matrix.cols + i];
+            }
+            static Matrix<T> transpose(const Matrix<T>& matrix) {
+                Matrix<T> result(matrix.rows, matrix.cols);
+                transpose(matrix, result.matrix);
+                return result;
+            }
+
+            static void inverse(Mat3* matrix) {
+                T* arr = matrix->matrix;
+                GLfloat det = (arr[4] * arr[8] - arr[5] * arr[7]) -
+                        2 * (arr[3] * arr[8] - arr[5] * arr[6]) +
+                        3 * (arr[3] * arr[7] - arr[4] * arr[6]);
+                if (det == 0)
+                    return;
+
+                // Rotacja
+                static T mat[9];
+                transpose(*matrix, mat);
+
+                arr[0] = mat[4] * mat[8] - mat[5] * mat[7];
+                arr[1] = -mat[3] * mat[8] + mat[5] * mat[6];
+                arr[2] = mat[3] * mat[7] - mat[4] * mat[6];
+                arr[3] = -mat[1] * mat[8] + mat[2] * mat[7];
+                arr[4] = mat[0] * mat[8] - mat[2] * mat[6];
+                arr[5] = -mat[0] * mat[7] + mat[1] * mat[6];
+                arr[6] = mat[1] * mat[5] - mat[2] * mat[4];
+                arr[7] = -mat[0] * mat[5] + mat[2] * mat[3];
+                arr[8] = mat[0] * mat[4] - mat[1] * mat[3];
+            }
+            static Mat3 inverse(const Mat3& matrix) {
+                Mat3 mat(matrix);
+                inverse(&mat);
+                return mat;
             }
     };
 

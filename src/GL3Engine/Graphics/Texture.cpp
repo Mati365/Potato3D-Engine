@@ -76,7 +76,6 @@ namespace GL3Engine {
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, data[i].size.X,
                     data[i].size.Y, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                     data[i].data);
-
         safeDelete(data, true);
     }
 }
