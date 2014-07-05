@@ -14,12 +14,12 @@ namespace GL3Engine {
 
         shader.begin();
         shader.setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
+        shader.setUniform("matrix.normal",
+                FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
         if (materials.empty())
             shader.setUniform("col", col);
         else
             shader.setUniform("material", materials);
-
-        shader.setUniform("cam", matrix.cam.pos);
         {
             glBindVertexArray(vao);
             if (!indices)

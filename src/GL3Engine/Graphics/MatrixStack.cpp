@@ -8,9 +8,11 @@ namespace GL3Engine {
         updateCameraCoords();
     }
     void MatrixStack::updateCameraCoords() {
+        if(cam.empty())
+            cam.push_back(Camera());
         view = FMAT_MATH::lookAt(
-                cam.pos,
-                cam.target,
+                cam[active_cam].pos,
+                cam[active_cam].target,
                 { 0, 1, 0 });
         vp_matrix = projection * view;
     }

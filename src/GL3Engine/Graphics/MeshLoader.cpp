@@ -172,7 +172,6 @@ namespace GL3Engine {
                 textures.clear();
             }
 
-
         private:
             void packTextures() {
                 vector<string> textures;
@@ -305,7 +304,12 @@ namespace GL3Engine {
             }
 
             Vertex getVertex(LOADER_ITERATOR& iter) {
-                Vertex v;
+                Vertex v = {
+                        { 0.0, 0.0, 0.0 },
+                        { 0.0, 0.0, 0.0 },
+                        { 0, 0 },
+                        -1
+                };
                 string param = *iter;
                 GLfloat args[3];
 

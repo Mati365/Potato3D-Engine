@@ -8,19 +8,17 @@ out 	vec2		frag_uv;
 out	vec3		frag_normal;
 out 	vec3		frag_pos;
 out 	float		mtl;
-out	mat3		NormalMatrix;
 
 struct Matrix {
-	mat4x4 	mvp;
-	mat3		normal_matrix;
+	mat4	 	mvp;
+	mat3		normal;
 };
 uniform Matrix	matrix;
 
 void main(void) {
 	gl_Position 	= 	Position * matrix.mvp;
-	NormalMatrix	=	matrix.normal_matrix;
-	frag_normal		= 	Normal;
-	frag_pos			= 	gl_Position.xyz;
+	frag_normal		= 	Normal * matrix.normal;
+	frag_pos			=	gl_Position.xyz;
 
 	frag_uv = UV;
 	mtl = MTL_index;

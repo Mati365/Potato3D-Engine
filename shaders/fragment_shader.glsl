@@ -3,7 +3,6 @@ in vec2		frag_uv;
 in	vec3		frag_normal;
 in	vec3		frag_pos;
 in float		mtl;
-in	mat3		NormalMatrix;
 
 struct Material {
 	float				transparent;
@@ -14,6 +13,8 @@ uniform	sampler2DArray	texture_pack;
 uniform	vec4				col;
 uniform	Material			material[4];
 
+bool 		use_material	=	mtl >= 0;
+
 #define	AMBIENT	0
 #define	DIFFUSE	1
 #define	SPECULAR	2
@@ -22,32 +23,40 @@ uniform	Material			material[4];
 #define	BUMP		4
 // -----------------------------------------
 
-#define	GET_MATERIAL_TEX(type)	texture(texture_pack, vec3(vec2(frag_uv.x, 1.0 - frag_uv.y), mtl * (BUMP+1) + ## type ##))
-#define	MATERIAL						material[int(mtl)]
+#define	GET_MATERIAL_UV_TEX(uv, type)	texture(texture_pack, vec3(uv , mtl * (BUMP+1) + type))
+#define	GET_MATERIAL_TEX(type)			GET_MATERIAL_UV_TEX(vec2(frag_uv.x, 1.0 - frag_uv.y), type)
+#define	MATERIAL								material[int(mtl)]
 
 struct Light {
 	vec3	pos;
-	vec4	col;
+	vec3	col;
 };
 Light	light = Light(
-	vec3(0, 0, 0),
-	vec4(1, 1, 1, 1)
+	vec3(-2.0, -1.0, 1.0),
+	vec3(1.0, 1.0, 1.0)
 );
 
-void calcLight(void) {
-	vec3 	light_vec	=	normalize(vec3(light.pos - frag_pos));
-	float	diffuse		= max(normalize(dot(light_vec, GET_MATERIAL_TEX(BUMP).rgb)), 0.0);
-	//gl_FragColor.rgb *= diffuse;
+vec2 pixelize(in float d) {
+	return vec2(d * floor(frag_uv.x / d), d * floor((1.0 - frag_uv.y) / d));
 }
-bool drawWithMaterial(void) {
-	if(mtl < 0)
+void calcLight(void) {
+	vec3	normal			=	normalize(frag_normal + 
+			(use_material ? 
+						normalize((GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0)) : 
+						vec3(0,0,0)));
+	
+	vec3	light_normal	=	normalize(light.pos - frag_pos);
+	float	diffuse			=	max(dot(normal, light_normal), 0.0);
+	gl_FragColor 			*= vec4(light.col * diffuse, 1.0);	
+}
+bool drawMaterial(void) {
+	if(!use_material)
 		return false;
-	// Oswietlenie
-	gl_FragColor =   GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.transparent;
+	gl_FragColor = GET_MATERIAL_UV_TEX(pixelize(0.01), DIFFUSE) * MATERIAL.transparent;
 	return true;
 }
 void main(void) {
-	if(!drawWithMaterial())
+	if(!drawMaterial())
 		gl_FragColor =	col;
 	calcLight();
 }

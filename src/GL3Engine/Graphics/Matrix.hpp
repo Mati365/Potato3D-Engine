@@ -105,6 +105,18 @@ namespace GL3Engine {
                 };
             }
 
+            Matrix<T> getCut(GLuint cols, GLuint rows) {
+                if (cols > this->cols || rows > this->rows)
+                    return *this;
+
+                Matrix<T> cut(cols, rows);
+                for (GLuint i = 0; i < this->rows && i < rows; ++i)
+                    for (GLuint j = 0; j < this->cols && j < cols; ++j)
+                        cut.matrix[i * rows + j] = matrix[i * this->rows + j];
+
+                return cut;
+            }
+
             T* get(GLuint x, GLuint y) {
                 return matrix[y * cols + x];
             }
@@ -157,24 +169,34 @@ namespace GL3Engine {
 
     /** Stos */
     struct Camera {
-            Vec4 pos = { 2.f, 1.f, 2.5f, 1.f };
+            Vec4 pos = { 2.f, 1.f, 1.5f, 1.f };
             Vec4 target = { 0.f, 0.f, 0.f, 1.f };
     };
     class MatrixStack {
+        private:
+            vector<Camera> cam;
+            GLuint active_cam = 0;
+
+            struct M_STACK_ARRAY {
+                    GLfloat array[16];
+            };
+            list<M_STACK_ARRAY> stack; // pushTransform i popTransform
+
         public:
             Mat4 projection,
                     view,
                     model,
                     vp_matrix; // cache z mnożenia view * projection
-            Camera cam;
-
-            struct M_STACK_ARRAY {
-                    GLfloat array[16];
-            };
-            list<M_STACK_ARRAY> stack;
 
             MatrixStack();
+
             void updateCameraCoords();
+            inline void addCam(const Camera& _cam) {
+                cam.push_back(_cam);
+            }
+            inline void selectCam(GLint index) {
+                active_cam = index;
+            }
 
             void pushTransform();
             void popTransform();

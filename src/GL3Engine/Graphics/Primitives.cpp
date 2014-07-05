@@ -12,25 +12,25 @@ namespace GL3Engine {
         for (GLint i = 0; i < (GLint) size; ++i) {
             sheet.push_back( {
                     { i * .5f - start_pos, 0.f, -start_pos },
-                    { 1.f, 1.f, 1.f },
+                    { 0.f, 0.f, 1.f },
                     { 0.f, 0.f },
                     -1
             });
             sheet.push_back( {
                     { i * .5f - start_pos, 0.f, start_pos },
-                    { 1.f, 1.f, 1.f },
+                    { 0.f, 0.f, 1.f },
                     { 0.f, 0.f },
                     -1
             });
             sheet.push_back( {
                     { start_pos, 0.f, -start_pos + i * .5f },
-                    { 1.f, 1.f, 1.f },
+                    { 0.f, 0.f, 1.f },
                     { 0.f, 0.f },
                     -1
             });
             sheet.push_back( {
                     { -start_pos, 0.f, -start_pos + i * .5f },
-                    { 1.f, 1.f, 1.f },
+                    { 0.f, 0.f, 1.f },
                     { 0.f, 0.f },
                     -1
             });
