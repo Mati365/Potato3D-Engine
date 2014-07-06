@@ -18,11 +18,7 @@ namespace GL3Engine {
         return buffer;
     }
 
-#define VRAM_MINIMUM_SIZE 4194304 // 32MB
-
     void Shape::draw(MatrixStack& matrix, GLint mode) {
-        static VBOBath bath(VRAM_MINIMUM_SIZE);
-
         static Shader shader(
                 getFileContents("shaders/fragment_shader.glsl"),
                 getFileContents("shaders/vertex_shader.glsl"),

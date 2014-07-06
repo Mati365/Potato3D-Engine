@@ -10,12 +10,22 @@ namespace GL3Engine {
                 bytes,
                 GL_ARRAY_BUFFER
         });
-
         indices = genGLBuffer( {
                 nullptr,
                 indices,
                 GL_ELEMENT_ARRAY_BUFFER
         });
+
+
+#define BUFFER_OFFSET(i) ((char *)nullptr + (i))
+#define VERTEX_ATTR_PTR(loc, count, strip) \
+        glVertexAttribPointer(loc, count, GL_FLOAT, GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(strip * sizeof(GLfloat))); \
+        glEnableVertexAttribArray(loc)
+
+        VERTEX_ATTR_PTR(0, 3, 0); // Vertex
+        VERTEX_ATTR_PTR(1, 3, 3); // Normals
+        VERTEX_ATTR_PTR(2, 2, 6); // UVs
+        VERTEX_ATTR_PTR(3, 1, 8); // MTL
 
         glBindVertexArray(0);
     }

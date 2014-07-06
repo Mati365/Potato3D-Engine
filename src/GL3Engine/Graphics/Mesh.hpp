@@ -11,6 +11,8 @@
 namespace GL3Engine {
     using namespace std;
 
+#define MINIMUM_VRAM_SIZE   (64*1024*1024) // wielkość VBOBath
+
     struct GL_BUFFER_DATA {
             const GLvoid* data;
             GLsizeiptr len;
@@ -37,7 +39,7 @@ namespace GL3Engine {
                     vbo_length,
                     indices_length;
     };
-    class VBOBath {
+    class VBOBath : public Singleton<VBOBath> {
         private:
             GLuint vao = 0,
                     vbo = 0,
@@ -46,7 +48,11 @@ namespace GL3Engine {
                     last_index_offset = 0;
 
         public:
+            VBOBath() {
+                VBOBath(MINIMUM_VRAM_SIZE);
+            }
             VBOBath(GLsizeiptr);
+
             VAO_BATH_PTR putBuffers(const GL_BUFFER_DATA&,
                     const GL_BUFFER_DATA&);
 
