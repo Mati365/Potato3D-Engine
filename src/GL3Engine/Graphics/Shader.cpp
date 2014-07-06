@@ -120,7 +120,7 @@ namespace GL3Engine {
             setUniform(MATERIAL_PARAM(".transparent"), mtl->transparent);
             setUniform(MATERIAL_PARAM(".shine"), mtl->shine);
 
-            setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".tex"), i,
+            setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".texture_pack"), i,
                     mtl->tex_array_handle);
         }
     }

@@ -9,9 +9,9 @@ struct Material {
 	float				shine;
 	vec4				col[4];
 };
+uniform	Material			material[4];
 uniform	sampler2DArray	texture_pack;
 uniform	vec4				col;
-uniform	Material			material[4];
 
 bool 		use_material	=	mtl >= 0;
 
@@ -29,34 +29,37 @@ bool 		use_material	=	mtl >= 0;
 
 struct Light {
 	vec3	pos;
-	vec3	col;
+
+	vec3	diffuse_col;
+	float	diffuse_intensity;	
 };
 Light	light = Light(
-	vec3(-2.0, -1.0, 1.0),
-	vec3(1.0, 1.0, 1.0)
+	vec3(2.0, -1.0, 8.0),
+	vec3(1.0, 1.0, 1.0),
+	0.95
 );
 
 vec2 pixelize(in float d) {
 	return vec2(d * floor(frag_uv.x / d), d * floor((1.0 - frag_uv.y) / d));
 }
-void calcLight(void) {
+void calcDiffuseLight(void) {
 	vec3	normal			=	normalize(frag_normal + 
 			(use_material ? 
 						normalize((GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0)) : 
 						vec3(0,0,0)));
 	
-	vec3	light_normal	=	normalize(light.pos - frag_pos);
-	float	diffuse			=	max(dot(normal, light_normal), 0.0);
-	gl_FragColor 			*= vec4(light.col * diffuse, 1.0);	
+	vec3	light_normal	=	normalize(normalize(light.pos) - frag_pos);
+	float	diffuse			=	max(dot(light_normal, normal), 0.0);
+	gl_FragColor.rgb 		*= (light.diffuse_col + MATERIAL.shine / 1000.0) * diffuse * light.diffuse_intensity;	
 }
 bool drawMaterial(void) {
 	if(!use_material)
 		return false;
-	gl_FragColor = GET_MATERIAL_UV_TEX(pixelize(0.01), DIFFUSE) * MATERIAL.transparent;
+	gl_FragColor = GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.transparent;
 	return true;
 }
 void main(void) {
 	if(!drawMaterial())
 		gl_FragColor =	col;
-	calcLight();
+	calcDiffuseLight();
 }

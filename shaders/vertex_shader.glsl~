@@ -17,7 +17,7 @@ uniform Matrix	matrix;
 
 void main(void) {
 	gl_Position 	= 	Position * matrix.mvp;
-	frag_normal		= 	Normal * matrix.normal;
+	frag_normal		= 	Normal ;
 	frag_pos			=	gl_Position.xyz;
 
 	frag_uv = UV;

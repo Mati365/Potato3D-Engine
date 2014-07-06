@@ -118,7 +118,7 @@ namespace GL3Engine {
                               { "bump", BUMP_TEX },
 
                               { "Ns", SHINE },
-                              { "D", TRANSPARENT },
+                              { "d", TRANSPARENT },
                               { "Tr", TRANSPARENT }
                       }) {
             }
@@ -135,9 +135,9 @@ namespace GL3Engine {
                 }
 
 #define DEFINE_3DVEC(header_type, mtl_type) \
-        if(active_header==header_type)material->mtl_type = getVec3D(it);
+        if(active_header==header_type) material->mtl_type = getVec3D(it);
 #define DEFINE_F_1DVEC(header_type, mtl_type) \
-        if(active_header==header_type)material->mtl_type = stringTo<GLfloat>(*it);
+        if(active_header==header_type) material->mtl_type = stringTo<GLfloat>(*it);
 #define DEFINE_1DTEX(header_type, tex_type) \
         if(active_header==header_type) material->tex[tex_type] = *it;
 

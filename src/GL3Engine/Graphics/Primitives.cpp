@@ -40,6 +40,6 @@ namespace GL3Engine {
                 sheet.size(),
                 nullptr,
                 0,
-                { .45f, .45f, .45f, 1.f });
+                { .15f, .15f, .15f, 1.f });
     }
 }
