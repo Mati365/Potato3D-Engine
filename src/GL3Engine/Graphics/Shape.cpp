@@ -6,7 +6,23 @@
 namespace GL3Engine {
     using namespace IO;
 
+    GLint genGLBuffer(const GL_BUFFER_DATA& data, bool bind) {
+        GLuint buffer = 0;
+
+        glGenBuffers(1, &buffer);
+        glBindBuffer(data.type, buffer);
+        glBufferData(data.type, data.len, data.data, GL_STATIC_DRAW);
+        if (!bind)
+            glBindBuffer(data.type, 0);
+
+        return buffer;
+    }
+
+#define VRAM_MINIMUM_SIZE 4194304 // 32MB
+
     void Shape::draw(MatrixStack& matrix, GLint mode) {
+        static VBOBath bath(VRAM_MINIMUM_SIZE);
+
         static Shader shader(
                 getFileContents("shaders/fragment_shader.glsl"),
                 getFileContents("shaders/vertex_shader.glsl"),
@@ -39,21 +55,23 @@ namespace GL3Engine {
 
         // Generowani bufora indeksow
         if (i_buffer != nullptr) {
-            this->indices = genGLBuffer<GLushort>(
+            this->indices = genGLBuffer(GL_BUFFER_DATA(
                     i_buffer,
                     indices,
-                    GL_ELEMENT_ARRAY_BUFFER);
+                    GL_ELEMENT_ARRAY_BUFFER
+                    ), true);
             this->indices_count = indices;
         }
 
         // Generowanie bufora wierzcholkow
-        vbo = genGLBuffer<Vertex>(
+        vbo = genGLBuffer( {
                 buffer,
-                vertices * sizeof(Vertex),
-                GL_ARRAY_BUFFER);
+                static_cast<GLsizeiptr>(vertices * sizeof(Vertex)),
+                GL_ARRAY_BUFFER
+        }, true);
         this->vertices_count = vertices;
 
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+#define BUFFER_OFFSET(i) ((char *)nullptr + (i))
 #define VERTEX_ATTR_PTR(loc, count, strip) \
         glVertexAttribPointer(loc, count, GL_FLOAT, GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(strip * sizeof(GLfloat))); \
         glEnableVertexAttribArray(loc)

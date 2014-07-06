@@ -11,18 +11,56 @@
 namespace GL3Engine {
     using namespace std;
 
-    template<typename T> GLint genGLBuffer(const T* data, GLuint len,
-            GLint type) {
-        GLuint buffer = 0;
-        if (data == nullptr)
-            return buffer;
+    struct GL_BUFFER_DATA {
+            const GLvoid* data;
+            GLsizeiptr len;
+            GLint type;
 
-        glGenBuffers(1, &buffer);
-        glBindBuffer(type, buffer);
-        glBufferData(type, len, data, GL_STATIC_DRAW);
+            GL_BUFFER_DATA()
+                    :
+                      data(nullptr),
+                      len(0),
+                      type(0) {
+            }
+            GL_BUFFER_DATA(const GLvoid* _data, GLsizeiptr _len, GLint _type)
+                    :
+                      data(_data),
+                      len(_len),
+                      type(_type) {
+            }
+    };
+    GLint genGLBuffer(const GL_BUFFER_DATA&, bool bind = false);
 
-        return buffer;
-    }
+    struct VAO_BATH_PTR {
+            GLsizeiptr vbo_offset,
+                    indices_offset,
+                    vbo_length,
+                    indices_length;
+    };
+    class VBOBath {
+        private:
+            GLuint vao = 0,
+                    vbo = 0,
+                    indices = 0;
+            GLsizeiptr last_vbo_offset = 0,
+                    last_index_offset = 0;
+
+        public:
+            VBOBath(GLsizeiptr);
+            VAO_BATH_PTR putBuffers(const GL_BUFFER_DATA&,
+                    const GL_BUFFER_DATA&);
+
+#define HANDLE_GETTER(name, variable) inline GLuint get##name##Buffer() const { return variable ; }
+
+            HANDLE_GETTER(VBO, vbo)
+            HANDLE_GETTER(VAO, vao)
+            HANDLE_GETTER(Indices, indices)
+
+        private:
+            static void assignBuffer(GLsizeiptr*,
+                    GLsizeiptr*, const GL_BUFFER_DATA&,
+                    GLint, GLsizeiptr*);
+    };
 
     class Texture {
         private:
