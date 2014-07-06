@@ -282,10 +282,11 @@ namespace GL3Engine {
 
             Shape* createObject() {
                 finalizePolygon();
-                return new Shape(&vertex_array[0],
-                        vertex_array.size(),
-                        nullptr,
-                        0,
+                return new Shape(
+                        GL_BUFFER_DATA(&vertex_array[0],
+                                vertex_array.size() * sizeof(Vertex),
+                                GL_ARRAY_BUFFER),
+                        GL_BUFFER_DATA(nullptr, 0, GL_ELEMENT_ARRAY_BUFFER),
                         materials);
             }
             void releaseMemory() {

@@ -26,6 +26,7 @@ namespace GL3Engine {
 
         shader.begin();
         shader.setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
+        shader.setUniform("matrix.m", matrix.model);
         shader.setUniform("matrix.normal",
                 FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
         if (materials.empty())
@@ -43,29 +44,21 @@ namespace GL3Engine {
         }
         shader.end();
     }
-    void Shape::create(const Vertex* buffer, GLint vertices,
-            const GLushort* i_buffer,
-            GLint indices) {
+    void Shape::create(const GL_BUFFER_DATA& vertices,
+            const GL_BUFFER_DATA& indices) {
+        // Generowanie osobnego VBO dla obiektu
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
         // Generowani bufora indeksow
-        if (i_buffer != nullptr) {
-            this->indices = genGLBuffer(GL_BUFFER_DATA(
-                    i_buffer,
-                    indices,
-                    GL_ELEMENT_ARRAY_BUFFER
-                    ), true);
-            this->indices_count = indices;
+        if (indices.data != nullptr) {
+            this->indices = genGLBuffer(indices, true);
+            this->indices_count = indices.len / sizeof(GLushort);
         }
 
         // Generowanie bufora wierzcholkow
-        vbo = genGLBuffer( {
-                buffer,
-                static_cast<GLsizeiptr>(vertices * sizeof(Vertex)),
-                GL_ARRAY_BUFFER
-        }, true);
-        this->vertices_count = vertices;
+        vbo = genGLBuffer(vertices, true);
+        this->vertices_count = vertices.len / sizeof(Vertex);
 
 #define BUFFER_OFFSET(i) ((char *)nullptr + (i))
 #define VERTEX_ATTR_PTR(loc, count, strip) \
@@ -80,4 +73,3 @@ namespace GL3Engine {
         glBindVertexArray(0);
     }
 }
-

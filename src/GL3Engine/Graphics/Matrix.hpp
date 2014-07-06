@@ -70,7 +70,7 @@ namespace GL3Engine {
                 for (GLuint i = 0; i < rows; ++i)
                     for (GLuint j = 0, index = 0; j < cols;
                             ++j, index = i * cols + j)
-                        this->matrix[index] += *matrix.matrix[index];
+                        this->matrix[index] += matrix.matrix[index];
                 return *this;
             }
             Matrix<T>& operator=(const Matrix<T>& matrix) {
@@ -169,12 +169,12 @@ namespace GL3Engine {
 
     /** Stos */
     struct Camera {
-            Vec4 pos = { 2.f, 1.f, 1.5f, 1.f };
-            Vec4 target = { 0.f, 0.f, 0.f, 1.f };
+            Vec4 pos;
+            Vec4 target;
     };
     class MatrixStack {
         private:
-            vector<Camera> cam;
+            vector<Camera*> cam;
             GLuint active_cam = 0;
 
             struct M_STACK_ARRAY {
@@ -189,13 +189,19 @@ namespace GL3Engine {
                     vp_matrix; // cache z mnożenia view * projection
 
             MatrixStack();
-
             void updateCameraCoords();
-            inline void addCam(const Camera& _cam) {
+
+            inline GLuint addCam(Camera* _cam) {
                 cam.push_back(_cam);
+                return cam.size() - 1;
             }
             inline void selectCam(GLint index) {
                 active_cam = index;
+                updateCameraCoords();
+            }
+
+            inline Camera* getActiveCamera() {
+                return cam[active_cam];
             }
 
             void pushTransform();
@@ -227,10 +233,10 @@ namespace GL3Engine {
 
             static Mat4 translate(const FPoint3D& v) {
                 return Mat4( {
-                        1, 0, 0, 0,
-                        0, 1, 0, 0,
-                        0, 0, 1, 0,
-                        v.X, v.Y, v.Z, 1
+                        1, 0, 0, v.X,
+                        0, 1, 0, v.Y,
+                        0, 0, 1, v.Z,
+                        0, 0, 0, 1
                 });
             }
             static inline void translate(Matrix<T>& matrix,

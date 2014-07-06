@@ -1,13 +1,13 @@
-#include "GL3Engine/Window/Window.hpp"
+#include "Game/Game.hpp"
 
 using namespace std;
 using namespace GL3Engine;
 
 int main() {
     try {
-        Window wnd( { 400, 400 });
-        unique_ptr<GL3Renderer> renderer(
-                new GL3Renderer());
+        Window wnd( { 480, 320 });
+        unique_ptr<Game::GameScreen> renderer(
+                new Game::GameScreen(&wnd));
         wnd.setRenderer(renderer.get());
         wnd.open();
     } catch (const string& ex) {

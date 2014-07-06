@@ -10,25 +10,10 @@ namespace GL3Engine {
         public:
             virtual void init() = 0;
             virtual void render() = 0;
+            virtual void getKeyEvent(SDL_Keycode) = 0;
+
             virtual ~Renderer() {
             }
-    };
-    class GL3Renderer : public Renderer {
-        private:
-            enum Flags {
-                DRAW_AXIS = 1 << 1
-            };
-            GLuint flags = 0;
-
-            MatrixStack matrix;
-            Camera cam;
-
-            unique_ptr<Shape> axis = nullptr,
-                    model = nullptr;
-
-        public:
-            void init();
-            void render();
     };
     class Window {
         public:

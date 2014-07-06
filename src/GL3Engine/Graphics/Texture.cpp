@@ -36,6 +36,7 @@ namespace GL3Engine {
                 &size.Y);
     }
 
+    // --------- TextureArray
     TextureArray::TextureArray(const vector<string>& _textures)
             :
               textures(_textures) {
@@ -43,7 +44,7 @@ namespace GL3Engine {
     }
     void TextureArray::create() {
         struct _TEX {
-                const GLuchar* data = nullptr;
+                GLuchar* data = nullptr;
                 IPoint2D size;
                 GLint mipmaps;
         };
@@ -72,11 +73,22 @@ namespace GL3Engine {
         }
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, biggest.X, biggest.Y,
                 textures.size());
-        for (GLuint i = 0; i < textures.size(); ++i)
+        for (GLuint i = 0; i < textures.size(); ++i) {
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, data[i].size.X,
                     data[i].size.Y, 1, GL_RGBA, GL_UNSIGNED_BYTE,
                     data[i].data);
+            SOIL_free_image_data(data[i].data);
+        }
+
         safeDelete(data, true);
+    }
+
+    // --------- Tile
+    Tile::Tile(Texture _tex, IPoint2D _cells)
+            :
+              tex(_tex),
+              cells(_cells),
+              cell_size(1.0 / _cells.X, 1.0 / _cells.Y) {
     }
 }
 

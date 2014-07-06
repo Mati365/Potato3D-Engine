@@ -36,10 +36,9 @@ namespace GL3Engine {
             });
         }
         return new Shape(
-                &sheet[0],
-                sheet.size(),
-                nullptr,
-                0,
+                GL_BUFFER_DATA(&sheet[0], sheet.size() * sizeof(Vertex),
+                        GL_ARRAY_BUFFER),
+                GL_BUFFER_DATA(nullptr, 0, GL_ELEMENT_ARRAY_BUFFER),
                 { .15f, .15f, .15f, 1.f });
     }
 }

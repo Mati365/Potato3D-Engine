@@ -9,7 +9,7 @@ namespace GL3Engine {
                 SDL_WINDOWPOS_UNDEFINED,
                 bounds.X,
                 bounds.Y,
-                SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL
+                SDL_WINDOW_OPENGL
                         );
 
         return window != nullptr;
@@ -38,25 +38,15 @@ namespace GL3Engine {
         SDL_Event event;
 
         initContext();
+        if (renderer == nullptr)
+            return;
         renderer->init();
 
         while (IS_SET_FLAG(flags, Flags::RUNNING)) {
             while (SDL_PollEvent(&event))
                 switch (event.type) {
                     case SDL_KEYDOWN:
-                        switch (event.key.keysym.sym) {
-                            case SDLK_LEFT:
-                                break;
-
-                            case SDLK_RIGHT:
-                                break;
-
-                            case SDLK_UP:
-                                break;
-
-                            case SDLK_DOWN:
-                                break;
-                        }
+                        renderer->getKeyEvent(event.key.keysym.sym);
                         break;
 
                     case SDL_QUIT:
@@ -66,8 +56,7 @@ namespace GL3Engine {
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (renderer != nullptr)
-                renderer->render();
+            renderer->render();
 
             SDL_GL_SwapWindow(window);
         }
