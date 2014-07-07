@@ -1,4 +1,4 @@
-src/3D\ engine.d: ../src/3D\ engine.cpp ../src/Game/Game.hpp \
+src/Game/Game.d: ../src/Game/Game.cpp ../src/Game/Game.hpp \
  ../src/Game/Map.hpp ../src/Game/../GL3Engine/Window/Window.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/GL3Engine.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/../IO.hpp \

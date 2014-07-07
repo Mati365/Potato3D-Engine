@@ -18,8 +18,8 @@ namespace Game {
 
             MatrixStack matrix;
             Camera cam = {
-                    { 0.f, .5f, -1.f, 1.f }, // wysokosc gracza to 1,5m
-                    { 1.f, .5f, 1.f, 1.f }
+                    { 0.f, 1.05f, -1.f, 1.f }, // wysokosc gracza to 1,5m
+                    { 0.f, .5f, 1.f, 1.f }
             };
 
         public:

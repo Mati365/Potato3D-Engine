@@ -4,7 +4,7 @@ namespace Game {
     void GameScreen::init() {
         axis = unique_ptr < Shape > (Primitives::genAxis(17));
         model = unique_ptr < Shape
-                > (MeshLoader::getInstance().load<Shape>("Earth/Earth.obj"));
+                > (MeshLoader::getInstance().load<Shape>("truck/untitled.obj"));
 
         matrix.selectCam(matrix.addCam(&cam));
     }
@@ -17,8 +17,8 @@ namespace Game {
             angle += 0.000005f;
 
             matrix.pushTransform();
-            matrix.model *= FMAT_MATH::scale( { 1.1f, 1.1f, 1.1f });
-            matrix.model *= FMAT_MATH::translate( { .0f, .0f, 1.05f });
+            matrix.model *= FMAT_MATH::scale( { 0.2f, 0.2f, 0.2f });
+            matrix.model *= FMAT_MATH::translate( { 0.0f, 0.5f, 10.0f });
             matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), {
                     0.f, 1.f, 0.f });
 
@@ -27,27 +27,31 @@ namespace Game {
         }
     }
     void GameScreen::getKeyEvent(SDL_Keycode key) {
-        static GLfloat angle = 0.f;
+        Vec4 v(
+                {
+                        0.2f,
+                        0.f,
+                        0.2f,
+                        0.f });
         switch (key) {
             case SDLK_LEFT:
-                angle -= .1f;
-                cam.target = Vec4( { 0.f, .5f, 1.f, 1.f })
-                        * FMAT_MATH::rotate(angle, { 0.f,
-                                1.f, 0.f });
+                cam.target *= FMAT_MATH::rotate(360 - 0.1, { 0.f,
+                        1.f, 0.f });
                 break;
 
             case SDLK_RIGHT:
-                angle += .1f;
-                cam.target = Vec4( { 0.f, .5f, 1.f, 1.f })
-                        * FMAT_MATH::rotate(angle, { 0.f,
-                                1.f, 0.f });
+                cam.target *= FMAT_MATH::rotate(0.1, { 0.f,
+                        1.f, 0.f });
                 break;
 
             case SDLK_UP:
-                cam.pos += Vec4({cam.target.matrix[0] / 10, 0.f, cam.target.matrix[2] / 10, 0.f});
+                cam.pos += v;
+                cam.target += v;
                 break;
 
             case SDLK_DOWN:
+                cam.pos -= v;
+                cam.target -= v;
                 break;
         }
         matrix.updateCameraCoords();

@@ -2,8 +2,8 @@
 
 namespace GL3Engine {
     MatrixStack::MatrixStack() {
-        projection = FMAT_MATH::perspective(45.f, 480.0 / 320.0, 1.f,
-                10.f);
+        projection = FMAT_MATH::perspective(45.f, 480.f / 320.f, 1.f,
+                100.f);
         model = FMAT_MATH::identity();
         updateCameraCoords();
     }

@@ -9,8 +9,8 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 0.000000
 illum 2
-map_Kd ./Truck/Truck_glass_D.tga
-bump ./Truck/Truck_glass_N.tga
+map_Kd ./truck/Truck_glass_D.tga
+bump ./truck/Truck_glass_N.tga
 
 newmtl TruckMat1
 Ns 92.156863
@@ -20,8 +20,9 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd ./Truck/Truck_mat1_D.tga
-bump ./Truck/Truck_mat1_N.tga
+map_Kd ./truck/Truck_mat1_D.tga
+map_KS ./truck/Truck_mat1_S.tga
+bump ./truck/Truck_mat1_N.tga
 
 newmtl TruckMat2
 Ns 92.156863
@@ -31,5 +32,5 @@ Ks 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd ./Truck/Truck_mat2_D.tga
-bump ./Truck/Truck_mat2_N.tga
+map_Kd ./truck/Truck_mat2_D.tga
+bump ./truck/Truck_mat2_N.tga

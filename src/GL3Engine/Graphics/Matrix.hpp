@@ -66,6 +66,7 @@ namespace GL3Engine {
 
                 return *this;
             }
+
             Matrix<T>& operator+=(const Matrix<T>& matrix) {
                 for (GLuint i = 0; i < rows; ++i)
                     for (GLuint j = 0, index = 0; j < cols;
@@ -73,6 +74,14 @@ namespace GL3Engine {
                         this->matrix[index] += matrix.matrix[index];
                 return *this;
             }
+            Matrix<T>& operator-=(const Matrix<T>& matrix) {
+                for (GLuint i = 0; i < rows; ++i)
+                    for (GLuint j = 0, index = 0; j < cols;
+                            ++j, index = i * cols + j)
+                        this->matrix[index] -= matrix.matrix[index];
+                return *this;
+            }
+
             Matrix<T>& operator=(const Matrix<T>& matrix) {
                 if (rows != matrix.rows && cols != matrix.cols) {
                     rows = matrix.rows;

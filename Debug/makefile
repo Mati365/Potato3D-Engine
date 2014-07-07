@@ -8,6 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/Game/subdir.mk
 -include src/GL3Engine/Window/subdir.mk
 -include src/GL3Engine/Graphics/subdir.mk
 -include src/GL3Engine/subdir.mk

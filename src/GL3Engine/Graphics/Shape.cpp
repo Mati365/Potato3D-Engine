@@ -29,6 +29,8 @@ namespace GL3Engine {
         shader.setUniform("matrix.m", matrix.model);
         shader.setUniform("matrix.normal",
                 FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
+        shader.setUniform("matrix.cam", matrix.getActiveCamera()->pos);
+
         if (materials.empty())
             shader.setUniform("col", col);
         else

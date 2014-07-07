@@ -4,23 +4,28 @@ layout(location = 1) in  vec3 	Normal;
 layout(location = 2) in  vec2 	UV;
 layout(location = 3) in  int	MTL_index;
 
-out 	vec2		frag_uv;
-out		vec3		frag_normal;
-out 	vec3		frag_pos;
-out 	float		mtl;
+out FragInfo {
+	vec2		uv;
+	vec3		normal;
+	vec3		pos;
+	vec3		cam;
+	float		mtl;
+} frag;
 
 struct Matrix {
 	mat4	 	mvp;
 	mat4		m;
 	mat3		normal;
+	vec4		cam; // w model matrix
 };
 uniform Matrix	matrix;
 
 void main(void) {
-	gl_Position 	= 	Position * matrix.mvp;
-	frag_normal		= 	Normal * matrix.normal;
-	frag_pos		=	vec3(Position * matrix.m);
-
-	frag_uv = UV;
-	mtl = MTL_index;
+	gl_Position = 	Position * matrix.mvp;
+	
+	frag.normal	= 	Normal * matrix.normal;
+	frag.pos	=	vec3(Position * matrix.m);
+	frag.uv 	= 	UV;
+	frag.mtl 	= 	MTL_index;
+	frag.cam	=	matrix.cam.xyz;
 }

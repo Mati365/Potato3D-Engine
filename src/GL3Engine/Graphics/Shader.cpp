@@ -110,9 +110,9 @@ namespace GL3Engine {
         glProgramUniform1i(program, UNIFORM_LOC(tex), flag);
     }
     void Shader::setUniform(c_str variable, const MATERIALS& material) {
+        static char array_variable[50], col_buffer[15];
         for (GLuint i = 0; i < material.size(); ++i) {
             Material* mtl = material[i];
-            char array_variable[50];
             sprintf(array_variable, "%s[%u]", variable.c_str(), i);
 
 #define MATERIAL_PARAM(param) (array_variable + string(param))
@@ -122,6 +122,11 @@ namespace GL3Engine {
 
             setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".texture_pack"), i,
                     mtl->tex_array_handle);
+
+            for (GLuint j = 0; j < Material::SPECULAR + 1; ++j) {
+                sprintf(col_buffer, ".%s[%u]", "col", j);
+                setUniform(MATERIAL_PARAM(col_buffer), mtl->col[j]);
+            }
         }
     }
 }
