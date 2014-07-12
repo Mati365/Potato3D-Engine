@@ -3,10 +3,10 @@
 #include "Primitives.hpp"
 
 namespace GL3Engine {
-    Shape* Primitives::genAxis(GLfloat size) {
+    Mesh* Primitives::genAxis(GLfloat size) {
         if (!size % 2)
-            return nullptr;
-        vector<Vertex> sheet;
+            size++;
+        vector<Vertex4f> sheet;
         GLfloat start_pos = floor(sqrt(size));
 
         for (GLint i = 0; i < (GLint) size; ++i) {
@@ -35,10 +35,24 @@ namespace GL3Engine {
                     -1
             });
         }
-        return new Shape(
-                GL_BUFFER_DATA(&sheet[0], sheet.size() * sizeof(Vertex),
-                        GL_ARRAY_BUFFER),
-                GL_BUFFER_DATA(nullptr, 0, GL_ELEMENT_ARRAY_BUFFER),
+        Shape3D* shape = new Shape3D(
+                {
+                        &sheet[0],
+                        sheet.size() * sizeof(Vertex4f),
+                        GL_ARRAY_BUFFER,
+                        0,
+                        GL_STATIC_DRAW
+                },
+                {
+                        nullptr,
+                        0,
+                        GL_ELEMENT_ARRAY_BUFFER,
+                        0,
+                        GL_STATIC_DRAW
+                },
                 { .1f, .1f, .1f, 1.f });
+        return new Mesh(
+                shape,
+                GET_SHADER(ShaderManager::DEFAULT_MESH_SHADER));
     }
 }

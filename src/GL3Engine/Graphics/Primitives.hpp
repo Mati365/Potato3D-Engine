@@ -5,7 +5,7 @@
 namespace GL3Engine {
     class Primitives {
         public:
-            static Shape* genAxis(GLfloat);
+            static Mesh* genAxis(GLfloat);
     };
 }
 

@@ -7,7 +7,6 @@
 #include <GL/gl.h>
 #include <iostream>
 #include <sstream>
-
 #include <memory>
 
 namespace Tools {
@@ -16,7 +15,7 @@ namespace Tools {
     using c_str = const string&;
     using GLuchar = unsigned char;
 
-#define IS_SET_FLAG(num, flag) (num & flag)
+#define IS_SET_FLAG(num, flag) ((num) & (flag))
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
 #define IS_IN_MAP(map, key) (map.find(key) != map.end())
 

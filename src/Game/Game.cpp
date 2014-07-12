@@ -1,16 +1,33 @@
 #include "Game.hpp"
 
+#include "../GL3Engine/Graphics/Text.hpp"
+
 namespace Game {
     void GameScreen::init() {
-        axis = unique_ptr < Shape > (Primitives::genAxis(17));
-        model = unique_ptr < Shape
-                > (MeshLoader::getInstance().load<Shape>("truck/untitled.obj"));
+        axis = unique_ptr < Mesh > (Primitives::genAxis(17));
+        model =
+                unique_ptr < Mesh
+                        > (
+                        new Mesh(
+                                MeshLoader::getInstance().load<Shape3D>(
+                                        "truck/untitled.obj"),
+                                GET_SHADER(ShaderManager::DEFAULT_MESH_SHADER)));
 
         matrix.selectCam(matrix.addCam(&cam));
+
+        font = new Font("sprites/font.png");
+        text = new TextRenderer(font);
     }
     void GameScreen::render() {
         if (axis != nullptr)
             axis->draw(matrix, GL_LINES);
+
+        //text.setText("truck");
+        matrix.pushTransform();
+        matrix.model *= FMAT_MATH::scale( { 2.0f, 0.4f, 1.4f });
+        matrix.model *= FMAT_MATH::translate( { 0.0f, 0.7f, 0.5f });
+        text->draw(matrix, 0);
+        matrix.popTransform();
 
         if (model != nullptr) {
             static GLfloat angle = 0.f;
@@ -18,7 +35,7 @@ namespace Game {
 
             matrix.pushTransform();
             matrix.model *= FMAT_MATH::scale( { 0.2f, 0.2f, 0.2f });
-            matrix.model *= FMAT_MATH::translate( { 0.0f, 0.5f, 10.0f });
+            matrix.model *= FMAT_MATH::translate( { 0.0f, 0.5f, -10.0f });
             matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), {
                     0.f, 1.f, 0.f });
 

@@ -11,7 +11,9 @@ src/3D\ engine.d: ../src/3D\ engine.cpp ../src/Game/Game.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/GL3Engine.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/Mesh.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/Texture.hpp \
- ../src/Game/../GL3Engine/Window/../Graphics/Primitives.hpp
+ ../src/Game/../GL3Engine/Window/../Graphics/Primitives.hpp \
+ ../src/Game/../GL3Engine/Graphics/Text.hpp \
+ ../src/Game/../GL3Engine/Graphics/Mesh.hpp
 
 ../src/Game/Game.hpp:
 
@@ -42,3 +44,7 @@ src/3D\ engine.d: ../src/3D\ engine.cpp ../src/Game/Game.hpp \
 ../src/Game/../GL3Engine/Window/../Graphics/Texture.hpp:
 
 ../src/Game/../GL3Engine/Window/../Graphics/Primitives.hpp:
+
+../src/Game/../GL3Engine/Graphics/Text.hpp:
+
+../src/Game/../GL3Engine/Graphics/Mesh.hpp:

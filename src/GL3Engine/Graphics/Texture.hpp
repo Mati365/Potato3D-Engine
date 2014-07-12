@@ -7,21 +7,33 @@ namespace GL3Engine {
     using namespace std;
 
     class Texture {
+        public:
+            enum Flag
+                : GLuint {
+                    USE_MIPMAP_NEAREST = 1 << 1,
+                USE_MIPMAP_LINEAR = 1 << 2
+            };
+
         private:
-            GLuint handle = 0;
+            GLuint handle = 0, flags = 0;
             IPoint2D size;
 
         public:
             Texture() {
             }
             Texture(const string&);
+            Texture(const string& _path, GLuint _flags)
+                    :
+                      Texture(_path) {
+                flags = _flags;
+            }
 
             void loadTexture(const string&);
 
             GLuint getHandle() const {
                 return handle;
             }
-            IPoint2D getSize() const {
+            const IPoint2D& getSize() const {
                 return size;
             }
 
@@ -51,37 +63,43 @@ namespace GL3Engine {
                 return handle;
             }
     };
+
+    /** Podzielone jako TRIANGLE!!! */
+    using TILE_ITER = vector<Vertex2f>::const_iterator;
     class Tile {
-        private:
+        public:
+            static const GLushort indices[6];
+
+        protected:
             Texture tex;
             IPoint2D cells;
             FPoint2D cell_size;
-            Vertex* vertices; // linia po linii, brak powtórzen
+
+            vector<Vertex2f> uv;
 
         public:
-            Tile(Texture, IPoint2D);
+            Tile(c_str&, IPoint2D);
 
-            inline IPoint2D getCells() const {
+            const IPoint2D& getCells() const {
                 return cells;
             }
-            inline FPoint2D getCellSize() const {
+            const FPoint2D& getCellSize() const {
                 return cell_size;
             }
-            inline GLuint getHandle() const {
+            GLuint getHandle() const {
                 return tex.getHandle();
             }
-            inline IPoint2D getSize() const {
+
+            const IPoint2D& getSize() const {
                 return tex.getSize();
             }
-            inline Texture& getTexture() {
+            const Texture& getTexture() const {
                 return tex;
             }
 
-            ~Tile() {
-                safeDelete<Vertex>(vertices, true);
-            }
+        private:
+            void tokenize();
     };
-
     struct Material {
             enum TEX_TYPE
                 : GLint {

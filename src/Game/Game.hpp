@@ -2,6 +2,8 @@
 #define GAME_HPP_
 #include "Map.hpp"
 
+#include "../GL3Engine/Graphics/Text.hpp"
+
 namespace Game {
     using namespace GL3Engine;
 
@@ -14,13 +16,16 @@ namespace Game {
 
         private:
             Window* wnd;
-            unique_ptr<Shape> axis = nullptr, model = nullptr;
+            unique_ptr<Mesh> axis = nullptr, model = nullptr;
 
             MatrixStack matrix;
             Camera cam = {
-                    { 0.f, 1.05f, -1.f, 1.f }, // wysokosc gracza to 1,5m
-                    { 0.f, .5f, 1.f, 1.f }
+                    { 0.f, 1.05f, 1.f, 1.f }, // wysokosc gracza to 1,5m
+                    { 0.f, 0.05f, -1.f, 1.f }
             };
+
+            Font* font = nullptr;
+            TextRenderer* text = nullptr;
 
         public:
             GameScreen(Window* _wnd)

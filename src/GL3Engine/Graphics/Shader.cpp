@@ -19,10 +19,6 @@ namespace GL3Engine {
         for (GLint shader : shaders)
             if (shader != 0)
                 glAttachShader(program, shader);
-        glBindAttribLocation(program, 0, "in_Position");
-        glBindAttribLocation(program, 1, "in_Normal");
-        glBindAttribLocation(program, 2, "in_UV");
-        glBindAttribLocation(program, 3, "in_MTL_index");
         glLinkProgram(program);
     }
     GLint Shader::compileShader(c_str& source, GLint type) {

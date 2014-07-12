@@ -11,7 +11,6 @@ namespace GL3Engine {
                 bounds.Y,
                 SDL_WINDOW_OPENGL
                         );
-
         return window != nullptr;
     }
     void Window::initContext() {
@@ -32,6 +31,8 @@ namespace GL3Engine {
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+
+        ShaderManager::getInstance().init();
     }
     void Window::run() {
         SDL_GLContext gl = SDL_GL_CreateContext(window);
@@ -64,6 +65,8 @@ namespace GL3Engine {
     }
 
     Window::~Window() {
+        ShaderManager::getInstance().destroy();
+
         SDL_DestroyWindow(window);
         SDL_Quit();
     }

@@ -39,12 +39,28 @@ namespace GL3Engine {
             RETURN_COLOR(a, 3)
             // Kolory
     };
-    struct Vertex {
-            GLfloat pos[3];
-            GLfloat normal[3];
-            GLfloat uv[2];
+
+    using UV = GLfloat[2];
+    using NORMAL = GLfloat[3];
+    using POS = NORMAL;
+
+    struct Vertex2f {
+            POS pos;
+            UV uv;
+    };
+    struct Vertex4f {
+            POS pos;
+            NORMAL normal;
+            UV uv;
             GLint mtl; // domyślnie solid color wyłączony!
     };
+
+    using Cube = Vertex4f[36];
+
+#define BUFFER_OFFSET(i) ((char *)nullptr + (i))
+#define VERTEX_ATTR_PTR(loc, count, strip, type) \
+        glVertexAttribPointer(loc, count, GL_FLOAT, GL_FALSE, sizeof(type), BUFFER_OFFSET(strip * sizeof(GLfloat))); \
+        glEnableVertexAttribArray(loc)
 }
 
 #endif

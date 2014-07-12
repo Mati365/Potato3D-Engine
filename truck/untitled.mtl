@@ -21,7 +21,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd ./truck/Truck_mat1_D.tga
-map_KS ./truck/Truck_mat1_S.tga
+map_Ks ./truck/Truck_mat1_S.tga
 bump ./truck/Truck_mat1_N.tga
 
 newmtl TruckMat2
@@ -33,5 +33,5 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd ./truck/Truck_mat2_D.tga
-map_KS ./truck/Truck_mat2_S.tga
+map_Ks ./truck/Truck_mat2_S.tga
 bump ./truck/Truck_mat2_N.tga

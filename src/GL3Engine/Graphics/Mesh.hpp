@@ -8,27 +8,18 @@
 
 #include "GL3Engine.hpp"
 #include "Texture.hpp"
+#include "Effects.hpp"
 
 namespace GL3Engine {
     using namespace std;
 
     struct GL_BUFFER_DATA {
             const GLvoid* data;
-            GLsizeiptr len;
+            size_t len;
             GLint type;
 
-            GL_BUFFER_DATA()
-                    :
-                      data(nullptr),
-                      len(0),
-                      type(0) {
-            }
-            GL_BUFFER_DATA(const GLvoid* _data, GLsizeiptr _len, GLint _type)
-                    :
-                      data(_data),
-                      len(_len),
-                      type(_type) {
-            }
+            GLuint offset;
+            GLuint vbo_draw_type;
     };
     GLint genGLBuffer(const GL_BUFFER_DATA&, bool bind = false);
 
@@ -38,8 +29,9 @@ namespace GL3Engine {
             virtual ~Drawable() {
             }
     };
-    class Shape : public Drawable {
-        public:
+
+    template<typename T> class VAOpolygon {
+        private:
             GLuint vao = 0,
                     vbo = 0,
                     indices = 0,
@@ -48,35 +40,76 @@ namespace GL3Engine {
             Color col;
             MATERIALS materials;
 
-            Shape(const GL_BUFFER_DATA& vertices,
+        public:
+            VAOpolygon(const GL_BUFFER_DATA& vertices,
                     const GL_BUFFER_DATA& indices,
                     const MATERIALS& _materials)
                     :
                       materials(_materials) {
                 create(vertices, indices);
             }
-            Shape(const GL_BUFFER_DATA& vertices,
+            VAOpolygon(const GL_BUFFER_DATA& vertices,
                     const GL_BUFFER_DATA& indices,
                     const Color& _col)
                     :
                       col(_col) {
                 create(vertices, indices);
             }
-            Shape(const GL_BUFFER_DATA& vertices,
+            VAOpolygon(const GL_BUFFER_DATA& vertices,
                     const GL_BUFFER_DATA& indices) {
                 create(vertices, indices);
             }
 
-            void draw(MatrixStack&, GLint);
+            GLuint getVAO() const {
+                return vao;
+            }
+            GLuint getVBO() const {
+                return vbo;
+            }
+            GLuint getIndices() const {
+                return indices;
+            }
+
+            GLuint getVerticesCount() const {
+                return vertices_count;
+            }
+            GLuint getIndicesCount() const {
+                return indices_count;
+            }
+            MATERIALS& getMaterials() {
+                return materials;
+            }
+            Color& getColor() {
+                return col;
+            }
+
+            GLboolean usingElementBuffer() const {
+                return indices_count > 0;
+            }
+
+            void changeData(const GL_BUFFER_DATA& vertices,
+                    const GL_BUFFER_DATA& indices);
 
         private:
             void create(const GL_BUFFER_DATA&, const GL_BUFFER_DATA&);
     };
+
+    using Shape3D = VAOpolygon<Vertex4f>;
+    using Shape2D = VAOpolygon<Vertex2f>;
+
+    /**
+     * Shader odpowiadający za mesha musi mieć
+     * określone vertex attributy
+     */
+    class Shader;
     class Mesh : public Drawable {
         public:
-            Shape* shape = nullptr;
-            FPoint3D pos;
-            Mat4 matrix;
+            shared_ptr<Shape3D> shape = nullptr;
+            Shader* effect = nullptr; // na 100% w shader managerze
+
+            Mesh(Shape3D*, Shader*);
+
+            void draw(MatrixStack&, GLint);
     };
 
     template<typename T> class Loader {
@@ -87,7 +120,7 @@ namespace GL3Engine {
     };
     class MeshLoader : public Singleton<MeshLoader> {
         private:
-            map<string, unique_ptr<Loader<Shape>> > loaders;
+            map<string, unique_ptr<Loader<Shape3D>> > loaders;
 
         public:
             MeshLoader();

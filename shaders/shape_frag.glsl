@@ -41,11 +41,11 @@ struct Light {
 	float	specular_intensity;
 };
 Light	light = Light(
-	vec3(0.0, 0.5, 0.5), // Pos
+	vec3(0.0, 0.5, 0.4), // Pos
 	1.0,				// Ambient intensity
 	
 	vec4(1.0, 1.0, 1.0, 1.0), // Diffuse col
-	1.0,
+	4.0,
 	
 	vec4(1.0, 1.0, 1.0, 1.0), // Specular col
 	1.0
@@ -69,17 +69,18 @@ void calcLight(void) {
 									col;
 											
 	// Specular
-	float specular_col = 0.f;
+	float specular_col = 0.0;
 	if(use_material) {
 		vec3 reflect 	= 	normalize(2 * diffuse * normal - light_normal);
 		vec3 viewDir 	=	normalize(abs(frag.cam - frag.pos));
-		float specular 	=	pow(max(dot(viewDir, reflect), 0.0), 64);
+		float specular 	=	pow(max(dot(viewDir, reflect), 0.0), 2);
 		
 		specular_col = GET_MATERIAL_TEX(SPECULAR).g * 
 							specular * 
 							light.specular_intensity;
 	}
 	
+	// Całość
 	gl_FragColor += 	
 				(diffuse_col + specular_col * light.specular_col) 
 				* light.diffuse_col 
@@ -90,7 +91,7 @@ bool drawMaterial(void) {
 	if(!use_material)
 		return false;
 	gl_FragColor = MATERIAL.col[AMBIENT]; // ambient
-	gl_FragColor.a = MATERIAL.transparent;
+	gl_FragColor.a = MATERIAL.transparent; // transparent
 	return true;
 }
 void main(void) {

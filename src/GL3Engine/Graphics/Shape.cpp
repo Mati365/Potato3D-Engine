@@ -11,67 +11,65 @@ namespace GL3Engine {
 
         glGenBuffers(1, &buffer);
         glBindBuffer(data.type, buffer);
-        glBufferData(data.type, data.len, data.data, GL_STATIC_DRAW);
+        glBufferData(data.type, data.len, data.data, data.vbo_draw_type);
         if (!bind)
             glBindBuffer(data.type, 0);
 
         return buffer;
     }
 
-    void Shape::draw(MatrixStack& matrix, GLint mode) {
-        static Shader shader(
-                getFileContents("shaders/fragment_shader.glsl"),
-                getFileContents("shaders/vertex_shader.glsl"),
-                "");
-
-        shader.begin();
-        shader.setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
-        shader.setUniform("matrix.m", matrix.model);
-        shader.setUniform("matrix.normal",
-                FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
-        shader.setUniform("matrix.cam", matrix.getActiveCamera()->pos);
-
-        if (materials.empty())
-            shader.setUniform("col", col);
-        else
-            shader.setUniform("material", materials);
-        {
-            glBindVertexArray(vao);
-            if (!indices)
-                glDrawArrays(mode, 0, vertices_count);
-            else
-                glDrawElements(mode, indices_count, GL_UNSIGNED_SHORT,
-                        nullptr);
-            glBindVertexArray(0);
-        }
-        shader.end();
-    }
-    void Shape::create(const GL_BUFFER_DATA& vertices,
+    template<typename T>
+    void VAOpolygon<T>::create(const GL_BUFFER_DATA& vertices,
             const GL_BUFFER_DATA& indices) {
         // Generowanie osobnego VBO dla obiektu
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 
-        // Generowani bufora indeksow
-        if (indices.data != nullptr) {
-            this->indices = genGLBuffer(indices, true);
-            this->indices_count = indices.len / sizeof(GLushort);
-        }
+        // Generowanie bufora indeksow
+        this->indices = genGLBuffer(indices, true);
+        this->indices_count = indices.len / sizeof(GLuint);
 
         // Generowanie bufora wierzcholkow
-        vbo = genGLBuffer(vertices, true);
-        this->vertices_count = vertices.len / sizeof(Vertex);
+        this->vbo = genGLBuffer(vertices, true);
+        this->vertices_count = vertices.len / sizeof(T);
 
-#define BUFFER_OFFSET(i) ((char *)nullptr + (i))
-#define VERTEX_ATTR_PTR(loc, count, strip) \
-        glVertexAttribPointer(loc, count, GL_FLOAT, GL_FALSE, sizeof(Vertex), BUFFER_OFFSET(strip * sizeof(GLfloat))); \
-        glEnableVertexAttribArray(loc)
-
-        VERTEX_ATTR_PTR(0, 3, 0); // Vertex
-        VERTEX_ATTR_PTR(1, 3, 3); // Normals
-        VERTEX_ATTR_PTR(2, 2, 6); // UVs
-        VERTEX_ATTR_PTR(3, 1, 8); // MTL
+        // Bardzo zły pomysł ale działa!
+        if (typeid(T) == typeid(Vertex4f)) {
+            VERTEX_ATTR_PTR(0, 3, 0, T); // Vertex
+            VERTEX_ATTR_PTR(1, 3, 3, T); // Normals
+            VERTEX_ATTR_PTR(2, 2, 6, T); // UVs
+            VERTEX_ATTR_PTR(3, 1, 8, T); // MTL
+        } else {
+            VERTEX_ATTR_PTR(0, 3, 0, T); // Vertex
+            VERTEX_ATTR_PTR(1, 2, 3, T); // UV
+        }
 
         glBindVertexArray(0);
     }
+    template<typename T>
+    void VAOpolygon<T>::changeData(const GL_BUFFER_DATA& _vertices,
+            const GL_BUFFER_DATA& _indices) {
+        glBindVertexArray(vao);
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
+                    _indices.offset,
+                    _indices.len,
+                    _indices.data);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferSubData(GL_ARRAY_BUFFER,
+                    _vertices.offset,
+                    _vertices.len,
+                    _vertices.data);
+        }
+        glBindVertexArray(0);
+
+        vertices_count = (_vertices.offset + _vertices.len) / sizeof(T);
+        indices_count = (_indices.offset + _indices.len) / sizeof(GLuint);
+
+    }
+
+    template class VAOpolygon<Vertex4f> ;
+    template class VAOpolygon<Vertex2f> ;
 }

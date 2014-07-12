@@ -9,6 +9,9 @@ namespace GL3Engine {
 
     using LOADER_ITERATOR = vector<string>::iterator;
 
+    /** TODO:
+     *  - MD2 loader
+     */
     template<typename T> class ASCIIloader : public Loader<T> {
         protected:
             map<string, GLint> headers;
@@ -183,7 +186,7 @@ namespace GL3Engine {
                             TextureArray(textures).getHandle();
             }
     };
-    class OBJloader : public ASCIIloader<Shape> {
+    class OBJloader : public ASCIIloader<Shape3D> {
         private:
             using HEADER_STACK = vector<FPoint3D>;
 
@@ -212,7 +215,7 @@ namespace GL3Engine {
 
             // Dane z pliku *.obj
             ParseStack indices;
-            vector<Vertex> polygon, vertex_array;
+            vector<Vertex4f> polygon, vertex_array;
 
             // Dane z pliku *.mtl
             unique_ptr<MTLloader> mtl_loader;
@@ -280,13 +283,23 @@ namespace GL3Engine {
                 }
             }
 
-            Shape* createObject() {
+            Shape3D* createObject() {
                 finalizePolygon();
-                return new Shape(
-                        GL_BUFFER_DATA(&vertex_array[0],
-                                vertex_array.size() * sizeof(Vertex),
-                                GL_ARRAY_BUFFER),
-                        GL_BUFFER_DATA(nullptr, 0, GL_ELEMENT_ARRAY_BUFFER),
+                return new Shape3D(
+                        {
+                                &vertex_array[0],
+                                vertex_array.size() * sizeof(Vertex4f),
+                                GL_ARRAY_BUFFER,
+                                0,
+                                GL_STATIC_DRAW
+                        },
+                        {
+                                nullptr,
+                                0,
+                                GL_ELEMENT_ARRAY_BUFFER,
+                                0,
+                                GL_STATIC_DRAW
+                        },
                         materials);
             }
             void releaseMemory() {
@@ -304,8 +317,8 @@ namespace GL3Engine {
                 polygon.clear();
             }
 
-            Vertex getVertex(LOADER_ITERATOR& iter) {
-                Vertex v = {
+            Vertex4f getVertex(LOADER_ITERATOR& iter) {
+                Vertex4f v = {
                         { 0.0, 0.0, 0.0 },
                         { 0.0, 0.0, 0.0 },
                         { 0, 0 },
