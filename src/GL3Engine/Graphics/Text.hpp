@@ -23,19 +23,21 @@ namespace GL3Engine {
 
 #define BUFFER_SIZE 256
     class TextRenderer : public Drawable, Singleton<TextRenderer> {
-        public:
+        private:
+            Color col = { 1.f, 1.f, 1.f, 1.f };
+            Font* font = nullptr;
+
             Shape2D* shape = nullptr;
             Shader* effect = nullptr;
 
-            Color col = { 1.0, 1.0, 1.0, 1.0 };
-            Font* font = nullptr;
-
-            TextRenderer(Font* _font)
-                    :
-                      font(_font) {
+        public:
+            TextRenderer() {
                 create();
             }
 
+            void setFont(Font* _font) {
+                font = _font;
+            }
             void setText(const string&);
             void draw(MatrixStack&, GLint);
 

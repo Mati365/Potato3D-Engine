@@ -19,6 +19,13 @@ namespace GL3Engine {
                       Y(_Y),
                       Z(_Z) {
             }
+            Point3D(const array<T, 3>& pos)
+                    :
+                      X(pos[0]),
+                      Y(pos[1]),
+                      Z(pos[2]) {
+
+            }
 
             Point3D<T>& operator+=(const Point3D<T>& v) {
                 X += v.X;
@@ -110,6 +117,10 @@ namespace GL3Engine {
             Point2D(const T& _X, const T& _Y)
                     :
                       Point3D<T>(_X, _Y, 0) {
+            }
+            Point2D(const array<T, 2>& pos)
+                    :
+                      Point3D<T>(array<T, 2> { pos[0], pos[1] }) {
             }
 
             inline array<T, 2> toArray() {

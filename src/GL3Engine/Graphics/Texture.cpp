@@ -16,7 +16,7 @@ namespace GL3Engine {
                         path.c_str(),
                         SOIL_LOAD_AUTO,
                         SOIL_CREATE_NEW_ID,
-                        SOIL_FLAG_INVERT_Y);
+                        SOIL_FLAG_POWER_OF_TWO);
         configure();
     }
     void Texture::configure() {
@@ -111,27 +111,24 @@ namespace GL3Engine {
     }
     void Tile::tokenize() {
         uv.clear();
-        for (GLfloat i = 1.0 - fmod(1.0, cell_size.Y); i >= 0; i -= cell_size.Y)
+        for (GLfloat i = 0; i < 1.0; i += cell_size.Y)
             for (GLfloat j = 0; j < 1.0; j += cell_size.X) {
-                // Vertexy
-                {
-                    uv.push_back( {
-                            { 0.f, 0.f, 0.f },
-                            { j, i }
-                    });
-                    uv.push_back( {
-                            { cell_size.X, 0.f, 0.f },
-                            { j + cell_size.X, i }
-                    });
-                    uv.push_back( {
-                            { cell_size.X, cell_size.Y, 0.f },
-                            { j + cell_size.X, i + cell_size.Y }
-                    });
-                    uv.push_back( {
-                            { 0.f, cell_size.Y, 0.f },
-                            { j, i + cell_size.Y }
-                    });
-                }
+                uv.push_back( {
+                        { 0.f, cell_size.Y, 0.f },
+                        { j, i }
+                });
+                uv.push_back( {
+                        { cell_size.X, cell_size.Y, 0.f },
+                        { j + cell_size.X, i }
+                });
+                uv.push_back( {
+                        { cell_size.X, 0.f, 0.f },
+                        { j + cell_size.X, i + cell_size.Y }
+                });
+                uv.push_back( {
+                        { 0.f, 0.f, 0.f },
+                        { j, i + cell_size.Y }
+                });
             }
     }
 }

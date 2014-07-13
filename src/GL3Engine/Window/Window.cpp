@@ -23,14 +23,13 @@ namespace GL3Engine {
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+
+        glViewport(0, 0, bounds.X, bounds.Y);
 
         ShaderManager::getInstance().init();
     }

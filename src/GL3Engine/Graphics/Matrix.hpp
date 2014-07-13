@@ -3,6 +3,7 @@
 #include <string.h>
 #include <list>
 #include <math.h>
+#include <array>
 
 #include "../Tools.hpp"
 #include "Dimensions.hpp"
@@ -108,6 +109,12 @@ namespace GL3Engine {
             Vec4 target;
     };
     class MatrixStack {
+        public:
+            enum Mode {
+                _3D,
+                _2D
+            };
+
         private:
             vector<Camera*> cam;
             GLuint active_cam = 0;
@@ -117,13 +124,17 @@ namespace GL3Engine {
             };
             list<M_STACK_ARRAY> stack; // pushTransform i popTransform
 
+            FPoint2D resolution;
+
         public:
             Mat4 projection,
                     view,
                     model,
                     vp_matrix; // cache z mnożenia view * projection
 
-            MatrixStack();
+            MatrixStack(const FPoint2D&);
+
+            void switchMode(Mode);
             void updateCameraCoords();
 
             inline GLuint addCam(Camera* _cam) {
@@ -137,6 +148,9 @@ namespace GL3Engine {
 
             inline Camera* getActiveCamera() {
                 return cam[active_cam];
+            }
+            const FPoint2D& getResolution() const {
+                return resolution;
             }
 
             void pushTransform();
@@ -181,6 +195,7 @@ namespace GL3Engine {
             static Mat4 perspective(GLfloat, GLfloat, GLfloat, GLfloat);
             static Mat4 lookAt(const FPoint3D&, const FPoint3D&,
                     const FPoint3D&);
+            static Mat4 orthof(const array<FPoint2D, 3>&);
 
             /** Obliczenia dla normal matrix */
             static void transpose(const Matrix<T>&, T*);

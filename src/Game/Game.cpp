@@ -14,20 +14,11 @@ namespace Game {
                                 GET_SHADER(ShaderManager::DEFAULT_MESH_SHADER)));
 
         matrix.selectCam(matrix.addCam(&cam));
-
-        font = new Font("sprites/font.png");
-        text = new TextRenderer(font);
     }
     void GameScreen::render() {
+        matrix.switchMode(MatrixStack::_3D);
         if (axis != nullptr)
             axis->draw(matrix, GL_LINES);
-
-        //text.setText("truck");
-        matrix.pushTransform();
-        matrix.model *= FMAT_MATH::scale( { 2.0f, 0.4f, 1.4f });
-        matrix.model *= FMAT_MATH::translate( { 0.0f, 0.7f, 0.5f });
-        text->draw(matrix, 0);
-        matrix.popTransform();
 
         if (model != nullptr) {
             static GLfloat angle = 0.f;

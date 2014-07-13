@@ -26,11 +26,11 @@ namespace GL3Engine {
             GLuint flags = Flags::RUNNING;
 
             SDL_Window* window;
-            IPoint2D bounds;
+            FPoint2D bounds;
             Renderer* renderer = nullptr;
 
         public:
-            Window(const IPoint2D& _bounds)
+            Window(const FPoint2D& _bounds)
                     :
                       bounds(_bounds) {
                 if (!initialize())
@@ -45,6 +45,10 @@ namespace GL3Engine {
             }
             Renderer* getRenderer() {
                 return renderer;
+            }
+
+            const FPoint2D& getBounds() const {
+                return bounds;
             }
 
             ~Window();

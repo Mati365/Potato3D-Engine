@@ -45,8 +45,8 @@ namespace GL3Engine {
     }
 
     /**
-     * Obiliczenia dla MVP
-     * Wzory:
+     * Obliczenia dla MVP
+     * Wzory macierzy:
      * http://www.3dcpptutorials.sk/index.php?id=2
      */
     template<typename T>
@@ -76,6 +76,18 @@ namespace GL3Engine {
                 y_c.X, y_c.Y, y_c.Z, -dot(y_c, _eye),
                 z_c.X, z_c.Y, z_c.Z, -dot(z_c, _eye),
                 0, 0, 0, 1
+        });
+    }
+    template<typename T>
+    Mat4 MatMatrix<T>::orthof(const array<FPoint2D, 3>& array) {
+        GLfloat _x = array[0].Y - array[0].X,
+                _y = array[1].Y - array[1].X,
+                _z = array[2].Y - array[2].X;
+        return Mat4( {
+                2.f / _x, 0, 0, -(array[0].Y + array[0].X) / _x,
+                0, 2.f / _y, 0, -(array[1].Y + array[1].X) / _y,
+                0, 0, -2.f / _z, -(array[2].Y + array[2].X) / _z,
+                0, 0, 0, 1.f
         });
     }
 

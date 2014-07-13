@@ -7,13 +7,21 @@ namespace GL3Engine {
 
     // ---------- TextRenderer
     void TextRenderer::setText(const string& text) {
+        if(!font)
+            return;
+
         vector<Vertex2f> vertex_buffer;
         vector<GLuint> index_buffer;
 
-        GLfloat cursor = 0.f;
+        FPoint2D cursor(0.f, 0.f);
         FPoint2D cell_size = font->getCellSize();
 
         for (char c : text) {
+            if(c == '\n') {
+                cursor.X = 0.f;
+                cursor.Y -= cell_size.Y;
+                continue;
+            }
             TILE_ITER iter = font->getCharacter(c);
             {
                 // UV
@@ -21,8 +29,8 @@ namespace GL3Engine {
                     TILE_ITER _v = iter + i;
                     vertex_buffer.push_back( {
                             {
-                                    _v->pos[0] + cursor,
-                                    _v->pos[1],
+                                    _v->pos[0] + cursor.X,
+                                    _v->pos[1] + cursor.Y,
                                     _v->pos[2]
                             },
                             { _v->uv[0], _v->uv[1] }
@@ -33,7 +41,7 @@ namespace GL3Engine {
                     index_buffer.push_back(
                             Tile::indices[i] + vertex_buffer.size() - 4);
             }
-            cursor += cell_size.X;
+            cursor.X += cell_size.X;
         }
         shape->changeData(
                 {
@@ -70,11 +78,11 @@ namespace GL3Engine {
                 },
                 col);
 
-        setText("Potato Engine 3D");
+        setText("Potato Engine 3D\nTest");
     }
 
     void TextRenderer::draw(MatrixStack& matrix, GLint) {
-        if (!effect || !shape)
+        if (!font || !effect || !shape)
             return;
 
         effect->begin();
@@ -97,4 +105,3 @@ namespace GL3Engine {
         effect->end();
     }
 }
-

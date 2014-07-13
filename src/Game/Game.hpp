@@ -24,13 +24,11 @@ namespace Game {
                     { 0.f, 0.05f, -1.f, 1.f }
             };
 
-            Font* font = nullptr;
-            TextRenderer* text = nullptr;
-
         public:
             GameScreen(Window* _wnd)
                     :
-                      wnd(_wnd) {
+                      wnd(_wnd),
+                      matrix(_wnd->getBounds()){
             }
 
             inline Window* getWindow() const {
