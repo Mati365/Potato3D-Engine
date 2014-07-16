@@ -31,7 +31,7 @@ namespace GL3Engine {
 
         glViewport(0, 0, bounds.X, bounds.Y);
 
-        ShaderManager::getInstance().init();
+       // RequiredResources::getInstance().init();
     }
     void Window::run() {
         SDL_GLContext gl = SDL_GL_CreateContext(window);
@@ -64,8 +64,6 @@ namespace GL3Engine {
     }
 
     Window::~Window() {
-        ShaderManager::getInstance().destroy();
-
         SDL_DestroyWindow(window);
         SDL_Quit();
     }

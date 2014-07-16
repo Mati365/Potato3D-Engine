@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "Primitives.hpp"
+#include "../Resources/Resources.hpp"
 
 namespace GL3Engine {
     Mesh* Primitives::genAxis(GLfloat size) {
@@ -53,6 +54,8 @@ namespace GL3Engine {
                 { .1f, .1f, .1f, 1.f });
         return new Mesh(
                 shape,
-                GET_SHADER(ShaderManager::DEFAULT_MESH_SHADER));
+                REQUIRE_SHADER(DEFAULT_MESH_SHADER));
+    }
+    void Primitives::printText(c_str& text, FPoint3D& pos) {
     }
 }

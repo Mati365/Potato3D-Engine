@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <fstream>
 
-#include "GL3Engine.hpp"
-#include "Texture.hpp"
 #include "Effects.hpp"
 
 namespace GL3Engine {
@@ -29,7 +27,6 @@ namespace GL3Engine {
             virtual ~Drawable() {
             }
     };
-
     template<typename T> class VAOpolygon {
         private:
             GLuint vao = 0,
@@ -93,6 +90,9 @@ namespace GL3Engine {
         private:
             void create(const GL_BUFFER_DATA&, const GL_BUFFER_DATA&);
     };
+    class VAOInstancedPolygon {
+
+    };
 
     using Shape3D = VAOpolygon<Vertex4f>;
     using Shape2D = VAOpolygon<Vertex2f>;
@@ -110,34 +110,6 @@ namespace GL3Engine {
             Mesh(Shape3D*, Shader*);
 
             void draw(MatrixStack&, GLint);
-    };
-
-    template<typename T> class Loader {
-        public:
-            virtual T* load(ifstream&) = 0;
-            virtual ~Loader() {
-            }
-    };
-    class MeshLoader : public Singleton<MeshLoader> {
-        private:
-            map<string, unique_ptr<Loader<Shape3D>> > loaders;
-
-        public:
-            MeshLoader();
-
-            template<typename T> inline void putExtension(
-                    const string& extension) {
-                loaders[extension] = unique_ptr<T>(new T);
-            }
-            template<typename T> T* load(const string& path) throw (string) {
-                string extension = path.substr(path.find('.') + 1);
-                if (!IS_IN_MAP(loaders, "obj"))
-                    throw "Unsupported mesh file!";
-                ifstream file(path);
-                if (!file.is_open())
-                    throw "File not found!";
-                return loaders[extension]->load(file);
-            }
     };
 }
 

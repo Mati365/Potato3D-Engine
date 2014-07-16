@@ -10,6 +10,7 @@ RM := rm -rf
 -include sources.mk
 -include src/Game/subdir.mk
 -include src/GL3Engine/Window/subdir.mk
+-include src/GL3Engine/Resources/subdir.mk
 -include src/GL3Engine/Graphics/subdir.mk
 -include src/GL3Engine/subdir.mk
 -include src/subdir.mk

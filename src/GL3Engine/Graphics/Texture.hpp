@@ -118,21 +118,12 @@ namespace GL3Engine {
             string tex[BUMP + 1];
             string name;
             GLuint tex_array_handle = 0; // handle wspóldzielony ze wszystkimi materialami w meshu
+            GLuint ubo = 0;
 
             Material() {
             }
-            Material(const Material& mat) {
-                name = mat.name;
-                transparent = mat.transparent;
-                shine = mat.shine;
-                illum_model = mat.illum_model;
-
-                memcpy(col, mat.col, sizeof(col));
-                memcpy(tex, mat.tex, sizeof(tex));
-            }
-            Material(const Color& diffuse_color) {
-                col[DIFFUSE] = diffuse_color;
-            }
+            Material(const Material&);
+            Material(const Color&);
     };
 
     using MATERIALS = vector<Material*>;

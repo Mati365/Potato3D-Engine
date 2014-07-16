@@ -116,14 +116,13 @@ namespace GL3Engine {
             setUniform(MATERIAL_PARAM(".transparent"), mtl->transparent);
             setUniform(MATERIAL_PARAM(".shine"), mtl->shine);
 
-            setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".texture_pack"), i,
-                    mtl->tex_array_handle);
-
             for (GLuint j = 0; j < Material::SPECULAR + 1; ++j) {
                 sprintf(col_buffer, ".%s[%u]", "col", j);
                 setUniform(MATERIAL_PARAM(col_buffer), mtl->col[j]);
             }
         }
+        setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".texture_pack"), 0,
+                material[0]->tex_array_handle);
     }
 }
 

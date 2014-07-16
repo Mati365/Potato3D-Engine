@@ -114,16 +114,14 @@ namespace GL3Engine {
                 _3D,
                 _2D
             };
+            struct M_STACK_ARRAY {
+                    GLfloat array[16];
+            };
 
         private:
             vector<Camera*> cam;
             GLuint active_cam = 0;
-
-            struct M_STACK_ARRAY {
-                    GLfloat array[16];
-            };
             list<M_STACK_ARRAY> stack; // pushTransform i popTransform
-
             FPoint2D resolution;
 
         public:
@@ -155,6 +153,7 @@ namespace GL3Engine {
 
             void pushTransform();
             void popTransform();
+            void loadMatrix(const Mat4&);
     };
 
     /** Obliczenia */

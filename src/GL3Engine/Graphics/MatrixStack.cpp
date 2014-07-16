@@ -62,4 +62,7 @@ namespace GL3Engine {
         memcpy(model.matrix, stack.back().array, 16 * sizeof(GLfloat));
         stack.pop_back();
     }
+    void MatrixStack::loadMatrix(const Mat4& mem) {
+        memcpy(model.matrix, mem.matrix, 16 * sizeof(GLfloat));
+    }
 }

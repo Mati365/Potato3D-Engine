@@ -5,11 +5,13 @@
 namespace IO {
     using namespace Tools;
 
-    extern size_t getFileLength(const string&);
-    extern string getFileContents(const string&);
+    extern size_t getFileLength(c_str&);
+
+    extern void getFileContents(c_str&, vector<string>&);
+    extern string getFileContents(c_str&);
     extern string getFileContents(ifstream&, char);
 
-    extern char* allocString(const string&);
+    extern char* allocString(c_str&);
 }
 
 #endif

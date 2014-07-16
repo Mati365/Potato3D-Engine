@@ -2,11 +2,12 @@
 #define EFFECTS_HPP_
 #include <array>
 #include <map>
+#include <GL/glew.h>
+#include <GL/glu.h>
 
-#include "GL3Engine.hpp"
+#include "Texture.hpp"
 
 namespace GL3Engine {
-    class ShaderManager;
     class Material;
     class Shader {
 #define UNIFORM_LOC(variable) glGetUniformLocation(program, variable.c_str())
@@ -15,9 +16,9 @@ namespace GL3Engine {
         private:
             GLint program = 0;
 
+        public:
             Shader(c_str, c_str, c_str);
 
-        public:
             inline void begin() const {
                 glUseProgram(program);
             }
@@ -59,6 +60,10 @@ namespace GL3Engine {
                 setUniform<4>(variable, p.toArray());
             }
 
+            inline GLint getProgram() const {
+                return program;
+            }
+
             ~Shader() {
                 glDeleteProgram(program);
             }
@@ -69,34 +74,6 @@ namespace GL3Engine {
         public:
             static GLint compileShader(c_str&, GLint);
     };
-
-    /** Prymitywny manager shaderów */
-    class ShaderManager : public Singleton<ShaderManager> {
-        public:
-            struct ShaderInfo {
-                    GLuint handle;
-                    string content[3];
-            };
-            enum DefaultShaders {
-                DEFAULT_MESH_SHADER,
-                DEFAULT_TEXT_SHADER,
-               // DEFAULT_BILLBOARD_SHADER
-            };
-
-        private:
-            map<GLuint, Shader*> shaders;
-            static ShaderInfo DEFAULT_SHADERS[];
-
-        public:
-            Shader* operator[](GLuint index) {
-                return shaders[index];
-            }
-            void putShader(ShaderInfo&);
-
-            void init();
-            void destroy();
-    };
-#define GET_SHADER(handle) ShaderManager::getInstance()[handle]
 }
 
 #endif

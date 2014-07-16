@@ -15,7 +15,9 @@ namespace Tools {
     using c_str = const string&;
     using GLuchar = unsigned char;
 
+#define REMOVE_FLAG(num, flag) ((num) & ~(flag))
 #define IS_SET_FLAG(num, flag) ((num) & (flag))
+
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
 #define IS_IN_MAP(map, key) (map.find(key) != map.end())
 
@@ -58,6 +60,10 @@ namespace Tools {
             if (*ptr == el)
                 buf++;
         return buf;
+    }
+
+    template<typename T, typename E> GLboolean instanceOf(T* obj) {
+        return dynamic_cast<E*>(&obj);
     }
 
     struct Log {

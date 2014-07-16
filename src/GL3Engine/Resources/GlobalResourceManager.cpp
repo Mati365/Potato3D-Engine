@@ -1,0 +1,31 @@
+#include <vector>
+#include <algorithm>
+#include <sstream>
+
+#include "Loaders.hpp"
+
+namespace GL3Engine {
+#define DECLARE_EXTENSION(stack, type) \
+    template<> \
+    void GlobalResourceManager::registerExtension(Loader<type>* l, c_str& e) { \
+        stack.putLoader(l, e); \
+    } \
+    template<> \
+    type* GlobalResourceManager::getResource(ResourceHandle handle) { \
+        return stack.getResource(handle); \
+    } \
+    template<> \
+    type* GlobalResourceManager::loadResource(c_str& path, ResourceHandle* handle) { \
+        return stack.load(path, handle); \
+    }
+
+    DECLARE_EXTENSION(textures, Texture);
+    DECLARE_EXTENSION(shapes, Shape3D);
+    DECLARE_EXTENSION(shaders, Shader);
+
+    GlobalResourceManager::GlobalResourceManager() {
+        registerExtension(new OBJloader, "obj");
+        registerExtension(new GLSLloader, "glsl");
+    }
+}
+

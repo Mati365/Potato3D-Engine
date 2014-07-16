@@ -67,7 +67,6 @@ namespace GL3Engine {
 
         vertices_count = (_vertices.offset + _vertices.len) / sizeof(T);
         indices_count = (_indices.offset + _indices.len) / sizeof(GLuint);
-
     }
 
     template class VAOpolygon<Vertex4f> ;

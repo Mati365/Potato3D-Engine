@@ -1,13 +1,14 @@
 #include "Text.hpp"
 
 #include "../IO.hpp"
+#include "../Resources/Resources.hpp"
 
 namespace GL3Engine {
     using namespace IO;
 
     // ---------- TextRenderer
     void TextRenderer::setText(const string& text) {
-        if(!font)
+        if (!font)
             return;
 
         vector<Vertex2f> vertex_buffer;
@@ -17,7 +18,7 @@ namespace GL3Engine {
         FPoint2D cell_size = font->getCellSize();
 
         for (char c : text) {
-            if(c == '\n') {
+            if (c == '\n') {
                 cursor.X = 0.f;
                 cursor.Y -= cell_size.Y;
                 continue;
@@ -60,7 +61,7 @@ namespace GL3Engine {
                 });
     }
     void TextRenderer::create() {
-        effect = GET_SHADER(ShaderManager::DEFAULT_TEXT_SHADER);
+        effect = REQUIRE_SHADER(DEFAULT_MESH_SHADER);
         shape = new Shape2D(
                 {
                         nullptr,

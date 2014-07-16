@@ -1,19 +1,18 @@
 #include "Game.hpp"
 
 #include "../GL3Engine/Graphics/Text.hpp"
+#include "../GL3Engine/Resources/Resources.hpp"
 
 namespace Game {
     void GameScreen::init() {
         axis = unique_ptr < Mesh > (Primitives::genAxis(17));
-        model =
-                unique_ptr < Mesh
-                        > (
-                        new Mesh(
-                                MeshLoader::getInstance().load<Shape3D>(
-                                        "truck/untitled.obj"),
-                                GET_SHADER(ShaderManager::DEFAULT_MESH_SHADER)));
-
+        model = new Mesh(
+                GlobalResourceManager::getInstance().loadResource<Shape3D>(
+                        "truck/untitled.obj"),
+                REQUIRE_SHADER(DEFAULT_MESH_SHADER));
         matrix.selectCam(matrix.addCam(&cam));
+
+        INIParser ini("test.ini");
     }
     void GameScreen::render() {
         matrix.switchMode(MatrixStack::_3D);

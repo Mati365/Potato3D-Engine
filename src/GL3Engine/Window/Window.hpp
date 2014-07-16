@@ -2,7 +2,7 @@
 #define WINDOW_HPP_
 #include <SDL2/SDL.h>
 
-#include "../Graphics/GL3Engine.hpp"
+#include "../GL3Engine.hpp"
 #include "../Graphics/Primitives.hpp"
 
 namespace GL3Engine {

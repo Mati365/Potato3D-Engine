@@ -6,12 +6,22 @@ in FragInfo {
 	vec3		cam;
 	float		mtl;
 } frag;
-
 struct Material {
 	float				transparent;
 	float				shine;
 	vec4				col[4];
 };
+struct Light {
+	vec3	pos;
+	float	ambient_intensity;
+	
+	vec4	diffuse_col;
+	float	diffuse_intensity;	
+	
+	vec4	specular_col;
+	float	specular_intensity;
+};
+
 uniform	Material			material[4];
 uniform	sampler2DArray		texture_pack;
 uniform	vec4				col;
@@ -30,16 +40,6 @@ bool use_material =	frag.mtl >= 0;
 #define	GET_MATERIAL_TEX(type)			GET_MATERIAL_UV_TEX(vec2(frag.uv.x, 1.0 - frag.uv.y), type)
 #define	MATERIAL						material[int(frag.mtl)]
 
-struct Light {
-	vec3	pos;
-	float	ambient_intensity;
-	
-	vec4	diffuse_col;
-	float	diffuse_intensity;	
-	
-	vec4	specular_col;
-	float	specular_intensity;
-};
 Light	light = Light(
 	vec3(0.0, 0.5, 0.4), // Pos
 	1.0,				// Ambient intensity
