@@ -73,9 +73,14 @@ namespace GL3Engine {
             GLuint getIndicesCount() const {
                 return indices_count;
             }
+
             MATERIALS& getMaterials() {
                 return materials;
             }
+            GLboolean hasMaterials() const {
+                return !materials.empty();
+            }
+
             Color& getColor() {
                 return col;
             }
@@ -103,13 +108,24 @@ namespace GL3Engine {
      */
     class Shader;
     class Mesh : public Drawable {
-        public:
+        private:
             shared_ptr<Shape3D> shape = nullptr;
-            Shader* effect = nullptr; // na 100% w shader managerze
+            Shader* effect = nullptr;
+            GLuint material_cache = 0;
 
+        public:
             Mesh(Shape3D*, Shader*);
-
             void draw(MatrixStack&, GLint);
+
+            const Shape3D* getShape() const {
+                return shape.get();
+            }
+            const Shader* getEffect() const {
+                return effect;
+            }
+
+        private:
+            void updateMaterialsCache();
     };
 }
 

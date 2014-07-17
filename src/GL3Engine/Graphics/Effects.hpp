@@ -29,6 +29,7 @@ namespace GL3Engine {
             /** Uniformy */
             void setUniform(GLint, c_str, GLint, GLuint);
             void setUniform(c_str, const vector<Material*>&);
+            void setUBO(c_str, GLuint&, const vector<GLfloat>&, GLuint, GLuint);
 
             void setUniform(c_str, GLfloat);
             void setUniform(c_str, GLint);
@@ -72,7 +73,7 @@ namespace GL3Engine {
             void linkShader(initializer_list<GLint>);
 
         public:
-            static GLint compileShader(c_str&, GLint);
+            static GLint compileShader(c_str, GLint);
     };
 }
 

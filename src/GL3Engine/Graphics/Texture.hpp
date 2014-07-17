@@ -100,6 +100,11 @@ namespace GL3Engine {
         private:
             void tokenize();
     };
+
+    /** Zwraca tablice bo Material nie
+     * sklada sie tylko z danych dla glsl
+     */
+    using MaterialBufferData = array<GLfloat, 16>;
     struct Material {
             enum TEX_TYPE
                 : GLint {
@@ -124,6 +129,8 @@ namespace GL3Engine {
             }
             Material(const Material&);
             Material(const Color&);
+
+            MaterialBufferData getMaterialBufferData() const;
     };
 
     using MATERIALS = vector<Material*>;

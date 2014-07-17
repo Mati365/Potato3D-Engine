@@ -6,7 +6,7 @@
 namespace GL3Engine {
     using namespace IO;
 
-    Shader::Shader(c_str& frag, c_str& vertex, c_str& geo) {
+    Shader::Shader(c_str frag, c_str vertex, c_str geo) {
         linkShader(
                 {
                         Shader::compileShader(frag, GL_FRAGMENT_SHADER),
@@ -123,6 +123,29 @@ namespace GL3Engine {
         }
         setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".texture_pack"), 0,
                 material[0]->tex_array_handle);
+    }
+    void Shader::setUBO(c_str variable, GLuint& buffer_id,
+            const vector<GLfloat>& data,
+            GLuint draw_type,
+            GLuint binding_point) {
+        if (buffer_id)
+            glDeleteBuffers(1, &buffer_id);
+
+        GLuint block_index = glGetUniformBlockIndex(program, variable.c_str());
+        glUniformBlockBinding(program, block_index, binding_point);
+
+        GLint block_size = 0;
+        glGetActiveUniformBlockiv(program, block_index,
+        GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
+
+        GLuint handle = genGLBuffer({
+            &data[0],
+            static_cast<size_t>(block_size),
+            GL_UNIFORM_BUFFER,
+            0,
+            draw_type
+        }, false);
+        glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, handle);
     }
 }
 
