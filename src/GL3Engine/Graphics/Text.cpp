@@ -7,6 +7,13 @@ namespace GL3Engine {
     using namespace IO;
 
     // ---------- TextRenderer
+    void TextRenderer::setSize(GLfloat size) {
+        GLfloat ratio = font->getRatio();
+        FMAT_MATH::scale(transform, {
+                size * ratio,
+                size / ratio,
+                1.f });
+    }
     void TextRenderer::setText(const string& text) {
         if (!font)
             return;
@@ -78,8 +85,6 @@ namespace GL3Engine {
                         GL_DYNAMIC_DRAW
                 },
                 col);
-
-        setText("Potato Engine 3D\nTest");
     }
 
     void TextRenderer::draw(MatrixStack& matrix, GLint) {
@@ -87,7 +92,8 @@ namespace GL3Engine {
             return;
 
         effect->begin();
-        effect->setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
+        effect->setUniform("matrix.mvp",
+                matrix.vp_matrix * matrix.model * transform);
         effect->setUniform("col", col);
         effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
         {
@@ -102,7 +108,6 @@ namespace GL3Engine {
 
             glEnable(GL_CULL_FACE);
         }
-
         effect->end();
     }
 }

@@ -26,7 +26,8 @@ namespace GL3Engine {
               }) {
     }
 
-    void MTLloader::onHeaderArgument(GLint active_header, LOADER_ITERATOR& it) {
+    void MTLloader::onHeaderArgument(c_str file_dir, GLint active_header,
+            LOADER_ITERATOR& it) {
         Material* material =
                 this->mtl.empty() ? nullptr : this->mtl.back();
         if (active_header == NAME) {
@@ -40,7 +41,7 @@ namespace GL3Engine {
 #define DEFINE_F_1DVEC(header_type, mtl_type) \
                if(active_header==header_type) material->mtl_type = stringTo<GLfloat>(*it);
 #define DEFINE_1DTEX(header_type, tex_type) \
-               if(active_header==header_type) material->tex[tex_type] = *it;
+               if(active_header==header_type) material->tex[tex_type] = file_dir + *it;
 
         // Parametry
         DEFINE_F_1DVEC(SHINE, shine);
@@ -86,7 +87,8 @@ namespace GL3Engine {
             return;
         finalizePolygon();
     }
-    void OBJloader::onHeaderArgument(GLint active_header, LOADER_ITERATOR& it) {
+    void OBJloader::onHeaderArgument(c_str, GLint active_header,
+            LOADER_ITERATOR& it) {
         switch (active_header) {
             // Plik MTL
             case LOAD_MATERIAL: {

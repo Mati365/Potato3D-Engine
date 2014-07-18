@@ -10,7 +10,8 @@ src/GL3Engine/Resources/GlobalResourceManager.d: \
  ../src/GL3Engine/Resources/../Graphics/../Tools.hpp \
  ../src/GL3Engine/Resources/../Graphics/Dimensions.hpp \
  ../src/GL3Engine/Resources/../IO.hpp \
- ../src/GL3Engine/Resources/../Tools.hpp
+ ../src/GL3Engine/Resources/../Tools.hpp \
+ ../src/GL3Engine/Resources/Config.hpp
 
 ../src/GL3Engine/Resources/Loaders.hpp:
 
@@ -33,3 +34,5 @@ src/GL3Engine/Resources/GlobalResourceManager.d: \
 ../src/GL3Engine/Resources/../IO.hpp:
 
 ../src/GL3Engine/Resources/../Tools.hpp:
+
+../src/GL3Engine/Resources/Config.hpp:

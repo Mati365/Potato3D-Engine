@@ -9,8 +9,8 @@ namespace GL3Engine {
     class Renderer {
         public:
             virtual void init() = 0;
-            virtual void render() = 0;
             virtual void getKeyEvent(SDL_Keycode) = 0;
+            virtual void render() = 0;
 
             virtual ~Renderer() {
             }

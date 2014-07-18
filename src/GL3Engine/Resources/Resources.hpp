@@ -11,27 +11,21 @@ namespace GL3Engine {
             }
     };
 
-    using ResourceHandle = GLuint;
-
     template<typename C>
     class ResourceManager {
         private:
             map<string, unique_ptr<Loader<C> > > loaders;
-            vector<unique_ptr<C>> resources;
+            map<string, unique_ptr<C>> resources;
 
         public:
-            C* getResource(GLuint handle) {
-                return resources[handle].get();
-            }
-
             inline void putLoader(Loader<C>* loader,
                     const string& extension) {
                 loaders[extension] = unique_ptr<Loader<C>>(loader);
             }
+            C* getResource(c_str);
 
-            C* load(c_str&, ResourceHandle* handle = nullptr)
-                    throw (string);
-            C* registerResource(C*, ResourceHandle*);
+        private:
+            C* registerResource(c_str, C*);
     };
     class GlobalResourceManager : public Singleton<GlobalResourceManager> {
         private:
@@ -43,42 +37,21 @@ namespace GL3Engine {
             GlobalResourceManager();
 
             template<typename Type>
-            Type* loadResource(c_str&, ResourceHandle* handle = nullptr) {
+            Type* getResource(c_str) {
                 return nullptr;
             }
             template<typename Type>
-            Type* getResource(ResourceHandle) {
-                return nullptr;
-            }
-            template<typename Type>
-            void registerExtension(Loader<Type>*, c_str&) {
+            void registerExtension(Loader<Type>*, c_str) {
             }
     };
-    /** Zasoby wymaganie do pracy silnika */
-    class RequiredResources : public Singleton<RequiredResources> {
-        public:
-            struct Package {
-                    enum Type {
-                        SHADER,
-                        MESH,
-                        TEXTURE
-                    };
-                    Type type;
-                    string path;
-                    string handle;
-            };
-            map<string, ResourceHandle> packages;
 
-        public:
-            RequiredResources();
+/** Domyślne typy wczytywane pierwsze */
+#define FONT_TEXTURE        "sprites/font.png"
+#define DEFAULT_MESH_SHADER "shaders/mesh_shader.glsl"
+#define DEFAULT_TEXT_SHADER "shaders/text_shader.glsl"
 
-            void init();
-    };
-
-#define DEFAULT_MESH_SHADER "DEFAULT_MESH_SHADER"
-#define DEFAULT_TEXT_SHADER "DEFAULT_TEXT_SHADER"
 #define REQUIRE_SHADER(handle) \
-        GlobalResourceManager::getInstance().getResource<Shader>(RequiredResources::getInstance().packages[handle])
+        GlobalResourceManager::getInstance().getResource<Shader>(handle)
 }
 
 #endif

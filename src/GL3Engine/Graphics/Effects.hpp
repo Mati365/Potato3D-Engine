@@ -29,7 +29,8 @@ namespace GL3Engine {
             /** Uniformy */
             void setUniform(GLint, c_str, GLint, GLuint);
             void setUniform(c_str, const vector<Material*>&);
-            void setUBO(c_str, GLuint&, const vector<GLfloat>&, GLuint, GLuint);
+            template<typename T> void setUBO(c_str, GLuint&, const vector<T>&,
+                    GLuint, GLuint);
 
             void setUniform(c_str, GLfloat);
             void setUniform(c_str, GLint);

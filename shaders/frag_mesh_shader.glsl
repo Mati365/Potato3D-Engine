@@ -44,11 +44,11 @@ bool use_material =	frag.mtl >= 0;
 
 Material 	MATERIAL 	= material[int(frag.mtl)];
 Light		light 		= Light(
-	vec3(0.0, 0.5, 0.3), // Pos
+	vec3(0.0, 0.5, 0.0), // Pos
 	1.0,				// Ambient intensity
 	
 	vec4(1.0, 1.0, 1.0, 1.0), // Diffuse col
-	2.0,
+	1.0,
 	
 	vec4(1.0, 1.0, 1.0, 1.0), // Specular col
 	1.0

@@ -56,6 +56,4 @@ namespace GL3Engine {
                 shape,
                 REQUIRE_SHADER(DEFAULT_MESH_SHADER));
     }
-    void Primitives::printText(c_str& text, FPoint3D& pos) {
-    }
 }

@@ -2,19 +2,18 @@
 
 namespace GL3Engine {
     template<typename C>
-    C* ResourceManager<C>::load(c_str& path, ResourceHandle* handle)
-            throw (string) {
+    C* ResourceManager<C>::getResource(c_str path) {
         string ext = path.substr(path.find('.') + 1);
         if (!IS_IN_MAP(loaders, ext))
-            throw "Unsupported file type!";
-        return registerResource(loaders[ext]->load(path), handle);
+             LOG(ERROR, "Unsupported file type!");
+
+        if (IS_IN_MAP(resources, path))
+            return resources[path].get();
+        return registerResource(path, loaders[ext]->load(path));
     }
     template<typename C>
-    C* ResourceManager<C>::registerResource(C* resource,
-            ResourceHandle* handle) {
-        resources.push_back(unique_ptr<C>(resource));
-        if (handle)
-            *handle = resources.size() - 1;
+    C* ResourceManager<C>::registerResource(c_str handle, C* resource) {
+        resources[handle] = unique_ptr<C>(resource);
         return resource;
     }
 

@@ -9,7 +9,6 @@ CPP_SRCS += \
 ../src/GL3Engine/Resources/GlobalResourceManager.cpp \
 ../src/GL3Engine/Resources/INIParser.cpp \
 ../src/GL3Engine/Resources/OBJloader.cpp \
-../src/GL3Engine/Resources/RequiredResources.cpp \
 ../src/GL3Engine/Resources/ResourceManager.cpp 
 
 OBJS += \
@@ -18,7 +17,6 @@ OBJS += \
 ./src/GL3Engine/Resources/GlobalResourceManager.o \
 ./src/GL3Engine/Resources/INIParser.o \
 ./src/GL3Engine/Resources/OBJloader.o \
-./src/GL3Engine/Resources/RequiredResources.o \
 ./src/GL3Engine/Resources/ResourceManager.o 
 
 CPP_DEPS += \
@@ -27,7 +25,6 @@ CPP_DEPS += \
 ./src/GL3Engine/Resources/GlobalResourceManager.d \
 ./src/GL3Engine/Resources/INIParser.d \
 ./src/GL3Engine/Resources/OBJloader.d \
-./src/GL3Engine/Resources/RequiredResources.d \
 ./src/GL3Engine/Resources/ResourceManager.d 
 
 

@@ -30,16 +30,14 @@ namespace GL3Engine {
         glCullFace(GL_BACK);
 
         glViewport(0, 0, bounds.X, bounds.Y);
-
-       // RequiredResources::getInstance().init();
     }
     void Window::run() {
+        if (!renderer)
+            return;
         SDL_GLContext gl = SDL_GL_CreateContext(window);
         SDL_Event event;
 
         initContext();
-        if (renderer == nullptr)
-            return;
         renderer->init();
 
         while (IS_SET_FLAG(flags, Flags::RUNNING)) {

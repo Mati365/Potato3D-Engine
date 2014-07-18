@@ -4,6 +4,7 @@ namespace GL3Engine {
     template<typename T>
     T* ASCIIMeshLoader<T>::load(c_str& path) {
         vector<string> lines;
+        string dir = path.substr(0, path.find_last_of('/') + 1);
 
         getFileContents(path, lines);
         for (string& line : lines) {
@@ -17,8 +18,9 @@ namespace GL3Engine {
                 continue;
             for (auto it = tokens.begin() + 1; it != tokens.end();
                     ++it)
-                onHeaderArgument(active_header, it);
+                onHeaderArgument(dir, active_header, it);
         }
+
         return selfCreateObject();
     }
     template<typename T>

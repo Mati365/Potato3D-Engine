@@ -7,12 +7,9 @@ namespace Game {
     void GameScreen::init() {
         axis = unique_ptr < Mesh > (Primitives::genAxis(17));
         model = new Mesh(
-                GlobalResourceManager::getInstance().loadResource<Shape3D>(
-                        "truck/untitled.obj"),
+                GlobalResourceManager::getInstance().getResource<Shape3D>("truck/untitled.obj"),
                 REQUIRE_SHADER(DEFAULT_MESH_SHADER));
         matrix.selectCam(matrix.addCam(&cam));
-
-        INIParser ini("test.ini");
     }
     void GameScreen::render() {
         matrix.switchMode(MatrixStack::_3D);

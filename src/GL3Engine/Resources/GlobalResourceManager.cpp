@@ -3,20 +3,17 @@
 #include <sstream>
 
 #include "Loaders.hpp"
+#include "Config.hpp"
 
 namespace GL3Engine {
 #define DECLARE_EXTENSION(stack, type) \
     template<> \
-    void GlobalResourceManager::registerExtension(Loader<type>* l, c_str& e) { \
+    void GlobalResourceManager::registerExtension(Loader<type>* l, c_str e) { \
         stack.putLoader(l, e); \
     } \
     template<> \
-    type* GlobalResourceManager::getResource(ResourceHandle handle) { \
+    type* GlobalResourceManager::getResource(c_str handle) { \
         return stack.getResource(handle); \
-    } \
-    template<> \
-    type* GlobalResourceManager::loadResource(c_str& path, ResourceHandle* handle) { \
-        return stack.load(path, handle); \
     }
 
     DECLARE_EXTENSION(textures, Texture);
@@ -26,6 +23,7 @@ namespace GL3Engine {
     GlobalResourceManager::GlobalResourceManager() {
         registerExtension(new OBJloader, "obj");
         registerExtension(new GLSLloader, "glsl");
+        registerExtension(new Textureloader, "png");
     }
 }
 

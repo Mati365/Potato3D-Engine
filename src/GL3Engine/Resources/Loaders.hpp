@@ -13,6 +13,12 @@ namespace GL3Engine {
             static string putToFileName(string, c_str&);
             Shader* load(c_str&);
     };
+    class Textureloader : public Loader<Texture> {
+        public:
+            Texture* load(c_str& str) {
+                return new Texture(str);
+            }
+    };
 
     /** MESHE */
     template<typename T> class ASCIIMeshLoader : public Loader<T> {
@@ -26,7 +32,7 @@ namespace GL3Engine {
             }
 
             virtual void onNewHeader(GLint, vector<string>&) = 0;
-            virtual void onHeaderArgument(GLint, LOADER_ITERATOR&) = 0;
+            virtual void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&) = 0;
 
             virtual T* createObject() = 0;
             virtual void releaseMemory() = 0;
@@ -85,7 +91,7 @@ namespace GL3Engine {
 
             void onNewHeader(GLint, vector<string>&) {
             }
-            void onHeaderArgument(GLint, LOADER_ITERATOR&);
+            void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
 
             /** Zwraca ostatni element!!! */
             GLuint getSize() {
@@ -144,7 +150,7 @@ namespace GL3Engine {
             OBJloader();
 
             void onNewHeader(GLint, vector<string>&);
-            void onHeaderArgument(GLint, LOADER_ITERATOR&);
+            void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
 
             Shape3D* createObject();
             void releaseMemory();

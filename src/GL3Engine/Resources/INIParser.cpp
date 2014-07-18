@@ -22,10 +22,20 @@ namespace GL3Engine {
                 string v = str.substr(s + 1);
 
                 if (v.find_first_of('"') != string::npos)
-                    v = v.substr(v.find_first_of('"') + 1, v.find_last_of('"') - 2);
+                    v = v.substr(v.find_first_of('"') + 1,
+                            v.find_last_of('"') - 1);
                 else
                     erase_all(v, " ");
                 data[header + '/' + str.substr(0, s)] = v;
             }
+    }
+    INIHeader INIParser::getKeys(c_str header) {
+        INIHeader buf;
+        for (auto& iter : data) {
+            size_t s = iter.first.find('/');
+            if (iter.first.substr(0, s) == header)
+                buf[iter.first.substr(s + 1)] = iter.second;
+        }
+        return buf;
     }
 }

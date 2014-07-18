@@ -124,8 +124,10 @@ namespace GL3Engine {
         setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".texture_pack"), 0,
                 material[0]->tex_array_handle);
     }
+
+    template<typename T>
     void Shader::setUBO(c_str variable, GLuint& buffer_id,
-            const vector<GLfloat>& data,
+            const vector<T>& data,
             GLuint draw_type,
             GLuint binding_point) {
         if (buffer_id)
@@ -138,14 +140,17 @@ namespace GL3Engine {
         glGetActiveUniformBlockiv(program, block_index,
         GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
 
-        GLuint handle = genGLBuffer({
-            &data[0],
-            static_cast<size_t>(block_size),
-            GL_UNIFORM_BUFFER,
-            0,
-            draw_type
+        GLuint handle = genGLBuffer( {
+                &data[0],
+                static_cast<size_t>(block_size),
+                GL_UNIFORM_BUFFER,
+                0,
+                draw_type
         }, false);
         glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, handle);
     }
+
+    template void Shader::setUBO<GLfloat>(c_str, GLuint&,
+            const vector<GLfloat>&, GLuint, GLuint);
 }
 

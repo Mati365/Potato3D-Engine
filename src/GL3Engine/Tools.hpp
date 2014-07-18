@@ -79,6 +79,8 @@ namespace Tools {
             static deque<Log> logs;
             static void putLog(Flag, const string&);
     };
+#define LOG(type, str) Log::putLog(Log::type, str)
+
     extern void showGLErrors();
 
     template<typename T> class Singleton {

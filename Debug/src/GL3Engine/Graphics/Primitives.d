@@ -6,7 +6,6 @@ src/GL3Engine/Graphics/Primitives.d: \
  ../src/GL3Engine/Graphics/Types.hpp ../src/GL3Engine/Graphics/Matrix.hpp \
  ../src/GL3Engine/Graphics/../Tools.hpp \
  ../src/GL3Engine/Graphics/Dimensions.hpp \
- ../src/GL3Engine/Graphics/Text.hpp \
  ../src/GL3Engine/Graphics/../Resources/Resources.hpp \
  ../src/GL3Engine/Graphics/../Resources/../Graphics/Mesh.hpp
 
@@ -25,8 +24,6 @@ src/GL3Engine/Graphics/Primitives.d: \
 ../src/GL3Engine/Graphics/../Tools.hpp:
 
 ../src/GL3Engine/Graphics/Dimensions.hpp:
-
-../src/GL3Engine/Graphics/Text.hpp:
 
 ../src/GL3Engine/Graphics/../Resources/Resources.hpp:
 

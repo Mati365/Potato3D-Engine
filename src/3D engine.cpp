@@ -5,7 +5,7 @@ using namespace GL3Engine;
 
 int main() {
     try {
-        Window wnd( { 480, 360 });
+        Window wnd( { 480, 320 });
         unique_ptr<Game::GameScreen> renderer(
                 new Game::GameScreen(&wnd));
         wnd.setRenderer(renderer.get());
