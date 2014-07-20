@@ -37,7 +37,7 @@ namespace Tools {
     }
 
     template<typename T> T toRad(const T& v) {
-        return v * 180 / 3.14;
+        return v * 180.f / 3.145f;
     }
     template<typename T, GLint size> inline void arrayToRaw(
             const array<T, size>& source, T* destination) {
@@ -85,7 +85,7 @@ namespace Tools {
 
     template<typename T> class Singleton {
         public:
-            static T& getInstance() {
+            static inline T& getInstance() {
                 static T t;
                 return t;
             }

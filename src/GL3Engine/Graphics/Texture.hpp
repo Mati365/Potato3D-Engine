@@ -71,14 +71,14 @@ namespace GL3Engine {
             static const GLushort indices[6];
 
         protected:
-            Texture tex;
+            Texture* tex;
             IPoint2D cells;
             FPoint2D cell_size;
 
             vector<Vertex2f> uv;
 
         public:
-            Tile(c_str&, IPoint2D);
+            Tile(Texture*, IPoint2D);
 
             const IPoint2D& getCells() const {
                 return cells;
@@ -87,13 +87,13 @@ namespace GL3Engine {
                 return cell_size;
             }
             GLuint getHandle() const {
-                return tex.getHandle();
+                return tex->getHandle();
             }
 
             const IPoint2D& getSize() const {
-                return tex.getSize();
+                return tex->getSize();
             }
-            const Texture& getTexture() const {
+            const Texture* getTexture() const {
                 return tex;
             }
 

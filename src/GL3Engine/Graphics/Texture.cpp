@@ -102,9 +102,9 @@ namespace GL3Engine {
             1, 3, 2
     };
 
-    Tile::Tile(c_str& _path, IPoint2D _cells)
+    Tile::Tile(Texture* _tex, IPoint2D _cells)
             :
-              tex(_path),
+              tex(_tex),
               cells(_cells),
               cell_size(1.0 / _cells.X, 1.0 / _cells.Y) {
         tokenize();

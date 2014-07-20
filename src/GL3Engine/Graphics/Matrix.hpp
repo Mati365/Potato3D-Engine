@@ -12,7 +12,7 @@ namespace GL3Engine {
     using namespace std;
     using namespace Tools;
 
-    /** Matrix */
+    /** Matrix ROW MAJOR! */
     template<typename T> class Matrix {
         public:
             T* matrix = nullptr;
@@ -99,9 +99,9 @@ namespace GL3Engine {
     using Mat3 = t_Matrix<GLfloat, 3, 3>;
     using Mat2 = t_Matrix<GLfloat, 2, 2>;
 
-    using Vec4 = t_Matrix<GLfloat, 4, 1>;
-    using Vec3 = t_Matrix<GLfloat, 3, 1>;
-    using Vec2 = t_Matrix<GLfloat, 2, 1>;
+    using Vec4 = t_Matrix<GLfloat, 1, 4>;
+    using Vec3 = t_Matrix<GLfloat, 1, 3>;
+    using Vec2 = t_Matrix<GLfloat, 1, 2>;
 
     /** Stos */
     struct Camera {
@@ -202,6 +202,11 @@ namespace GL3Engine {
 
             static void inverse(Mat3*);
             static Mat3 inverse(const Mat3&);
+
+            /** Row Major */
+            static inline void mul(Vec4& v, const Mat4& m) {
+                v = m * v;
+            }
     };
 
     using FMAT_MATH = MatMatrix<GLfloat>;

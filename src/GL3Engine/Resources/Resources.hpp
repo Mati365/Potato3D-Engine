@@ -50,8 +50,8 @@ namespace GL3Engine {
 #define DEFAULT_MESH_SHADER "shaders/mesh_shader.glsl"
 #define DEFAULT_TEXT_SHADER "shaders/text_shader.glsl"
 
-#define REQUIRE_SHADER(handle) \
-        GlobalResourceManager::getInstance().getResource<Shader>(handle)
+#define REQUIRE_RES(type, handle) \
+        GlobalResourceManager::getInstance().getResource<type>(handle)
 }
 
 #endif

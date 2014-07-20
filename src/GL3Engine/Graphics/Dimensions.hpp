@@ -27,24 +27,17 @@ namespace GL3Engine {
 
             }
 
-            Point3D<T>& operator+=(const Point3D<T>& v) {
-                X += v.X;
-                Y += v.Y;
-                Z += v.Z;
-                return *this;
+#define POINT3D_OPERATOR(oper) \
+            Point3D<T>& operator oper (const Point3D<T>& v) { \
+                X oper v.X; \
+                Y oper v.Y; \
+                Z oper v.Z; \
+                return *this; \
             }
-            Point3D<T>& operator-=(const Point3D<T>& v) {
-                X -= v.X;
-                Y -= v.Y;
-                Z -= v.Z;
-                return *this;
-            }
-            Point3D<T>& operator*=(const Point3D<T>& v) {
-                this->X *= v.X;
-                this->Y *= v.Y;
-                this->Z *= v.Z;
-                return *this;
-            }
+            POINT3D_OPERATOR(+=)
+            POINT3D_OPERATOR(-=)
+            POINT3D_OPERATOR(*=)
+            POINT3D_OPERATOR(/=)
 
             GLboolean operator>(const Point3D<T>& p) {
                 return X + Y + Z > p.X + p.Y + p.Z;
@@ -67,6 +60,13 @@ namespace GL3Engine {
 
             T operator[](GLint i) const {
                 return i == 0 ? X : (i == 1 ? Y : Z);
+            }
+            Point3D<T> operator-() const {
+                return Point3D<T> {
+                        -X,
+                        -Y,
+                        -Z
+                };
             }
 
             inline T getVecLength() const {

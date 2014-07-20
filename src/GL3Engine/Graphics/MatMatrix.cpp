@@ -72,9 +72,9 @@ namespace GL3Engine {
         y_c = cross(z_c, x_c);
 
         return Mat4( {
-                x_c.X, x_c.Y, x_c.Z, -dot(x_c, _eye),
-                y_c.X, y_c.Y, y_c.Z, -dot(y_c, _eye),
-                z_c.X, z_c.Y, z_c.Z, -dot(z_c, _eye),
+                x_c.X, x_c.Y, x_c.Z, dot(x_c, -_eye),
+                y_c.X, y_c.Y, y_c.Z, dot(y_c, -_eye),
+                z_c.X, z_c.Y, z_c.Z, dot(z_c, -_eye),
                 0, 0, 0, 1
         });
     }

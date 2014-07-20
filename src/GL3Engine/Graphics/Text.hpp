@@ -5,14 +5,11 @@
 namespace GL3Engine {
     class Font : public Tile {
         public:
-            Font(const string& path)
+            Font(Texture* _tex)
                     :
-                      Tile(path, IPoint2D(32, 3)) {
+                      Tile(_tex, IPoint2D(32, 3)) {
             }
 
-            inline GLfloat getRatio() const {
-                return cell_size.X / cell_size.Y;
-            }
             inline TILE_ITER getCharacter(char c) const {
                 GLuint index = ((GLuint) c - 32);
                 return {
@@ -22,7 +19,7 @@ namespace GL3Engine {
     };
 
 #define BUFFER_SIZE 128
-    class TextRenderer : public Drawable, Singleton<TextRenderer> {
+    class TextRenderer : public Drawable {
         private:
             Color col = { 1.f, 1.f, 1.f, 1.f };
             Font* font = nullptr;
@@ -36,11 +33,14 @@ namespace GL3Engine {
                 create();
             }
 
+            void setPos(const FPoint3D&);
             void setSize(GLfloat);
             void setFont(Font* _font) {
-                font = _font;
+                if (_font)
+                    font = _font;
             }
             void setText(const string&);
+
             void draw(MatrixStack&, GLint);
 
             Shader* getEffect() {

@@ -4,13 +4,17 @@ namespace GL3Engine {
     bool Window::initialize() noexcept {
         SDL_Init(SDL_INIT_VIDEO);
         window = SDL_CreateWindow(
-                "Debug",
+                "Debug 3D",
                 SDL_WINDOWPOS_UNDEFINED,
                 SDL_WINDOWPOS_UNDEFINED,
                 bounds.X,
                 bounds.Y,
                 SDL_WINDOW_OPENGL
-                        );
+                );
+
+        // SDL_ShowCursor(SDL_FALSE);
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+
         return window != nullptr;
     }
     void Window::initContext() {
@@ -45,6 +49,16 @@ namespace GL3Engine {
                 switch (event.type) {
                     case SDL_KEYDOWN:
                         renderer->getKeyEvent(event.key.keysym.sym);
+                        break;
+
+                    case SDL_MOUSEBUTTONDOWN:
+                        case SDL_MOUSEMOTION: {
+                        IPoint2D pos;
+                        SDL_GetRelativeMouseState(&pos.X, &pos.Y);
+                        renderer->getMouseEvent(
+                                pos,
+                                event.button.button);
+                    }
                         break;
 
                     case SDL_QUIT:

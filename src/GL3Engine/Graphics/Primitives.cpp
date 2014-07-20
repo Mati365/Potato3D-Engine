@@ -54,6 +54,21 @@ namespace GL3Engine {
                 { .1f, .1f, .1f, 1.f });
         return new Mesh(
                 shape,
-                REQUIRE_SHADER(DEFAULT_MESH_SHADER));
+                REQUIRE_RES(Shader, DEFAULT_MESH_SHADER));
+    }
+    void Primitives::printText(MatrixStack& stack, c_str text,
+            const FPoint3D& pos, GLfloat size,
+            Font* font) {
+        static TextRenderer renderer;
+        renderer.setText(text);
+        renderer.setSize(size);
+        renderer.setFont(font);
+
+        stack.pushTransform();
+        {
+            FMAT_MATH::translate(stack.model, pos);
+            renderer.draw(stack, 0);
+        }
+        stack.popTransform();
     }
 }

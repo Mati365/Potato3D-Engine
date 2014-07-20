@@ -7,11 +7,13 @@ namespace GL3Engine {
     using namespace IO;
 
     // ---------- TextRenderer
+    void TextRenderer::setPos(const FPoint3D& pos) {
+
+    }
     void TextRenderer::setSize(GLfloat size) {
-        GLfloat ratio = font->getRatio();
         FMAT_MATH::scale(transform, {
-                size * ratio,
-                size / ratio,
+                font->getCellSize().X * font->getCells().X * size,
+                font->getCellSize().X * font->getCells().Y * size,
                 1.f });
     }
     void TextRenderer::setText(const string& text) {
@@ -68,7 +70,8 @@ namespace GL3Engine {
                 });
     }
     void TextRenderer::create() {
-        effect = REQUIRE_SHADER(DEFAULT_MESH_SHADER);
+        effect = REQUIRE_RES(Shader, DEFAULT_TEXT_SHADER);
+        font = new Font(REQUIRE_RES(Texture, FONT_TEXTURE));
         shape = new Shape2D(
                 {
                         nullptr,
@@ -109,5 +112,6 @@ namespace GL3Engine {
             glEnable(GL_CULL_FACE);
         }
         effect->end();
+        transform = FMAT_MATH::identity();
     }
 }

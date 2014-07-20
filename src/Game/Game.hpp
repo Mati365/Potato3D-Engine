@@ -21,8 +21,8 @@ namespace Game {
 
             MatrixStack matrix;
             Camera cam = {
-                    { 0.f, 1.05f, 1.f, 1.f }, // wysokosc gracza to 1,5m
-                    { 0.f, 0.05f, -1.f, 1.f }
+                    Vec4 { 0.f, .5f, 1.f, 1.f }, // wysokosc gracza to 1,5m
+                    Vec4 { 0.f, .5f, -2.f, 1.f }
             };
 
         public:
@@ -38,6 +38,8 @@ namespace Game {
 
             void init() override;
             void render() override;
+
+            void getMouseEvent(const IPoint2D&, GLuint) override;
             void getKeyEvent(SDL_Keycode) override;
     };
 }

@@ -48,7 +48,7 @@ Light		light 		= Light(
 	1.0,				// Ambient intensity
 	
 	vec4(1.0, 1.0, 1.0, 1.0), // Diffuse col
-	1.0,
+	2.0,
 	
 	vec4(1.0, 1.0, 1.0, 1.0), // Specular col
 	1.0
@@ -66,7 +66,7 @@ void calcLight(void) {
 	float	distance		=	length(frag.pos - light.pos);
 	vec3	light_normal	=	normalize(abs(frag.pos - light.pos));
 	float	diffuse			=	max(dot(light_normal, normal), 0.0) 
-									* (1.0 / (distance * distance));
+									* (1.0 / (1.0 + (0.55 * distance * distance)));
 	vec4	diffuse_col		=	use_material ? 
 									(GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE]) : 
 									col;
@@ -76,7 +76,7 @@ void calcLight(void) {
 	if(use_material) {
 		vec3 reflect 	= 	normalize(2 * diffuse * normal - light_normal);
 		vec3 viewDir 	=	normalize(abs(frag.cam - frag.pos));
-		float aspect 	=	pow(max(dot(viewDir, reflect), 0.0), 2);
+		float aspect 	=	pow(max(dot(viewDir, reflect), 0.0), 4);
 		
 		specular = GET_MATERIAL_TEX(SPECULAR).g * 
 							aspect * 
@@ -85,7 +85,7 @@ void calcLight(void) {
 	
 	// Całość
 	vec3	col_out	=	
-				MATERIAL.col[AMBIENT].rgb + 
+				MATERIAL.col[AMBIENT].rgb * light.ambient_intensity  + 
 				(MATERIAL.col[SPECULAR] * specular * light.specular_col * light.specular_intensity).rgb;
 	gl_FragColor += 
 				vec4(col_out, 0.0) +

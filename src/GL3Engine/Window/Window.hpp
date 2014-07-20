@@ -9,7 +9,11 @@ namespace GL3Engine {
     class Renderer {
         public:
             virtual void init() = 0;
-            virtual void getKeyEvent(SDL_Keycode) = 0;
+
+            virtual void getKeyEvent(SDL_Keycode) {
+            }
+            virtual void getMouseEvent(const IPoint2D&, GLuint) {
+            }
             virtual void render() = 0;
 
             virtual ~Renderer() {
