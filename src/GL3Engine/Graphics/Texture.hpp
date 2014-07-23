@@ -6,6 +6,7 @@ namespace GL3Engine {
     using namespace Tools;
     using namespace std;
 
+    /** FBO */
     class Texture {
         public:
             enum Flag
@@ -62,6 +63,10 @@ namespace GL3Engine {
             GLuint getHandle() const {
                 return handle;
             }
+
+            ~TextureArray() {
+                glDeleteTextures(1, &handle);
+            }
     };
 
     /** Podzielone jako TRIANGLE!!! */
@@ -104,7 +109,7 @@ namespace GL3Engine {
     /** Zwraca tablice bo Material nie
      * sklada sie tylko z danych dla glsl
      */
-    using MaterialBufferData = array<GLfloat, 16>;
+    using MaterialBufferData = array<GLfloat, 36>;
     struct Material {
             enum TEX_TYPE
                 : GLint {
@@ -122,8 +127,9 @@ namespace GL3Engine {
 
             string tex[BUMP + 1];
             string name;
-            GLuint tex_array_handle = 0; // handle wspóldzielony ze wszystkimi materialami w meshu
             GLuint ubo = 0;
+
+            shared_ptr<TextureArray> tex_array;
 
             Material() {
             }

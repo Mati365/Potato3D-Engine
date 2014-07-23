@@ -92,11 +92,10 @@ namespace GL3Engine {
             void changeData(const GL_BUFFER_DATA& vertices,
                     const GL_BUFFER_DATA& indices);
 
+            ~VAOpolygon();
+
         private:
             void create(const GL_BUFFER_DATA&, const GL_BUFFER_DATA&);
-    };
-    class VAOInstancedPolygon {
-
     };
 
     using Shape3D = VAOpolygon<Vertex4f>;
@@ -109,16 +108,18 @@ namespace GL3Engine {
     class Shader;
     class Mesh : public Drawable {
         private:
-            shared_ptr<Shape3D> shape = nullptr;
+            Shape3D* shape = nullptr;
             Shader* effect = nullptr;
-            GLuint material_cache = 0;
+
+            vector<MaterialBufferData> material_cache;
+            GLuint ubo_handle;
 
         public:
             Mesh(Shape3D*, Shader*);
             void draw(MatrixStack&, GLint);
 
             const Shape3D* getShape() const {
-                return shape.get();
+                return shape;
             }
             const Shader* getEffect() const {
                 return effect;

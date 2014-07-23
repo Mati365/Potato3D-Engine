@@ -8,19 +8,27 @@ namespace Game {
         axis = unique_ptr < Mesh > (Primitives::genAxis(17));
         model = new Mesh(
                 GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "truck/untitled.obj"),
+                        "mesh/truck/untitled.obj"),
                 REQUIRE_RES(Shader, DEFAULT_MESH_SHADER));
         matrix.selectCam(matrix.addCam(&cam));
     }
     void GameScreen::render() {
         matrix.switchMode(MatrixStack::_3D);
-        if (axis != nullptr)
+
+        if (!box)
+            box =
+                    new Mesh(
+                            GlobalResourceManager::getInstance().getResource<
+                                    Shape3D>(
+                                    "mesh/wall/wall.obj"),
+                            REQUIRE_RES(Shader, DEFAULT_MESH_SHADER));
+
+        if (axis)
             axis->draw(matrix, GL_LINES);
 
-        if (model != nullptr) {
-            static GLfloat angle = 0.f;
-            angle += 0.000005f;
-
+        static GLfloat angle = 0.f;
+        angle += 0.000005f;
+        if (model) {
             matrix.pushTransform();
             matrix.model *= FMAT_MATH::scale( { 0.2f, 0.2f, 0.2f });
             matrix.model *= FMAT_MATH::translate( { 0.0f, 0.5f, -10.0f });
@@ -31,7 +39,16 @@ namespace Game {
             model->draw(matrix, GL_TRIANGLES);
             matrix.popTransform();
         }
-        Primitives::printText(matrix, "test czcionek", { 1.f, 1.f, 1.f}, 3.f, nullptr);
+        if (box) {
+            matrix.pushTransform();
+            matrix.model *= FMAT_MATH::translate( { 0.0f, 0.0f, 2.0f });
+            matrix.model *= FMAT_MATH::scale( { 1.3f, 1.3f, 1.3f });
+            matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), {
+                              0.f, 1.f, 0.f });
+
+            box->draw(matrix, GL_TRIANGLES);
+            matrix.popTransform();
+        }
     }
 
     void GameScreen::getKeyEvent(SDL_Keycode key) {
@@ -43,7 +60,6 @@ namespace Game {
         v *= {.05f, .05f, .05f};
 
         Mat4 transform = FMAT_MATH::translate(v);
-        transform.print();
 
         FMAT_MATH::mul(cam.pos, transform);
         FMAT_MATH::mul(cam.target, transform);
@@ -55,10 +71,11 @@ namespace Game {
                 v = (GLfloat) p.X > 0.f ? -sensinity :
                                           (p.X < 0 ? sensinity : 0.f);
         v *= abs(p.X - last_mouse_pos.X);
-        cam.target =
+        FMAT_MATH::mul(
+                cam.target,
                 FMAT_MATH::rotate(
                         Tools::toRad<GLfloat>(v),
-                        { 0.f, 1.f, 0.f }) * cam.target;
+                        { 0.f, 1.f, 0.f }));
         last_mouse_pos = p;
     }
 }

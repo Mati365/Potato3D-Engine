@@ -11,10 +11,7 @@ namespace GL3Engine {
                 bounds.Y,
                 SDL_WINDOW_OPENGL
                 );
-
-        // SDL_ShowCursor(SDL_FALSE);
         SDL_SetRelativeMouseMode(SDL_TRUE);
-
         return window != nullptr;
     }
     void Window::initContext() {

@@ -3,22 +3,18 @@
 namespace GL3Engine {
     Mesh::Mesh(Shape3D* _shape, Shader* _effect)
             :
-              shape(shared_ptr < Shape3D > (_shape)),
+              shape(_shape),
               effect(_effect) {
         updateMaterialsCache();
     }
 
     void Mesh::updateMaterialsCache() {
-        vector<GLfloat> data;
-        if (!shape->hasMaterials()) {
-            material_cache = 0;
+        material_cache.clear();
+        if (!shape->hasMaterials())
             return;
-        }
-        for (Material* mat : shape->getMaterials()) {
-            MaterialBufferData mat_data = mat->getMaterialBufferData();
-            data.insert(data.end(), mat_data.begin(), mat_data.end());
-        }
-        effect->setUBO("MaterialBlock", material_cache, data, GL_STATIC_DRAW,
+        for (Material* mat : shape->getMaterials())
+            material_cache.push_back(mat->getMaterialBufferData());
+        ubo_handle = effect->setUBO("MaterialBlock", nullptr, GL_DYNAMIC_DRAW,
                 1);
     }
     void Mesh::draw(MatrixStack& matrix, GLint mode) {
@@ -26,21 +22,29 @@ namespace GL3Engine {
             return;
 
         effect->begin();
-        effect->setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
-        effect->setUniform("matrix.m", matrix.model);
-        effect->setUniform("matrix.normal",
-                FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
-        effect->setUniform("matrix.cam", matrix.getActiveCamera()->pos);
-        if (shape->getMaterials().empty())
-            effect->setUniform("col", shape->getColor());
         {
-            glBindVertexArray(shape->getVAO());
-            if (!shape->usingElementBuffer())
-                glDrawArrays(mode, 0, shape->getVerticesCount());
-            else
-                glDrawElements(mode, shape->getIndicesCount(),
-                GL_UNSIGNED_SHORT, nullptr);
-            glBindVertexArray(0);
+            effect->setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
+            effect->setUniform("matrix.m", matrix.model);
+            effect->setUniform("matrix.normal",
+                    FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
+            effect->setUniform("matrix.cam", matrix.getActiveCamera()->pos);
+            if (shape->getMaterials().empty())
+                effect->setUniform("col", shape->getColor());
+            else {
+                effect->setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
+                        shape->getMaterials()[0]->tex_array->getHandle());
+                effect->changeUBOData(ubo_handle, &material_cache[0],
+                        material_cache.size() * sizeof(MaterialBufferData));
+            }
+            {
+                glBindVertexArray(shape->getVAO());
+                if (!shape->usingElementBuffer())
+                    glDrawArrays(mode, 0, shape->getVerticesCount());
+                else
+                    glDrawElements(mode, shape->getIndicesCount(),
+                    GL_UNSIGNED_SHORT, nullptr);
+                glBindVertexArray(0);
+            }
         }
         effect->end();
     }

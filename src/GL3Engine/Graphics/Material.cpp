@@ -17,12 +17,23 @@ namespace GL3Engine {
     MaterialBufferData Material::getMaterialBufferData() const {
 #define COL_DEFINE(type) \
         col[type].r(), col[type].g(), col[type].b(), col[type].a()
+#define TEX_USAGE_DEFINE(type) \
+        (tex[type].empty() ? 0.f : 1.f), 0.f, 0.f, 0.f
+
         return MaterialBufferData {
                 COL_DEFINE(AMBIENT),
                 COL_DEFINE(DIFFUSE),
                 COL_DEFINE(SPECULAR),
+
+                TEX_USAGE_DEFINE(AMBIENT),
+                TEX_USAGE_DEFINE(DIFFUSE),
+                TEX_USAGE_DEFINE(SPECULAR),
+                TEX_USAGE_DEFINE(ALPHA),
+                TEX_USAGE_DEFINE(BUMP),
+
                 transparent,
                 shine,
+
                 0.f,
                 0.f
         };

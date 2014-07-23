@@ -64,9 +64,10 @@ namespace GL3Engine {
         for (Material* material : mtl)
             for (string& str : material->tex)
                 textures.push_back(str);
+
+        TextureArray* array = new TextureArray(textures);
         for (Material* material : mtl)
-            material->tex_array_handle =
-                    TextureArray(textures).getHandle();
+            material->tex_array.reset(array);
     }
 
     /* SIATKI */
@@ -82,20 +83,26 @@ namespace GL3Engine {
         mtl_loader.reset(new MTLloader);
     }
 
-    void OBJloader::onNewHeader(GLint, vector<string>&) {
-        if (polygon.empty())
-            return;
-        finalizePolygon();
+    void OBJloader::onNewHeader(GLint header, vector<string>&) {
+        switch (header) {
+            case FACE:
+                if (polygon.empty())
+                    return;
+                finalizePolygon();
+                break;
+        }
     }
-    void OBJloader::onHeaderArgument(c_str, GLint active_header,
+    void OBJloader::onHeaderArgument(c_str file_dir, GLint active_header,
             LOADER_ITERATOR& it) {
         switch (active_header) {
             // Plik MTL
             case LOAD_MATERIAL: {
-                MATERIALS* ptr = (MATERIALS*) mtl_loader->load(*it);
-                if (ptr)
-                    for (Material* mat : *ptr)
-                        materials.push_back(mat);
+                MATERIALS* ptr = (MATERIALS*) mtl_loader->load(file_dir + *it);
+                if (ptr) {
+                    materials.insert(materials.begin(), ptr->begin(),
+                            ptr->end());
+                    safeDelete(ptr, false);
+                }
             }
                 break;
             case USE_MATERIAL: {
@@ -181,7 +188,7 @@ namespace GL3Engine {
                 SHORT_COPY(2, 1, uv, uv);
                 break;
             case 2:
-                if (param.find("//") == string::npos) {
+                if (param.find("//") != string::npos) {
                     // v1//vn1
                     sscanf(param.c_str(), "%f//%f", &args[0], &args[1]);
                     SHORT_COPY(3, 0, vertices, pos);

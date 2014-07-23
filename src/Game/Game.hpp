@@ -17,7 +17,7 @@ namespace Game {
         private:
             Window* wnd;
             unique_ptr<Mesh> axis = nullptr;
-            Mesh* model = nullptr;
+            Mesh* model = nullptr, *box = nullptr;
 
             MatrixStack matrix;
             Camera cam = {

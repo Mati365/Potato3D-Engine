@@ -1,0 +1,37 @@
+# Blender MTL File: 'None'
+# Material Count: 3
+
+newmtl TruckGlass
+Ns 90.196078
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Truck_glass_D.tga
+map_bump Truck_glass_N.tga
+
+newmtl TruckMat1
+Ns 90.196078
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Truck_mat1_D.tga
+map_bump Truck_mat1_N.tga
+map_Ks Truck_mat1_S.tga
+
+newmtl TruckMat2
+Ns 90.196078
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Truck_mat2_D.tga
+map_bump Truck_mat2_N.tga
+map_Ks Truck_mat2_S.tga

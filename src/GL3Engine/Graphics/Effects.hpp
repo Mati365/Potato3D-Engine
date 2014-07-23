@@ -11,10 +11,10 @@ namespace GL3Engine {
     class Material;
     class Shader {
 #define UNIFORM_LOC(variable) glGetUniformLocation(program, variable.c_str())
-            friend class ShaderManager;
 
         private:
             GLint program = 0;
+            map<GLuint, GLuint> ubo; // blockindex handle do bufora
 
         public:
             Shader(c_str, c_str, c_str);
@@ -29,8 +29,10 @@ namespace GL3Engine {
             /** Uniformy */
             void setUniform(GLint, c_str, GLint, GLuint);
             void setUniform(c_str, const vector<Material*>&);
-            template<typename T> void setUBO(c_str, GLuint&, const vector<T>&,
-                    GLuint, GLuint);
+
+            GLuint setUBO(c_str, void*, GLuint, GLuint);
+            GLuint bindToSlot(c_str, GLuint);
+            void changeUBOData(GLuint, void*, size_t);
 
             void setUniform(c_str, GLfloat);
             void setUniform(c_str, GLint);
@@ -66,9 +68,7 @@ namespace GL3Engine {
                 return program;
             }
 
-            ~Shader() {
-                glDeleteProgram(program);
-            }
+            ~Shader();
 
         private:
             void linkShader(initializer_list<GLint>);

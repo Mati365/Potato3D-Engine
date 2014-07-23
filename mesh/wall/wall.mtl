@@ -1,0 +1,14 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl cube
+Ns 90.843137
+Ka 0.000000 0.000000 0.000000
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd stone_diff.png
+map_Ks stone_spec.png
+map_bump stone_bump.png

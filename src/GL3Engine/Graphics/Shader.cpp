@@ -116,41 +116,60 @@ namespace GL3Engine {
             setUniform(MATERIAL_PARAM(".transparent"), mtl->transparent);
             setUniform(MATERIAL_PARAM(".shine"), mtl->shine);
 
-            for (GLuint j = 0; j < Material::SPECULAR + 1; ++j) {
-                sprintf(col_buffer, ".%s[%u]", "col", j);
-                setUniform(MATERIAL_PARAM(col_buffer), mtl->col[j]);
+            for (GLuint j = 0; j < Material::BUMP + 1; ++j) {
+                if (j < Material::SPECULAR + 1) {
+                    sprintf(col_buffer, ".%s[%u]", "col", j);
+                    setUniform(MATERIAL_PARAM(col_buffer), mtl->col[j]);
+                }
+                sprintf(col_buffer, ".%s[%u]", "tex_flag", j);
+                setUniform(MATERIAL_PARAM(col_buffer), !mtl->tex[j].empty());
             }
         }
-        setUniform(GL_TEXTURE_2D_ARRAY, MATERIAL_PARAM(".texture_pack"), 0,
-                material[0]->tex_array_handle);
+        setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
+                material[0]->tex_array->getHandle());
     }
 
-    template<typename T>
-    void Shader::setUBO(c_str variable, GLuint& buffer_id,
-            const vector<T>& data,
-            GLuint draw_type,
-            GLuint binding_point) {
-        if (buffer_id)
-            glDeleteBuffers(1, &buffer_id);
-
+    GLuint Shader::bindToSlot(c_str variable, GLuint binding_point) {
         GLuint block_index = glGetUniformBlockIndex(program, variable.c_str());
         glUniformBlockBinding(program, block_index, binding_point);
-
+        return block_index;
+    }
+    GLuint Shader::setUBO(c_str variable, void* data,
+            GLuint draw_type,
+            GLuint binding_point) {
+        GLuint block_index = bindToSlot(variable, binding_point);
         GLint block_size = 0;
+
+        if (IS_IN_MAP(ubo, block_index))
+            return ubo[block_index];
+
         glGetActiveUniformBlockiv(program, block_index,
         GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
 
         GLuint handle = genGLBuffer( {
-                &data[0],
+                data,
                 static_cast<size_t>(block_size),
                 GL_UNIFORM_BUFFER,
                 0,
                 draw_type
         }, false);
         glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, handle);
+        ubo[block_index] = handle;
+
+        return handle;
+    }
+    void Shader::changeUBOData(GLuint ubo_buf, void* data, size_t size) {
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_buf);
+        {
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+        }
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
-    template void Shader::setUBO<GLfloat>(c_str, GLuint&,
-            const vector<GLfloat>&, GLuint, GLuint);
+    Shader::~Shader() {
+        glDeleteProgram(program);
+        for (auto& handle : ubo)
+            glDeleteBuffers(1, &handle.second);
+    }
 }
 

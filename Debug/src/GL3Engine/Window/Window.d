@@ -13,7 +13,8 @@ src/GL3Engine/Window/Window.d: ../src/GL3Engine/Window/Window.cpp \
  ../src/GL3Engine/Window/../Resources/Config.hpp \
  ../src/GL3Engine/Window/../Resources/Resources.hpp \
  ../src/GL3Engine/Window/../Graphics/Primitives.hpp \
- ../src/GL3Engine/Window/../Graphics/Mesh.hpp
+ ../src/GL3Engine/Window/../Graphics/Mesh.hpp \
+ ../src/GL3Engine/Window/../Graphics/Text.hpp
 
 ../src/GL3Engine/Window/Window.hpp:
 
@@ -44,3 +45,5 @@ src/GL3Engine/Window/Window.d: ../src/GL3Engine/Window/Window.cpp \
 ../src/GL3Engine/Window/../Graphics/Primitives.hpp:
 
 ../src/GL3Engine/Window/../Graphics/Mesh.hpp:
+
+../src/GL3Engine/Window/../Graphics/Text.hpp:

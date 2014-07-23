@@ -8,4 +8,9 @@
 #define VERSION 0.2
 #define AUTHOR  "Mateusz Bagiński"
 
+/**
+ * TODO:
+ * - SSAO
+ * - FBO
+ */
 #endif
