@@ -8,7 +8,8 @@ namespace GL3Engine {
         public:
             static Mesh* genAxis(GLfloat);
 
-            static void printText(MatrixStack&, c_str, const FPoint3D&, GLfloat,
+            static void printText(Shader*, MatrixStack&, c_str, const FPoint3D&,
+                    GLfloat,
                     Font* font = nullptr);
     };
 }

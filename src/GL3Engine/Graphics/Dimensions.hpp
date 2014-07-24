@@ -5,6 +5,7 @@
 namespace GL3Engine {
     using namespace std;
 
+    /** Wektory nie są macierzami ze względów wyadjnosci */
     template<typename T> class Point3D {
         public:
             T X = 0,
@@ -13,19 +14,8 @@ namespace GL3Engine {
 
             Point3D() {
             }
-            Point3D(const T& _X, const T& _Y, const T& _Z)
-                    :
-                      X(_X),
-                      Y(_Y),
-                      Z(_Z) {
-            }
-            Point3D(const array<T, 3>& pos)
-                    :
-                      X(pos[0]),
-                      Y(pos[1]),
-                      Z(pos[2]) {
-
-            }
+            Point3D(const T&, const T&, const T&);
+            Point3D(const array<T, 3>&);
 
 #define POINT3D_OPERATOR(oper) \
             Point3D<T>& operator oper (const Point3D<T>& v) { \
@@ -39,50 +29,37 @@ namespace GL3Engine {
             POINT3D_OPERATOR(*=)
             POINT3D_OPERATOR(/=)
 
-            GLboolean operator>(const Point3D<T>& p) {
-                return X + Y + Z > p.X + p.Y + p.Z;
+            template<typename C> operator Point3D<C>() const {
+                return Point3D<C>(
+                        this->X,
+                        this->Y);
             }
-            GLboolean operator<(const Point3D<T>& p) {
-                return !(this > p);
-            }
+
+            GLboolean operator>(const Point3D<T>&) const;
+            GLboolean operator<(const Point3D<T>&) const;
 
             inline array<T, 3> toArray() {
                 return {X, Y, Z};
             }
-            void copyTo3DArray(T array[3]) {
-                std::template array<T, 3> v = toArray();
-                copy(v.begin(), v.end(), array);
-            }
-            void copyTo2DArray(T array[2]) {
-                std::template array<T, 3> v = toArray();
-                copy(v.begin(), v.end() - 1, array);
-            }
+            void copyTo3DArray(T array[3]);
+            void copyTo2DArray(T array[2]);
 
             T operator[](GLint i) const {
                 return i == 0 ? X : (i == 1 ? Y : Z);
             }
-            Point3D<T> operator-() const {
-                return Point3D<T> {
-                        -X,
-                        -Y,
-                        -Z
-                };
-            }
+            Point3D<T> operator-() const;
 
             inline T getVecLength() const {
                 return sqrt(pow(this->X, 2) + pow(this->Y, 2) + pow(this->Z, 2));
             }
-            Point3D<T>& normalize() {
-                T length = getVecLength();
-                this->X /= length;
-                this->Y /= length;
-                this->Z /= length;
-                return *this;
-            }
+            Point3D<T>& normalize();
 
             virtual ~Point3D() {
             }
-    };
+        };
+
+    extern template class Point3D<GLfloat> ;
+    extern template class Point3D<GLint> ;
 
 #define VEC_OVERLOAD(oper) \
     template<typename T> Point3D<T> operator oper (const Point3D<T>& l, \
@@ -95,6 +72,28 @@ namespace GL3Engine {
     VEC_OVERLOAD(-)
     VEC_OVERLOAD(*)
 
+    template<typename T> class Point2D : public Point3D<T> {
+        public:
+            Point2D() {
+            }
+            Point2D(const T&, const T&);
+            Point2D(const array<T, 2>&);
+
+            template<typename C> operator Point2D<C>() const {
+                return Point2D<C>(
+                        this->X,
+                        this->Y
+                        );
+            }
+            inline array<T, 2> toArray() {
+                return {this->X, this->Y};
+            }
+    };
+
+    extern template class Point2D<GLfloat> ;
+    extern template class Point2D<GLint> ;
+
+    /** Operacje na wektorach */
     template<typename T> inline Point3D<T> normalize(const Point3D<T>& _p) {
         return Point3D<T>(_p).normalize();
     }
@@ -110,23 +109,6 @@ namespace GL3Engine {
             const Point3D<T>& b) {
         return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
     }
-    template<typename T> class Point2D : public Point3D<T> {
-        public:
-            Point2D() {
-            }
-            Point2D(const T& _X, const T& _Y)
-                    :
-                      Point3D<T>(_X, _Y, 0) {
-            }
-            Point2D(const array<T, 2>& pos)
-                    :
-                      Point3D<T>(array<T, 2> { pos[0], pos[1] }) {
-            }
-
-            inline array<T, 2> toArray() {
-                return {this->X, this->Y};
-            }
-    };
 
     using IPoint2D = Point2D<GLint>;
     using FPoint2D = Point2D<GLfloat>;

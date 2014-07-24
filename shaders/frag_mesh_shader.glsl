@@ -66,7 +66,7 @@ vec2 pixelize(in float d) {
 void calcLight(void) {
 	vec3 normal;
 	if(MATERIAL.tex_flag[BUMP])
-		normal = normalize(frag.normal + (GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0));
+		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0);
 	else
 		normal = normalize(frag.normal);
 	

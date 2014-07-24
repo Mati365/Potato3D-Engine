@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
+#include <assert.h>
 
 namespace Tools {
     using namespace std;

@@ -6,7 +6,6 @@ namespace GL3Engine {
     using namespace Tools;
     using namespace std;
 
-    /** FBO */
     class Texture {
         public:
             enum Flag
@@ -28,8 +27,10 @@ namespace GL3Engine {
                       Texture(_path) {
                 flags = _flags;
             }
+            Texture(const IPoint2D&);
 
             void loadTexture(const string&);
+            void generate(const IPoint2D&);
 
             GLuint getHandle() const {
                 return handle;
@@ -73,7 +74,7 @@ namespace GL3Engine {
     using TILE_ITER = vector<Vertex2f>::const_iterator;
     class Tile {
         public:
-            static const GLushort indices[6];
+            static const GLushort quad_indices[6];
 
         protected:
             Texture* tex;

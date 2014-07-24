@@ -25,7 +25,6 @@ namespace GL3Engine {
             Font* font = nullptr;
 
             Shape2D* shape = nullptr;
-            Shader* effect = nullptr;
             Mat4 transform = FMAT_MATH::identity();
 
         public:
@@ -41,11 +40,7 @@ namespace GL3Engine {
             }
             void setText(const string&);
 
-            void draw(MatrixStack&, GLint);
-
-            Shader* getEffect() {
-                return effect;
-            }
+            void draw(MatrixStack&, GLint, Shader*);
 
             ~TextRenderer() {
                 safeDelete(shape, false);

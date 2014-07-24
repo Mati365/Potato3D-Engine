@@ -16,8 +16,10 @@ namespace Game {
 
         private:
             Window* wnd;
+
             unique_ptr<Mesh> axis = nullptr;
             Mesh* model = nullptr, *box = nullptr;
+            FBO* fbo = nullptr;
 
             MatrixStack matrix;
             Camera cam = {
@@ -26,11 +28,7 @@ namespace Game {
             };
 
         public:
-            GameScreen(Window* _wnd)
-                    :
-                      wnd(_wnd),
-                      matrix(_wnd->getBounds()){
-            }
+            GameScreen(Window*);
 
             inline Window* getWindow() const {
                 return wnd;

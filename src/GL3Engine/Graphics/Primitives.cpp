@@ -52,11 +52,10 @@ namespace GL3Engine {
                         GL_STATIC_DRAW
                 },
                 { .1f, .1f, .1f, 1.f });
-        return new Mesh(
-                shape,
-                REQUIRE_RES(Shader, DEFAULT_MESH_SHADER));
+        return new Mesh(shape);
     }
-    void Primitives::printText(MatrixStack& stack, c_str text,
+    void Primitives::printText(Shader* effect,
+            MatrixStack& stack, c_str text,
             const FPoint3D& pos, GLfloat size,
             Font* font) {
         static TextRenderer renderer;
@@ -67,7 +66,7 @@ namespace GL3Engine {
         stack.pushTransform();
         {
             FMAT_MATH::translate(stack.model, pos);
-            renderer.draw(stack, 0);
+            renderer.draw(stack, 0, effect);
         }
         stack.popTransform();
     }

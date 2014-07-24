@@ -4,10 +4,31 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
+    void putGLTextureFlags(GLenum type) {
+        glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
     Texture::Texture(const string& path) {
         loadTexture(path);
     }
+    Texture::Texture(const IPoint2D& size) {
+        generate(size);
+    }
 
+    void Texture::generate(const IPoint2D& size) {
+        glGenTextures(1, &handle);
+        glBindTexture(GL_TEXTURE_2D, handle);
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.X, size.Y, 0, GL_RGBA,
+            GL_UNSIGNED_BYTE, 0);
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
+        configure();
+    }
     void Texture::loadTexture(const string& path) {
         if (handle != 0)
             glDeleteTextures(1, &handle);
@@ -19,16 +40,11 @@ namespace GL3Engine {
                         SOIL_FLAG_POWER_OF_TWO);
         configure();
     }
+
     void Texture::configure() {
         glBindTexture(GL_TEXTURE_2D, handle);
         {
-            glTexParameteri(GL_TEXTURE_2D,
-            GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-            GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-            GL_NEAREST);
-
+            putGLTextureFlags(GL_TEXTURE_2D);
             if (IS_SET_FLAG(flags, USE_MIPMAP_NEAREST | USE_MIPMAP_LINEAR)) {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                         IS_SET_FLAG(flags, USE_MIPMAP_NEAREST) ?
@@ -36,9 +52,6 @@ namespace GL3Engine {
                                                                  GL_LINEAR_MIPMAP_LINEAR);
                 glGenerateMipmap(GL_TEXTURE_2D);
             }
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,
                 &size.X);
@@ -76,13 +89,8 @@ namespace GL3Engine {
         glGenTextures(1, &handle);
         glBindTexture(GL_TEXTURE_2D_ARRAY, handle);
         {
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER,
-            GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER,
-            GL_NEAREST);
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            putGLTextureFlags(GL_TEXTURE_2D_ARRAY);
+            glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_GENERATE_MIPMAP, GL_TRUE);
         }
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, biggest.X, biggest.Y,
                 textures.size());
@@ -96,7 +104,7 @@ namespace GL3Engine {
     }
 
     // --------- Tile
-    const GLushort Tile::indices[6] = {
+    const GLushort Tile::quad_indices[6] = {
             1, 0, 3,
             1, 3, 2
     };

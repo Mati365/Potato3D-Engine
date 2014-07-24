@@ -23,7 +23,7 @@ namespace GL3Engine {
 
     class Drawable {
         public:
-            virtual void draw(MatrixStack&, GLint)=0;
+            virtual void draw(MatrixStack&, GLint, Shader*)=0;
             virtual ~Drawable() {
             }
     };
@@ -109,24 +109,56 @@ namespace GL3Engine {
     class Mesh : public Drawable {
         private:
             Shape3D* shape = nullptr;
-            Shader* effect = nullptr;
-
             vector<MaterialBufferData> material_cache;
-            GLuint ubo_handle;
+            GLuint ubo_handle = 0;
 
         public:
-            Mesh(Shape3D*, Shader*);
-            void draw(MatrixStack&, GLint);
+            Mesh(Shape3D*);
+            void draw(MatrixStack&, GLint, Shader*);
 
             const Shape3D* getShape() const {
                 return shape;
             }
-            const Shader* getEffect() const {
-                return effect;
+
+        private:
+            void updateMaterialsCache(Shader*);
+    };
+
+    /** FBO ma quada i drawable dlatego tutaj */
+    class FBO : public Drawable {
+        private:
+            IPoint2D size;
+            GLuint fbo_handle = 0;
+
+            Texture tex;
+            unique_ptr<Shape2D> quad;
+
+        public:
+            FBO(const IPoint2D&);
+            /**
+             *  Renderuje bezposrednio na ekran
+             *  quada pomijac macierze
+             */
+            void draw(MatrixStack&, GLint, Shader*);
+            /**
+             * Przestawienie outputu
+             * renderingu, end nie rysuje
+             */
+            void begin();
+            void end();
+
+            GLuint getFBO() const {
+                return fbo_handle;
+            }
+            const IPoint2D& getSize() const {
+                return size;
+            }
+            Texture& getTexture() {
+                return tex;
             }
 
         private:
-            void updateMaterialsCache();
+            void create();
     };
 }
 

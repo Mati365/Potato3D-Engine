@@ -23,7 +23,7 @@ namespace GL3Engine {
                 glUseProgram(program);
             }
             inline void end() const {
-                glUseProgram(program);
+                glUseProgram(0);
             }
 
             /** Uniformy */

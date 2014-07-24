@@ -49,7 +49,7 @@ namespace GL3Engine {
                 // Index
                 for (GLuint i = 0; i < 6; ++i)
                     index_buffer.push_back(
-                            Tile::indices[i] + vertex_buffer.size() - 4);
+                            Tile::quad_indices[i] + vertex_buffer.size() - 4);
             }
             cursor.X += cell_size.X;
         }
@@ -70,7 +70,6 @@ namespace GL3Engine {
                 });
     }
     void TextRenderer::create() {
-        effect = REQUIRE_RES(Shader, DEFAULT_TEXT_SHADER);
         font = new Font(REQUIRE_RES(Texture, FONT_TEXTURE));
         shape = new Shape2D(
                 {
@@ -90,28 +89,26 @@ namespace GL3Engine {
                 col);
     }
 
-    void TextRenderer::draw(MatrixStack& matrix, GLint) {
+    void TextRenderer::draw(MatrixStack& matrix, GLint, Shader* effect) {
         if (!font || !effect || !shape)
             return;
 
-        effect->begin();
-        effect->setUniform("matrix.mvp",
-                matrix.vp_matrix * matrix.model * transform);
-        effect->setUniform("col", col);
-        effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
+        if (effect) {
+            effect->setUniform("matrix.mvp",
+                    matrix.vp_matrix * matrix.model * transform);
+            effect->setUniform("col", col);
+            effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
+        }
+        glDisable(GL_CULL_FACE);
         {
-            glDisable(GL_CULL_FACE);
-
             glBindVertexArray(shape->getVAO());
             glDrawElements(GL_TRIANGLES,
                     shape->getIndicesCount(),
                     GL_UNSIGNED_INT,
                     nullptr);
             glBindVertexArray(0);
-
-            glEnable(GL_CULL_FACE);
         }
-        effect->end();
+        glEnable(GL_CULL_FACE);
         transform = FMAT_MATH::identity();
     }
 }

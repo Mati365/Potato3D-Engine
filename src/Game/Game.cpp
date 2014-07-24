@@ -4,15 +4,27 @@
 #include "../GL3Engine/Resources/Resources.hpp"
 
 namespace Game {
+    GameScreen::GameScreen(Window* _wnd)
+            :
+              wnd(_wnd),
+              matrix(_wnd->getBounds()) {
+    }
+
     void GameScreen::init() {
         axis = unique_ptr < Mesh > (Primitives::genAxis(17));
         model = new Mesh(
                 GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "mesh/truck/untitled.obj"),
-                REQUIRE_RES(Shader, DEFAULT_MESH_SHADER));
+                        "mesh/truck/untitled.obj"));
         matrix.selectCam(matrix.addCam(&cam));
+
+        fbo = new FBO(static_cast<IPoint2D>(matrix.getResolution()));
     }
     void GameScreen::render() {
+        static Shader* mesh_shader = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER);
+        static Shader* fbo_shader = REQUIRE_RES(Shader, DEFAULT_FBO_SHADER);
+
+        fbo->begin();
+        mesh_shader->begin();
         matrix.switchMode(MatrixStack::_3D);
 
         if (!box)
@@ -20,11 +32,10 @@ namespace Game {
                     new Mesh(
                             GlobalResourceManager::getInstance().getResource<
                                     Shape3D>(
-                                    "mesh/wall/wall.obj"),
-                            REQUIRE_RES(Shader, DEFAULT_MESH_SHADER));
+                                    "mesh/wall/wall.obj"));
 
         if (axis)
-            axis->draw(matrix, GL_LINES);
+            axis->draw(matrix, GL_LINES, mesh_shader);
 
         static GLfloat angle = 0.f;
         angle += 0.000005f;
@@ -36,7 +47,7 @@ namespace Game {
             matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), {
                     0.f, 1.f, 0.f });
 
-            model->draw(matrix, GL_TRIANGLES);
+            model->draw(matrix, GL_TRIANGLES, mesh_shader);
             matrix.popTransform();
         }
         if (box) {
@@ -44,11 +55,16 @@ namespace Game {
             matrix.model *= FMAT_MATH::translate( { 0.0f, 0.0f, 2.0f });
             matrix.model *= FMAT_MATH::scale( { 1.3f, 1.3f, 1.3f });
             matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), {
-                              0.f, 1.f, 0.f });
+                    0.f, 1.f, 0.f });
 
-            box->draw(matrix, GL_TRIANGLES);
+            box->draw(matrix, GL_TRIANGLES, mesh_shader);
             matrix.popTransform();
         }
+        glUseProgram(0);
+        fbo->end();
+
+        fbo_shader->begin();
+        fbo->draw(matrix, 0, fbo_shader);
     }
 
     void GameScreen::getKeyEvent(SDL_Keycode key) {

@@ -1,14 +1,12 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    Mesh::Mesh(Shape3D* _shape, Shader* _effect)
+    Mesh::Mesh(Shape3D* _shape)
             :
-              shape(_shape),
-              effect(_effect) {
-        updateMaterialsCache();
+              shape(_shape) {
     }
 
-    void Mesh::updateMaterialsCache() {
+    void Mesh::updateMaterialsCache(Shader* effect) {
         material_cache.clear();
         if (!shape->hasMaterials())
             return;
@@ -17,36 +15,36 @@ namespace GL3Engine {
         ubo_handle = effect->setUBO("MaterialBlock", nullptr, GL_DYNAMIC_DRAW,
                 1);
     }
-    void Mesh::draw(MatrixStack& matrix, GLint mode) {
-        if (!effect || !shape)
+    void Mesh::draw(MatrixStack& matrix, GLint mode, Shader* effect) {
+        if (!shape)
             return;
+        if (effect) {
+            if (material_cache.empty())
+                updateMaterialsCache(effect);
 
-        effect->begin();
-        {
             effect->setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
             effect->setUniform("matrix.m", matrix.model);
             effect->setUniform("matrix.normal",
                     FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
             effect->setUniform("matrix.cam", matrix.getActiveCamera()->pos);
-            if (shape->getMaterials().empty())
-                effect->setUniform("col", shape->getColor());
-            else {
-                effect->setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
-                        shape->getMaterials()[0]->tex_array->getHandle());
-                effect->changeUBOData(ubo_handle, &material_cache[0],
-                        material_cache.size() * sizeof(MaterialBufferData));
-            }
             {
-                glBindVertexArray(shape->getVAO());
-                if (!shape->usingElementBuffer())
-                    glDrawArrays(mode, 0, shape->getVerticesCount());
-                else
-                    glDrawElements(mode, shape->getIndicesCount(),
-                    GL_UNSIGNED_SHORT, nullptr);
-                glBindVertexArray(0);
+                if (shape->getMaterials().empty())
+                    effect->setUniform("col", shape->getColor());
+                else {
+                    effect->setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
+                            shape->getMaterials()[0]->tex_array->getHandle());
+                    effect->changeUBOData(ubo_handle, &material_cache[0],
+                            material_cache.size() * sizeof(MaterialBufferData));
+                }
             }
         }
-        effect->end();
+        glBindVertexArray(shape->getVAO());
+        if (!shape->usingElementBuffer())
+            glDrawArrays(mode, 0, shape->getVerticesCount());
+        else
+            glDrawElements(mode, shape->getIndicesCount(),
+            GL_UNSIGNED_SHORT, nullptr);
+        glBindVertexArray(0);
     }
 }
 
