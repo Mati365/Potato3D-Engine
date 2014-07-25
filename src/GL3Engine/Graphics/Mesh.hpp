@@ -157,6 +157,9 @@ namespace GL3Engine {
                 return tex;
             }
 
+            ~FBO() {
+                glDeleteFramebuffers(1, &fbo_handle);
+            }
         private:
             void create();
     };
