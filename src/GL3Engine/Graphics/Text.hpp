@@ -18,8 +18,9 @@ namespace GL3Engine {
             }
     };
 
-#define BUFFER_SIZE 128
     class TextRenderer : public Drawable {
+            static constexpr size_t BUFFER_SIZE    =   128;
+
         private:
             Color col = { 1.f, 1.f, 1.f, 1.f };
             Font* font = nullptr;

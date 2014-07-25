@@ -40,6 +40,7 @@ namespace GL3Engine {
             // Kolory
     };
 
+    using COL = GLfloat[4];
     using UV = GLfloat[2];
     using NORMAL = GLfloat[3];
     using POS = NORMAL;

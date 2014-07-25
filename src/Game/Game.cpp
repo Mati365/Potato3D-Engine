@@ -2,6 +2,7 @@
 
 #include "../GL3Engine/Graphics/Text.hpp"
 #include "../GL3Engine/Resources/Resources.hpp"
+#include "../GL3Engine/Graphics/Light.hpp"
 
 namespace Game {
     GameScreen::GameScreen(Window* _wnd)
@@ -18,10 +19,37 @@ namespace Game {
         matrix.selectCam(matrix.addCam(&cam));
 
         fbo = new FBO(static_cast<IPoint2D>(matrix.getResolution()));
+
+        LightManager::getInstance().addLight(
+                Light {
+            0.0, 0.5, 0.0, 0.0, // Pos
+            1.0, 1.0, 1.0, 1.0, // Specular col
+            0.0, 0.0, 1.0, 1.0, // Diffuse col
+
+            1.0,
+            2.0,
+            1.0,
+            Light::ON
+                });
+
+        LightManager::getInstance().addLight(
+                        Light {
+                    1.0, 1.5, 0.5, 0.0, // Pos
+                    1.0, 1.0, 1.0, 1.0, // Specular col
+                    1.0, 0.0, 0.0, 1.0, // Diffuse col
+
+                    1.0,
+                    2.0,
+                    1.0,
+                    Light::ON
+                        });
     }
     void GameScreen::render() {
         static Shader* mesh_shader = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER);
         static Shader* fbo_shader = REQUIRE_RES(Shader, DEFAULT_FBO_SHADER);
+
+        LightManager::getInstance().update();
+        mesh_shader->bindToSlot("LightBlock", LightManager::BINDING_POINT);
 
         fbo->begin();
         mesh_shader->begin();

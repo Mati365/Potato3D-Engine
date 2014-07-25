@@ -15,28 +15,34 @@ in FragInfo {
 	vec3		cam;
 	float		mtl;
 } frag;
-struct Light {
-	vec3	pos;
-	float	ambient_intensity;
-	
-	vec4	diffuse_col;
-	float	diffuse_intensity;	
-	
-	vec4	specular_col;
-	float	specular_intensity;
-};
 
 // ------------- UNIFORMY -----------------
 // std140
 // tablica wielkosc * sizeof vec4
 // chunk vec4
+#define MAX_LIGHTS	10
+struct Light {
+	vec3	pos;							//	16B
+	vec4	specular_col;					//	16B
+	vec4	diffuse_col; 					// 	16B
+	
+	float	ambient_intensity;				// 	4B
+	float	diffuse_intensity;	 			// 	4B
+	float	specular_intensity;  			// 	4B
+											//	4B extra
+};
+layout(std140) uniform LightBlock {
+	Light		lights[MAX_LIGHTS];
+	float		light_count;
+};
+
 // 3 bloki po 136B+8B extra i 4 block 136B
 struct Material { // 136B size
-	vec4				col[3]; // 48B
+	vec4				col[3]; 			// 48B
 	bool				tex_flag[BUMP + 1]; // 80B
-	float				transparent; // 4B
-	float				shine; // 4B
-	// 4*float=8B extra
+	float				transparent; 		// 4B
+	float				shine; 				// 4B
+											// 8B extra
 };
 layout(std140) uniform MaterialBlock {
 	Material	material[4];
@@ -49,21 +55,11 @@ uniform	vec4				col;
 #define	GET_MATERIAL_TEX(type)			GET_MATERIAL_UV_TEX(vec2(frag.uv.x, 1.0 - frag.uv.y), type)
 
 Material 	MATERIAL 	= 	material[int(frag.mtl)];
-Light		light 		= 	Light(
-	vec3(0.0, 0.5, 0.0), // Pos
-	1.0,				// Ambient intensity
-	
-	vec4(1.0, 1.0, 1.0, 1.0), // Diffuse col
-	2.0,
-	
-	vec4(1.0, 1.0, 1.0, 1.0), // Specular col
-	1.0
-);
 
 vec2 pixelize(in float d) {
 	return vec2(d * floor(frag.uv.x / d), d * floor((1.0 - frag.uv.y) / d));
 }
-void calcLight(void) {
+void calcLight(in Light light) {
 	vec3 normal;
 	if(MATERIAL.tex_flag[BUMP])
 		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0);
@@ -98,7 +94,7 @@ void calcLight(void) {
 	if(MATERIAL.tex_flag[AMBIENT])	
 		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * 
 						light.ambient_intensity, 0.0);
-						
+	
 	if(MATERIAL.tex_flag[DIFFUSE]) {
 		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE];
 		gl_FragColor += 
@@ -111,5 +107,6 @@ void calcLight(void) {
 		gl_FragColor =	col;
 }
 void main(void) {
-	calcLight();
+	for(int i = 0;i < light_count;++i)
+		calcLight(lights[i]);
 }

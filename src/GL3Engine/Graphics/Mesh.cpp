@@ -1,4 +1,5 @@
 #include "Mesh.hpp"
+#include "Light.hpp"
 
 namespace GL3Engine {
     Mesh::Mesh(Shape3D* _shape)
@@ -10,10 +11,11 @@ namespace GL3Engine {
         material_cache.clear();
         if (!shape->hasMaterials())
             return;
+
         for (Material* mat : shape->getMaterials())
             material_cache.push_back(mat->getMaterialBufferData());
         ubo_handle = effect->setUBO("MaterialBlock", nullptr, GL_DYNAMIC_DRAW,
-                1);
+                LightManager::BINDING_POINT + 1);
     }
     void Mesh::draw(MatrixStack& matrix, GLint mode, Shader* effect) {
         if (!shape)

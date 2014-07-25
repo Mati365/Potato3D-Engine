@@ -11,6 +11,6 @@
 /**
  * TODO:
  * - SSAO
- * - FBO
+ * - SSBO dla GL 4.3+
  */
 #endif
