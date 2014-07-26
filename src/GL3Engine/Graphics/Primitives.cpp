@@ -65,7 +65,7 @@ namespace GL3Engine {
 
         stack.pushTransform();
         {
-            FMAT_MATH::translate(stack.model, pos);
+            MatMatrix::translate(stack.model, pos);
             renderer.draw(stack, 0, effect);
         }
         stack.popTransform();

@@ -11,7 +11,7 @@ namespace GL3Engine {
 
     }
     void TextRenderer::setSize(GLfloat size) {
-        FMAT_MATH::scale(transform, {
+        MatMatrix::scale(transform, {
                 font->getCellSize().X * font->getCells().X * size,
                 font->getCellSize().X * font->getCells().Y * size,
                 1.f });
@@ -109,6 +109,6 @@ namespace GL3Engine {
             glBindVertexArray(0);
         }
         glEnable(GL_CULL_FACE);
-        transform = FMAT_MATH::identity();
+        MatMatrix::identity(1, &transform);
     }
 }

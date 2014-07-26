@@ -4,6 +4,7 @@
 #include <list>
 #include <math.h>
 #include <array>
+#include <utility>
 
 #include "../Tools.hpp"
 #include "Dimensions.hpp"
@@ -69,6 +70,8 @@ namespace GL3Engine {
     };
     extern template class Matrix<GLfloat> ;
 
+    using FMat = Matrix<GLfloat>;
+
     template<typename T> Matrix<T> operator*(const Matrix<T>& l,
             const Matrix<T>& r) {
         Matrix<T> temp = l;
@@ -123,6 +126,7 @@ namespace GL3Engine {
         private:
             vector<Camera*> cam;
             GLuint active_cam = 0;
+
             list<M_STACK_ARRAY> stack; // pushTransform i popTransform
             FPoint2D resolution;
 
@@ -159,7 +163,7 @@ namespace GL3Engine {
     };
 
     /** Obliczenia */
-    template<typename T> class MatMatrix {
+    class MatMatrix {
         public:
             static inline GLfloat toRad(GLfloat deg) {
                 return deg * 180.0 / 3.145;
@@ -169,7 +173,7 @@ namespace GL3Engine {
             }
 
             /** Operacje na macierzy macierzy [ x, y, z, w ] */
-            static constexpr Mat4 identity() {
+            static Mat4 identity() {
                 return Mat4( {
                         1, 0, 0, 0,
                         0, 1, 0, 0,
@@ -177,16 +181,16 @@ namespace GL3Engine {
                         0, 0, 0, 1
                 });
             }
-            static inline void identity(Matrix<T>&);
+            static void identity(GLuint, ...);
 
-            static Mat4 translate(const FPoint3D&);
-            static void translate(Matrix<T>&, const FPoint3D&);
+            static const Mat4& translate(const FPoint3D&);
+            static void translate(FMat&, const FPoint3D&);
 
-            static Mat4 scale(const FPoint3D&);
-            static void scale(Matrix<T>&, const FPoint3D&);
+            static const Mat4& scale(const FPoint3D&);
+            static void scale(FMat&, const FPoint3D&);
 
-            static Mat4 rotate(GLfloat, const FPoint3D&);
-            static inline void rotate(Matrix<T>&, GLfloat, const FPoint3D&);
+            static const Mat4& rotate(GLfloat, const FPoint3D&);
+            static void rotate(FMat&, GLfloat, const FPoint3D&);
 
             /**
              * Obiliczenia dla MVP
@@ -199,8 +203,8 @@ namespace GL3Engine {
             static Mat4 orthof(const array<FPoint2D, 3>&);
 
             /** Obliczenia dla normal matrix */
-            static void transpose(const Matrix<T>&, T*);
-            static Matrix<T> transpose(const Matrix<T>&);
+            static void transpose(const FMat&, GLfloat*);
+            static FMat transpose(const FMat&);
 
             static void inverse(Mat3*);
             static Mat3 inverse(const Mat3&);
@@ -210,9 +214,6 @@ namespace GL3Engine {
                 v = m * v;
             }
     };
-    extern template class MatMatrix<GLfloat> ;
-
-    using FMAT_MATH = MatMatrix<GLfloat>;
 }
 
 #endif

@@ -17,17 +17,20 @@ namespace GL3Engine {
         ubo_handle = effect->setUBO("MaterialBlock", nullptr, GL_DYNAMIC_DRAW,
                 LightManager::BINDING_POINT + 1);
     }
-    void Mesh::draw(MatrixStack& matrix, GLint mode, Shader* effect) {
-        if (!shape)
-            return;
-        if (effect) {
-            if (material_cache.empty())
-                updateMaterialsCache(effect);
 
+    void Mesh::passToShader(MatrixStack& matrix, Shader* effect) {
+        if (!effect)
+            return;
+        if (material_cache.empty())
+            updateMaterialsCache(effect);
+
+        matrix.pushTransform();
+        matrix.model *= transform.model;
+        {
             effect->setUniform("matrix.mvp", matrix.vp_matrix * matrix.model);
             effect->setUniform("matrix.m", matrix.model);
             effect->setUniform("matrix.normal",
-                    FMAT_MATH::inverse(matrix.model.getCut(3, 3)));
+                    MatMatrix::inverse(matrix.model.getCut(3, 3)));
             effect->setUniform("matrix.cam", matrix.getActiveCamera()->pos);
             {
                 if (shape->getMaterials().empty())
@@ -40,6 +43,13 @@ namespace GL3Engine {
                 }
             }
         }
+        matrix.popTransform();
+    }
+    void Mesh::draw(MatrixStack& matrix, GLint mode, Shader* effect) {
+        if (!shape)
+            return;
+
+        passToShader(matrix, effect);
         glBindVertexArray(shape->getVAO());
         if (!shape->usingElementBuffer())
             glDrawArrays(mode, 0, shape->getVerticesCount());

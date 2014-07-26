@@ -26,7 +26,7 @@ namespace GL3Engine {
             Font* font = nullptr;
 
             Shape2D* shape = nullptr;
-            Mat4 transform = FMAT_MATH::identity();
+            Mat4 transform = MatMatrix::identity();
 
         public:
             TextRenderer() {

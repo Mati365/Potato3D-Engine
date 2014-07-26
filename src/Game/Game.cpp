@@ -22,27 +22,27 @@ namespace Game {
 
         LightManager::getInstance().addLight(
                 Light {
-            0.0, 0.5, 0.0, 0.0, // Pos
-            1.0, 1.0, 1.0, 1.0, // Specular col
-            0.0, 0.0, 1.0, 1.0, // Diffuse col
+                        0.0, 0.5, 0.0, 0.0, // Pos
+                        1.0, 1.0, 1.0, 1.0, // Specular col
+                        0.0, 0.0, 1.0, 1.0, // Diffuse col
 
-            1.0,
-            2.0,
-            1.0,
-            Light::ON
+                        1.0,
+                        2.0,
+                        1.0,
+                        Light::ON
                 });
 
         LightManager::getInstance().addLight(
-                        Light {
-                    1.0, 1.5, 0.5, 0.0, // Pos
-                    1.0, 1.0, 1.0, 1.0, // Specular col
-                    1.0, 0.0, 0.0, 1.0, // Diffuse col
+                Light {
+                        1.0, 1.5, 0.5, 0.0, // Pos
+                        1.0, 1.0, 1.0, 1.0, // Specular col
+                        1.0, 0.0, 0.0, 1.0, // Diffuse col
 
-                    1.0,
-                    2.0,
-                    1.0,
-                    Light::ON
-                        });
+                        1.0,
+                        2.0,
+                        1.0,
+                        Light::ON
+                });
     }
     void GameScreen::render() {
         static Shader* mesh_shader = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER);
@@ -68,25 +68,25 @@ namespace Game {
         static GLfloat angle = 0.f;
         angle += 0.000005f;
         if (model) {
-            matrix.pushTransform();
-            matrix.model *= FMAT_MATH::scale( { 0.2f, 0.2f, 0.2f });
-            matrix.model *= FMAT_MATH::translate( { 0.0f, 0.5f, -10.0f });
-
-            matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), {
-                    0.f, 1.f, 0.f });
-
+            model->getTransform()
+                    .identity()
+                    .mul(MatMatrix::scale( { .2f, .2f, .2f }))
+                    .mul(MatMatrix::translate( { 0.f, 0.5f, -10.f }))
+                    .mul(MatMatrix::rotate(
+                    Tools::toRad<GLfloat>(angle),
+                    { 0.f, 1.f, 0.f }));
             model->draw(matrix, GL_TRIANGLES, mesh_shader);
-            matrix.popTransform();
         }
         if (box) {
-            matrix.pushTransform();
-            matrix.model *= FMAT_MATH::translate( { 0.0f, 0.0f, 2.0f });
-            matrix.model *= FMAT_MATH::scale( { 1.3f, 1.3f, 1.3f });
-            matrix.model *= FMAT_MATH::rotate(Tools::toRad<GLfloat>(angle), {
-                    0.f, 1.f, 0.f });
+            box->getTransform()
+                    .identity()
+                    .mul(MatMatrix::translate( { 0.0f, 0.0f, 2.0f }))
+                    .mul(MatMatrix::scale( { 1.3f, 1.3f, 1.3f }))
+                    .mul(MatMatrix::rotate(
+                    Tools::toRad<GLfloat>(angle),
+                    { 0.f, 1.f, 0.f }));
 
             box->draw(matrix, GL_TRIANGLES, mesh_shader);
-            matrix.popTransform();
         }
         glUseProgram(0);
         fbo->end();
@@ -103,10 +103,10 @@ namespace Game {
         });
         v *= {.05f, .05f, .05f};
 
-        Mat4 transform = FMAT_MATH::translate(v);
+        Mat4 transform = MatMatrix::translate(v);
 
-        FMAT_MATH::mul(cam.pos, transform);
-        FMAT_MATH::mul(cam.target, transform);
+        MatMatrix::mul(cam.pos, transform);
+        MatMatrix::mul(cam.target, transform);
     }
     void GameScreen::getMouseEvent(const IPoint2D& p, GLuint btn) {
         static IPoint2D last_mouse_pos = { 0, 0 };
@@ -115,9 +115,9 @@ namespace Game {
                 v = (GLfloat) p.X > 0.f ? -sensinity :
                                           (p.X < 0 ? sensinity : 0.f);
         v *= abs(p.X - last_mouse_pos.X);
-        FMAT_MATH::mul(
+        MatMatrix::mul(
                 cam.target,
-                FMAT_MATH::rotate(
+                MatMatrix::rotate(
                         Tools::toRad<GLfloat>(v),
                         { 0.f, 1.f, 0.f }));
         last_mouse_pos = p;

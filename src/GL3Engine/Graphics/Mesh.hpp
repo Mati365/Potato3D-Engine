@@ -24,6 +24,9 @@ namespace GL3Engine {
     class Drawable {
         public:
             virtual void draw(MatrixStack&, GLint, Shader*)=0;
+            virtual void passToShader(MatrixStack&, Shader*) {
+            }
+
             virtual ~Drawable() {
             }
     };
@@ -101,14 +104,24 @@ namespace GL3Engine {
     using Shape3D = VAOpolygon<Vertex4f>;
     using Shape2D = VAOpolygon<Vertex2f>;
 
-    /**
-     * Shader odpowiadający za mesha musi mieć
-     * określone vertex attributy
-     */
+    struct Transform {
+            Mat4 model = MatMatrix::identity();
+
+            Transform& mul(const Mat4& m) {
+                model *= m;
+                return *this;
+            }
+            Transform& identity() {
+                MatMatrix::identity(1, &model);
+                return *this;
+            }
+    };
     class Shader;
     class Mesh : public Drawable {
         private:
             Shape3D* shape = nullptr;
+            Transform transform;
+
             vector<MaterialBufferData> material_cache;
             GLuint ubo_handle = 0;
 
@@ -119,9 +132,13 @@ namespace GL3Engine {
             const Shape3D* getShape() const {
                 return shape;
             }
+            Transform& getTransform() {
+                return transform;
+            }
 
-        private:
+        protected:
             void updateMaterialsCache(Shader*);
+            void passToShader(MatrixStack&, Shader*);
     };
 
     /** FBO ma quada i drawable dlatego tutaj */
