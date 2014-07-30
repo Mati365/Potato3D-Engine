@@ -47,8 +47,8 @@ namespace Tools {
         copy(source.begin(), source.end(), destination);
     }
 
-    template<typename T> void safeDelete(T*& ptr, bool arr) {
-        if (ptr == nullptr)
+    template<typename T> void safeDelete(T*& ptr, GLboolean arr) {
+        if (!ptr)
             return;
 
         if (arr)

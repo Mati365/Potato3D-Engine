@@ -32,8 +32,10 @@ namespace GL3Engine {
     };
     class RectSystem : public CTSystem<Rect> {
             virtual void logic(Entity* c) {
-                cout << "E" << c->get<Point>()->x << endl;
-                c->get<Point>()->x += 2;
+                //cout << "E" << c->get<Point>()->x << endl;
+                //c->get<Point>()->x += 2;
+                c->get<Rect>()->w += 30;
+                cout << c->get<Rect>()->w << endl;
             }
     };
 
@@ -44,9 +46,13 @@ namespace GL3Engine {
 
         Entity* dick = new Entity();
         dick->add(REQUIRE_CTYPE_OBJ("Rect"));
-        dick->add(REQUIRE_CTYPE_OBJ("Point"));
+       // dick->add(REQUIRE_CTYPE_OBJ("Point"));
 
         world.regEntity(dick);
+
         world.update();
+        world.update();
+
+        cout << "SIZE:" << world.getSystem<RectSystem>()->getEntities().size() << endl;
     }
 }

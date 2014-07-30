@@ -28,7 +28,6 @@ namespace GL3Engine {
         static size_t hash = typeid(type).hash_code(); \
         return hash; \
     }
-
 #define CHECK_CTYPE(type) \
     static_assert(is_base_of<Component, type>::value, "Bad Component type!")
 
@@ -75,6 +74,7 @@ namespace GL3Engine {
     class CSystem {
         private:
             vector<TypePtr> c_types;
+            vector<Entity*> entities;
 
         public:
             CSystem(const vector<TypePtr>& _c_types)
@@ -82,13 +82,28 @@ namespace GL3Engine {
                       c_types(_c_types) {
             }
 
-            virtual void logic(Entity* c) = 0;
-            virtual void update(Entity* c) {
+            CSystem& delEntity(Entity* c) {
+                entities.erase(
+                        remove(entities.begin(), entities.end(), c),
+                        entities.end());
+                return *this;
+            }
+            CSystem& regEntity(Entity* c) {
                 assert(c != nullptr);
                 for (auto& ptr : c_types)
                     if (!c->has(ptr))
-                        return;
-                logic(c);
+                        return *this;
+                entities.push_back(c);
+                return *this;
+            }
+            vector<Entity*>& getEntities() {
+                return entities;
+            }
+
+            virtual void logic(Entity* c) = 0;
+            virtual void update() {
+                for (auto* c : entities)
+                    logic(c);
             }
 
             virtual ~CSystem() {
@@ -119,16 +134,41 @@ namespace GL3Engine {
                                 unique_ptr<CSystem>(new T)));
                 return *this;
             }
+            template<typename T> T* getSystem() {
+                {
+                    static_assert(is_base_of<CSystem, T>::value, "System not exists!");
+                    assert(IS_IN_MAP(systems, typeid(T)));
+                }
+                return dynamic_cast<T*>(systems[typeid(T)].get());
+            }
+
             CWorld& regEntity(Entity* e) {
                 assert(e);
-                entities.push_back(unique_ptr < Entity > (e));
+                {
+                    entities.push_back(unique_ptr < Entity > (e));
+                    for (auto& sys : systems)
+                        sys.second->regEntity(e);
+                }
+                return *this;
+            }
+            CWorld& delEntity(Entity* e) {
+                assert(e);
+                {
+                    for (auto& sys : systems)
+                        sys.second->delEntity(e);
+                    auto p = remove_if(entities.begin(), entities.end(),
+                            [e](const unique_ptr<Entity>& v)
+                            {
+                                return v.get() == e;
+                            });
+                    entities.erase(p, entities.end());
+                }
                 return *this;
             }
 
-            void update() {
+            inline void update() {
                 for (auto& sys : systems)
-                    for (auto& e : entities)
-                        sys.second->update(e.get());
+                    sys.second->update();
             }
     };
 
@@ -154,7 +194,6 @@ namespace GL3Engine {
                 return dynamic_cast<T*>(handles[name]());
             }
     };
-
 
 #define DECLARE_CTYPE(type) \
     struct C##type##InitBlock { \
