@@ -8,7 +8,7 @@ namespace GL3Engine {
 
     // ---------- TextRenderer
     void TextRenderer::setPos(const FPoint3D& pos) {
-
+        MatMatrix::translate(transform, pos);
     }
     void TextRenderer::setSize(GLfloat size) {
         MatMatrix::scale(transform, {
@@ -89,16 +89,20 @@ namespace GL3Engine {
                 col);
     }
 
-    void TextRenderer::draw(MatrixStack& matrix, GLint, Shader* effect) {
-        if (!font || !effect || !shape)
+    void TextRenderer::passToShader(MatrixStack& matrix, Shader* effect) {
+        if (!effect)
             return;
 
-        if (effect) {
-            effect->setUniform("matrix.mvp",
-                    matrix.vp_matrix * matrix.model * transform);
-            effect->setUniform("col", col);
-            effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
-        }
+        effect->setUniform("matrix.mvp",
+                matrix.vp_matrix * matrix.model * transform);
+        effect->setUniform("col", col);
+        effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
+    }
+    void TextRenderer::draw(MatrixStack& matrix, GLint, Shader* effect) {
+        if (!font || !shape)
+            return;
+
+        passToShader(matrix, effect);
         glDisable(GL_CULL_FACE);
         {
             glBindVertexArray(shape->getVAO());

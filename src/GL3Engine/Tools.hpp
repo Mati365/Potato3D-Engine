@@ -10,6 +10,8 @@
 #include <memory>
 #include <assert.h>
 
+#include <type_traits>
+
 namespace Tools {
     using namespace std;
 
@@ -20,7 +22,7 @@ namespace Tools {
 #define IS_SET_FLAG(num, flag) ((num) & (flag))
 
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
-#define IS_IN_MAP(map, key) (map.find(key) != map.end())
+#define IS_IN_MAP(map, key) (map.find(key) != map.cend())
 
     extern vector<string> tokenize(const string&, char);
 
@@ -85,6 +87,10 @@ namespace Tools {
     extern void showGLErrors();
 
     template<typename T> class Singleton {
+        protected:
+            Singleton() {
+            }
+
         public:
             static inline T& getInstance() {
                 static T t;

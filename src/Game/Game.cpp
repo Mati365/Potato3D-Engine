@@ -24,7 +24,7 @@ namespace Game {
                 Light {
                         0.0, 0.5, 0.0, 0.0, // Pos
                         1.0, 1.0, 1.0, 1.0, // Specular col
-                        0.0, 0.0, 1.0, 1.0, // Diffuse col
+                        1.0, 1.0, 1.0, 1.0, // Diffuse col
 
                         1.0,
                         2.0,
@@ -41,7 +41,7 @@ namespace Game {
                         1.0,
                         2.0,
                         1.0,
-                        Light::ON
+                        Light::OFF
                 });
     }
     void GameScreen::render() {
@@ -51,9 +51,9 @@ namespace Game {
         LightManager::getInstance().update();
         mesh_shader->bindToSlot("LightBlock", LightManager::BINDING_POINT);
 
+        matrix.switchMode(MatrixStack::_3D);
         fbo->begin();
         mesh_shader->begin();
-        matrix.switchMode(MatrixStack::_3D);
 
         if (!box)
             box =
@@ -88,11 +88,13 @@ namespace Game {
 
             box->draw(matrix, GL_TRIANGLES, mesh_shader);
         }
-        glUseProgram(0);
         fbo->end();
 
         fbo_shader->begin();
         fbo->draw(matrix, 0, fbo_shader);
+
+        matrix.switchMode(MatrixStack::_2D);
+
     }
 
     void GameScreen::getKeyEvent(SDL_Keycode key) {

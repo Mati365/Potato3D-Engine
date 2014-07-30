@@ -17,9 +17,8 @@ namespace GL3Engine {
                 };
             }
     };
-
     class TextRenderer : public Drawable {
-            static constexpr size_t BUFFER_SIZE    =   128;
+            static constexpr size_t BUFFER_SIZE = 128;
 
         private:
             Color col = { 1.f, 1.f, 1.f, 1.f };
@@ -46,8 +45,10 @@ namespace GL3Engine {
             ~TextRenderer() {
                 safeDelete(shape, false);
             }
-        private:
+
+        protected:
             void create();
+            void passToShader(MatrixStack&, Shader*);
     };
 }
 

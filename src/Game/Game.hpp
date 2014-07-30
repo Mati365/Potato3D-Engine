@@ -10,7 +10,8 @@ namespace Game {
     class GameScreen : public Renderer {
         public:
             enum Flags {
-                DRAW_AXIS = 1 << 1
+                DRAW_AXIS = 1 << 1,
+                DRAW_RENDERER_INFO = 1 << 2
             };
             GLuint flags = 0;
 

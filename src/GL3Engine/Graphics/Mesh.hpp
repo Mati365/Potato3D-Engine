@@ -24,8 +24,7 @@ namespace GL3Engine {
     class Drawable {
         public:
             virtual void draw(MatrixStack&, GLint, Shader*)=0;
-            virtual void passToShader(MatrixStack&, Shader*) {
-            }
+            virtual void passToShader(MatrixStack&, Shader*)=0;
 
             virtual ~Drawable() {
             }
@@ -177,8 +176,10 @@ namespace GL3Engine {
             ~FBO() {
                 glDeleteFramebuffers(1, &fbo_handle);
             }
-        private:
+
+        protected:
             void create();
+            void passToShader(MatrixStack&, Shader*);
     };
 }
 

@@ -58,10 +58,13 @@ namespace GL3Engine {
                 }));
     }
 
-    void FBO::draw(MatrixStack&, GLint, Shader* effect) {
+    void FBO::passToShader(MatrixStack&, Shader* effect) {
         if (effect)
             effect->setUniform(GL_TEXTURE_2D, "texture", 0,
                     tex.getHandle());
+    }
+    void FBO::draw(MatrixStack& stack, GLint, Shader* effect) {
+        passToShader(stack, effect);
 
         glDisable( GL_CULL_FACE);
         glBindVertexArray(quad->getVAO());
@@ -71,6 +74,7 @@ namespace GL3Engine {
         glBindVertexArray(0);
         glEnable( GL_CULL_FACE);
     }
+
     void FBO::begin() {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
         glViewport(0, 0, size.X, size.Y);
