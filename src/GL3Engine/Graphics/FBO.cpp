@@ -1,3 +1,4 @@
+#include "../Resources/Resources.hpp"
 #include "Mesh.hpp"
 
 namespace GL3Engine {
@@ -64,15 +65,20 @@ namespace GL3Engine {
                     tex.getHandle());
     }
     void FBO::draw(MatrixStack& stack, GLint, Shader* effect) {
-        passToShader(stack, effect);
-
-        glDisable( GL_CULL_FACE);
-        glBindVertexArray(quad->getVAO());
+        if(!effect)
+            effect = REQUIRE_RES(Shader, DEFAULT_FBO_SHADER);
+        effect->begin();
         {
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+            passToShader(stack, effect);
+            glDisable( GL_CULL_FACE);
+            glBindVertexArray(quad->getVAO());
+            {
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+            }
+            glBindVertexArray(0);
+            glEnable( GL_CULL_FACE);
         }
-        glBindVertexArray(0);
-        glEnable( GL_CULL_FACE);
+        effect->end();
     }
 
     void FBO::begin() {

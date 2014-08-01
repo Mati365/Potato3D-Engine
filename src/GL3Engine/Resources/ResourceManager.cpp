@@ -3,12 +3,12 @@
 namespace GL3Engine {
     template<typename C>
     C* ResourceManager<C>::getResource(c_str path) {
-        string ext = path.substr(path.find('.') + 1);
-        if (!IS_IN_MAP(loaders, ext))
-             LOG(ERROR, "Unsupported file type!");
-
         if (IS_IN_MAP(resources, path))
             return resources[path].get();
+
+        string ext = path.substr(path.find('.') + 1);
+        if (!IS_IN_MAP(loaders, ext))
+            LOG(ERROR, "Unsupported file type!");
         return registerResource(path, loaders[ext]->load(path));
     }
     template<typename C>

@@ -13,7 +13,6 @@ RM := rm -rf
 -include src/GL3Engine/Window/subdir.mk
 -include src/GL3Engine/Resources/subdir.mk
 -include src/GL3Engine/Graphics/subdir.mk
--include src/GL3Engine/ECS/subdir.mk
 -include src/GL3Engine/subdir.mk
 -include src/subdir.mk
 -include subdir.mk

@@ -29,6 +29,5 @@ src/GL3Engine/Window \
 src/GL3Engine \
 src/GL3Engine/Resources \
 src/GL3Engine/Graphics \
-src/GL3Engine/ECS \
 src \
 

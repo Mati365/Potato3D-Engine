@@ -40,22 +40,14 @@ namespace GL3Engine {
             MATERIALS materials;
 
         public:
-            VAOpolygon(const GL_BUFFER_DATA& vertices,
+            VAOpolygon(
+                    const GL_BUFFER_DATA& vertices,
                     const GL_BUFFER_DATA& indices,
-                    const MATERIALS& _materials)
+                    const Color& _col = { },
+                    const MATERIALS& _materials = { })
                     :
+                      col(_col),
                       materials(_materials) {
-                create(vertices, indices);
-            }
-            VAOpolygon(const GL_BUFFER_DATA& vertices,
-                    const GL_BUFFER_DATA& indices,
-                    const Color& _col)
-                    :
-                      col(_col) {
-                create(vertices, indices);
-            }
-            VAOpolygon(const GL_BUFFER_DATA& vertices,
-                    const GL_BUFFER_DATA& indices) {
                 create(vertices, indices);
             }
 

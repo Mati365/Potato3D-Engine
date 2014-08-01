@@ -46,14 +46,12 @@ namespace Game {
     }
     void GameScreen::render() {
         static Shader* mesh_shader = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER);
-        static Shader* fbo_shader = REQUIRE_RES(Shader, DEFAULT_FBO_SHADER);
 
         LightManager::getInstance().update();
         mesh_shader->bindToSlot("LightBlock", LightManager::BINDING_POINT);
 
         matrix.switchMode(MatrixStack::_3D);
         fbo->begin();
-        mesh_shader->begin();
 
         if (!box)
             box =
@@ -63,7 +61,7 @@ namespace Game {
                                     "mesh/wall/wall.obj"));
 
         if (axis)
-            axis->draw(matrix, GL_LINES, mesh_shader);
+            axis->draw(matrix, GL_LINES, nullptr);
 
         static GLfloat angle = 0.f;
         angle += 0.000005f;
@@ -75,7 +73,7 @@ namespace Game {
                     .mul(MatMatrix::rotate(
                     Tools::toRad<GLfloat>(angle),
                     { 0.f, 1.f, 0.f }));
-            model->draw(matrix, GL_TRIANGLES, mesh_shader);
+            model->draw(matrix, GL_TRIANGLES, nullptr);
         }
         if (box) {
             box->getTransform()
@@ -86,12 +84,10 @@ namespace Game {
                     Tools::toRad<GLfloat>(angle),
                     { 0.f, 1.f, 0.f }));
 
-            box->draw(matrix, GL_TRIANGLES, mesh_shader);
+            box->draw(matrix, GL_TRIANGLES, nullptr);
         }
         fbo->end();
-
-        fbo_shader->begin();
-        fbo->draw(matrix, 0, fbo_shader);
+        fbo->draw(matrix, GL_TRIANGLES, nullptr);
 
         matrix.switchMode(MatrixStack::_2D);
 

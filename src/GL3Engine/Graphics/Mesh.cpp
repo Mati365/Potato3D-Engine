@@ -1,3 +1,5 @@
+#include "../Resources/Resources.hpp"
+
 #include "Mesh.hpp"
 #include "Light.hpp"
 
@@ -46,17 +48,20 @@ namespace GL3Engine {
         matrix.popTransform();
     }
     void Mesh::draw(MatrixStack& matrix, GLint mode, Shader* effect) {
-        if (!shape)
-            return;
-
-        passToShader(matrix, effect);
-        glBindVertexArray(shape->getVAO());
-        if (!shape->usingElementBuffer())
-            glDrawArrays(mode, 0, shape->getVerticesCount());
-        else
-            glDrawElements(mode, shape->getIndicesCount(),
-            GL_UNSIGNED_SHORT, nullptr);
-        glBindVertexArray(0);
+        if (!effect)
+            effect = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER);
+        effect->begin();
+        {
+            passToShader(matrix, effect);
+            glBindVertexArray(shape->getVAO());
+            if (!shape->usingElementBuffer())
+                glDrawArrays(mode, 0, shape->getVerticesCount());
+            else
+                glDrawElements(mode, shape->getIndicesCount(),
+                GL_UNSIGNED_SHORT, nullptr);
+            glBindVertexArray(0);
+        }
+        effect->end();
     }
 }
 

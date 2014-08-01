@@ -152,6 +152,7 @@ namespace GL3Engine {
                         0,
                         GL_STATIC_DRAW
                 },
+                { },
                 materials);
     }
     void OBJloader::releaseMemory() {
