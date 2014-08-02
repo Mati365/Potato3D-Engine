@@ -4,13 +4,16 @@
 #include "Text.hpp"
 
 namespace GL3Engine {
-    class Primitives {
+    class AxisMesh : public Mesh {
         public:
-            static Mesh* genAxis(GLfloat);
+            AxisMesh(GLfloat size = 17.f)
+                    :
+                      Mesh(genAxis(size)) {
+                setRenderMode(GL_LINES);
+            }
 
-            static void printText(Shader*, MatrixStack&, c_str, const FPoint3D&,
-                    GLfloat,
-                    Font* font = nullptr);
+        private:
+            static Shape3D* genAxis(GLfloat);
     };
 }
 

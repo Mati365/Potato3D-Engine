@@ -4,7 +4,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/GL3Engine/Graphics/FBO.cpp \
 ../src/GL3Engine/Graphics/Light.cpp \
 ../src/GL3Engine/Graphics/MatMatrix.cpp \
 ../src/GL3Engine/Graphics/Material.cpp \
@@ -13,13 +12,14 @@ CPP_SRCS += \
 ../src/GL3Engine/Graphics/Mesh.cpp \
 ../src/GL3Engine/Graphics/Point.cpp \
 ../src/GL3Engine/Graphics/Primitives.cpp \
+../src/GL3Engine/Graphics/RenderQuad.cpp \
+../src/GL3Engine/Graphics/SceneManager.cpp \
 ../src/GL3Engine/Graphics/Shader.cpp \
 ../src/GL3Engine/Graphics/Text.cpp \
 ../src/GL3Engine/Graphics/Texture.cpp \
 ../src/GL3Engine/Graphics/VAOpolygon.cpp 
 
 OBJS += \
-./src/GL3Engine/Graphics/FBO.o \
 ./src/GL3Engine/Graphics/Light.o \
 ./src/GL3Engine/Graphics/MatMatrix.o \
 ./src/GL3Engine/Graphics/Material.o \
@@ -28,13 +28,14 @@ OBJS += \
 ./src/GL3Engine/Graphics/Mesh.o \
 ./src/GL3Engine/Graphics/Point.o \
 ./src/GL3Engine/Graphics/Primitives.o \
+./src/GL3Engine/Graphics/RenderQuad.o \
+./src/GL3Engine/Graphics/SceneManager.o \
 ./src/GL3Engine/Graphics/Shader.o \
 ./src/GL3Engine/Graphics/Text.o \
 ./src/GL3Engine/Graphics/Texture.o \
 ./src/GL3Engine/Graphics/VAOpolygon.o 
 
 CPP_DEPS += \
-./src/GL3Engine/Graphics/FBO.d \
 ./src/GL3Engine/Graphics/Light.d \
 ./src/GL3Engine/Graphics/MatMatrix.d \
 ./src/GL3Engine/Graphics/Material.d \
@@ -43,6 +44,8 @@ CPP_DEPS += \
 ./src/GL3Engine/Graphics/Mesh.d \
 ./src/GL3Engine/Graphics/Point.d \
 ./src/GL3Engine/Graphics/Primitives.d \
+./src/GL3Engine/Graphics/RenderQuad.d \
+./src/GL3Engine/Graphics/SceneManager.d \
 ./src/GL3Engine/Graphics/Shader.d \
 ./src/GL3Engine/Graphics/Text.d \
 ./src/GL3Engine/Graphics/Texture.d \

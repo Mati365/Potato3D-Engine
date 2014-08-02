@@ -1,4 +1,5 @@
-#include "Matrix.hpp"
+#include "MatrixStack.hpp"
+#include "Camera.hpp"
 
 namespace GL3Engine {
     MatrixStack::MatrixStack(const FPoint2D& _resolution)
@@ -6,6 +7,7 @@ namespace GL3Engine {
               resolution(_resolution) {
         switchMode(Mode::_3D);
     }
+
     void MatrixStack::switchMode(Mode mode) {
         switch (mode) {
             case _3D: {
@@ -41,11 +43,11 @@ namespace GL3Engine {
         }
     }
     void MatrixStack::updateCameraCoords() {
-        if (cam.empty() || cam.size() < active_cam)
+        if (!active_cam)
             return;
         view = MatMatrix::lookAt(
-                cam[active_cam]->pos,
-                cam[active_cam]->target,
+                active_cam->getPos(),
+                active_cam->getTarget(),
                 { 0, 1, 0 });
         vp_matrix = projection * view;
     }

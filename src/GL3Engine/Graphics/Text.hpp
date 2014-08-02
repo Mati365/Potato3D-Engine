@@ -1,5 +1,6 @@
 #ifndef TEXT_HPP_
 #define TEXT_HPP_
+#include "../Resources/Resources.hpp"
 #include "Mesh.hpp"
 
 namespace GL3Engine {
@@ -7,7 +8,7 @@ namespace GL3Engine {
         public:
             Font(Texture* _tex)
                     :
-                      Tile(_tex, IPoint2D(32, 3)) {
+                      Tile(_tex, IPoint2D(32, 4)) {
             }
 
             inline TILE_ITER getCharacter(char c) const {
@@ -17,38 +18,36 @@ namespace GL3Engine {
                 };
             }
     };
-    class TextRenderer : public Drawable {
+    class Text : public Node {
             static constexpr size_t BUFFER_SIZE = 128;
 
         private:
             Color col = { 1.f, 1.f, 1.f, 1.f };
-            Font* font = nullptr;
+            unique_ptr<Font> font = unique_ptr < Font > (
+                    new Font(
+                            REQUIRE_RES(Texture, FONT_TEXTURE)));
 
             Shape2D* shape = nullptr;
-            Mat4 transform = MatMatrix::identity();
 
         public:
-            TextRenderer() {
-                create();
+            Text() {
+                createBuffer();
             }
 
-            void setPos(const FPoint3D&);
-            void setSize(GLfloat);
-            void setFont(Font* _font) {
+            Text& setPos(const FPoint3D&);
+            Text& setSize(GLfloat);
+            Text& setFont(Font* _font) {
                 if (_font)
-                    font = _font;
+                    font.reset(_font);
+                return *this;
             }
-            void setText(const string&);
+            Text& setText(c_str);
 
-            void draw(MatrixStack&, GLint, Shader*);
-
-            ~TextRenderer() {
-                safeDelete(shape, false);
-            }
+            void draw();
 
         protected:
-            void create();
-            void passToShader(MatrixStack&, Shader*);
+            void createBuffer();
+            void passToShader();
     };
 }
 

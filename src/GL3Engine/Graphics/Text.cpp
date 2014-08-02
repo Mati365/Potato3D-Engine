@@ -7,18 +7,21 @@ namespace GL3Engine {
     using namespace IO;
 
     // ---------- TextRenderer
-    void TextRenderer::setPos(const FPoint3D& pos) {
-        MatMatrix::translate(transform, pos);
+    Text& Text::setPos(const FPoint3D& pos) {
+        MatMatrix::translate(this->transform.model, pos);
+        return *this;
     }
-    void TextRenderer::setSize(GLfloat size) {
-        MatMatrix::scale(transform, {
-                font->getCellSize().X * font->getCells().X * size,
-                font->getCellSize().X * font->getCells().Y * size,
-                1.f });
+    Text& Text::setSize(GLfloat size) {
+        MatMatrix::scale(
+                this->transform.model, {
+                        size,
+                        size / font->getCells().Y,
+                        1.f });
+        return *this;
     }
-    void TextRenderer::setText(const string& text) {
+    Text& Text::setText(const string& text) {
         if (!font)
-            return;
+            return *this;
 
         vector<Vertex2f> vertex_buffer;
         vector<GLuint> index_buffer;
@@ -68,9 +71,9 @@ namespace GL3Engine {
                         0,
                         GL_DYNAMIC_DRAW
                 });
+        return *this;
     }
-    void TextRenderer::create() {
-        font = new Font(REQUIRE_RES(Texture, FONT_TEXTURE));
+    void Text::createBuffer() {
         shape = new Shape2D(
                 {
                         nullptr,
@@ -89,30 +92,37 @@ namespace GL3Engine {
                 col);
     }
 
-    void TextRenderer::passToShader(MatrixStack& matrix, Shader* effect) {
-        if (!effect)
-            return;
-
-        effect->setUniform("matrix.mvp",
-                matrix.vp_matrix * matrix.model * transform);
-        effect->setUniform("col", col);
-        effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
+    void Text::passToShader() {
+        MatrixStack& matrix = scene->getWorldMatrix();
+        assert(effect);
+        {
+            effect->setUniform("matrix.mvp",
+                    matrix.vp_matrix * matrix.model * transform.model);
+            effect->setUniform("col", col);
+            effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
+        }
     }
-    void TextRenderer::draw(MatrixStack& matrix, GLint, Shader* effect) {
+    void Text::draw() {
         if (!font || !shape)
             return;
 
-        passToShader(matrix, effect);
-        glDisable(GL_CULL_FACE);
+        if (!effect)
+            effect = REQUIRE_RES(Shader, DEFAULT_TEXT_SHADER);
+        effect->begin();
         {
-            glBindVertexArray(shape->getVAO());
-            glDrawElements(GL_TRIANGLES,
-                    shape->getIndicesCount(),
-                    GL_UNSIGNED_INT,
-                    nullptr);
-            glBindVertexArray(0);
+            passToShader();
+            glDisable(GL_CULL_FACE);
+            {
+                glBindVertexArray(shape->getVAO());
+                glDrawElements(
+                GL_TRIANGLES,
+                        shape->getIndicesCount(),
+                        GL_UNSIGNED_INT,
+                        nullptr);
+                glBindVertexArray(0);
+            }
+            glEnable(GL_CULL_FACE);
         }
-        glEnable(GL_CULL_FACE);
-        MatMatrix::identity(1, &transform);
+        effect->end();
     }
 }

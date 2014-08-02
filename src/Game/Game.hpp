@@ -3,6 +3,8 @@
 #include "Map.hpp"
 
 #include "../GL3Engine/Graphics/Text.hpp"
+#include "../GL3Engine/Graphics/Scene.hpp"
+#include "../GL3Engine/Graphics/Camera.hpp"
 
 namespace Game {
     using namespace GL3Engine;
@@ -18,15 +20,8 @@ namespace Game {
         private:
             Window* wnd;
 
-            unique_ptr<Mesh> axis = nullptr;
-            Mesh* model = nullptr, *box = nullptr;
-            FBO* fbo = nullptr;
-
-            MatrixStack matrix;
-            Camera cam = {
-                    Vec4 { 0.f, .5f, 1.f, 1.f }, // wysokosc gracza to 1,5m
-                    Vec4 { 0.f, .5f, -2.f, 1.f }
-            };
+            SceneManager scene;
+            Camera* cam = nullptr;
 
         public:
             GameScreen(Window*);

@@ -4,7 +4,7 @@
 #include "../Resources/Resources.hpp"
 
 namespace GL3Engine {
-    Mesh* Primitives::genAxis(GLfloat size) {
+    Shape3D* AxisMesh::genAxis(GLfloat size) {
         if (!size % 2)
             size++;
         vector<Vertex4f> sheet;
@@ -51,23 +51,7 @@ namespace GL3Engine {
                         0,
                         GL_STATIC_DRAW
                 },
-                { .1f, .1f, .1f, 1.f });
-        return new Mesh(shape);
-    }
-    void Primitives::printText(Shader* effect,
-            MatrixStack& stack, c_str text,
-            const FPoint3D& pos, GLfloat size,
-            Font* font) {
-        static TextRenderer renderer;
-        renderer.setText(text);
-        renderer.setSize(size);
-        renderer.setFont(font);
-
-        stack.pushTransform();
-        {
-            MatMatrix::translate(stack.model, pos);
-            renderer.draw(stack, 0, effect);
-        }
-        stack.popTransform();
+                { .15f, .15f, .15f, 1.f });
+        return shape;
     }
 }

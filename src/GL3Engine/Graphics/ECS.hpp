@@ -5,7 +5,6 @@
 #include <map>
 #include <assert.h>
 #include <algorithm>
-#include <boost/any.hpp>
 #include <typeindex>
 
 #include "Types.hpp"
@@ -13,7 +12,6 @@
 
 namespace GL3Engine {
     using namespace Tools;
-    using namespace boost;
 
     class Component {
         public:
@@ -130,7 +128,7 @@ namespace GL3Engine {
                 return entities;
             }
 
-            virtual void logic(Entity* c) = 0;
+            virtual void logic(Entity*) = 0;
             virtual void update() {
                 for (auto* c : entities)
                     logic(c);
@@ -244,7 +242,6 @@ namespace GL3Engine {
         S##type##InitBlock() { CWorld::getInstance().regSystem<type>(); } \
     }; \
     static S##type##InitBlock   __st_block_##type;
-
 #define REQUIRE_CTYPE_OBJ(name) \
     CTypeManager::getInstance().operator[]<>(name)
 }

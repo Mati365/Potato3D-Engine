@@ -2,8 +2,6 @@
 #define EFFECTS_HPP_
 #include <array>
 #include <map>
-#include <GL/glew.h>
-#include <GL/glu.h>
 
 #include "Texture.hpp"
 
@@ -36,7 +34,8 @@ namespace GL3Engine {
 
             void setUniform(c_str, GLfloat);
             void setUniform(c_str, GLint);
-            template<GLuint len> void setUniform(c_str variable,
+            template<GLuint len> void setUniform(
+                    c_str variable,
                     const array<GLfloat, len>& array) {
                 GLint loc = UNIFORM_LOC(variable);
 #define ARRAY_UNIFORM(len) \

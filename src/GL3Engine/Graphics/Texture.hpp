@@ -44,6 +44,12 @@ namespace GL3Engine {
             }
 
         private:
+            Texture(const Texture&) {
+            }
+            Texture& operator=(const Texture&) {
+                return *this;
+            }
+
             void configure();
     };
     class TextureArray {
@@ -130,7 +136,7 @@ namespace GL3Engine {
             string name;
             GLuint ubo = 0;
 
-            shared_ptr<TextureArray> tex_array;
+            std::shared_ptr<TextureArray> tex_array;
 
             Material() {
             }

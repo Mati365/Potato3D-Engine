@@ -5,9 +5,12 @@
 #include <math.h>
 #include <array>
 #include <utility>
+#include <GL/glew.h>
+#include <GL/glu.h>
 
 #include "../Tools.hpp"
 #include "Dimensions.hpp"
+#include "ECS.hpp"
 
 namespace GL3Engine {
     using namespace std;
@@ -73,7 +76,7 @@ namespace GL3Engine {
     using FMat = Matrix<GLfloat>;
 
     template<typename T> Matrix<T> operator*(const Matrix<T>& l,
-            const Matrix<T>& r) {
+                                             const Matrix<T>& r) {
         Matrix<T> temp = l;
         temp *= r;
         return temp;
@@ -107,60 +110,6 @@ namespace GL3Engine {
     using Vec4 = t_Matrix<GLfloat, 1, 4>;
     using Vec3 = t_Matrix<GLfloat, 1, 3>;
     using Vec2 = t_Matrix<GLfloat, 1, 2>;
-
-    /** Stos */
-    struct Camera {
-            Vec4 pos;
-            Vec4 target;
-    };
-    class MatrixStack {
-        public:
-            enum Mode {
-                _3D,
-                _2D
-            };
-            struct M_STACK_ARRAY {
-                    GLfloat array[16];
-            };
-
-        private:
-            vector<Camera*> cam;
-            GLuint active_cam = 0;
-
-            list<M_STACK_ARRAY> stack; // pushTransform i popTransform
-            FPoint2D resolution;
-
-        public:
-            Mat4 projection,
-                    view,
-                    model,
-                    vp_matrix; // cache z mnożenia view * projection
-
-            MatrixStack(const FPoint2D&);
-
-            void switchMode(Mode);
-            void updateCameraCoords();
-
-            inline GLuint addCam(Camera* _cam) {
-                cam.push_back(_cam);
-                return cam.size() - 1;
-            }
-            inline void selectCam(GLint index) {
-                active_cam = index;
-                updateCameraCoords();
-            }
-
-            inline Camera* getActiveCamera() {
-                return cam[active_cam];
-            }
-            const FPoint2D& getResolution() const {
-                return resolution;
-            }
-
-            void pushTransform();
-            void popTransform();
-            void loadMatrix(const Mat4&);
-    };
 
     /** Obliczenia */
     class MatMatrix {
@@ -199,7 +148,7 @@ namespace GL3Engine {
              */
             static Mat4 perspective(GLfloat, GLfloat, GLfloat, GLfloat);
             static Mat4 lookAt(const FPoint3D&, const FPoint3D&,
-                    const FPoint3D&);
+                               const FPoint3D&);
             static Mat4 orthof(const array<FPoint2D, 3>&);
 
             /** Obliczenia dla normal matrix */
@@ -212,6 +161,19 @@ namespace GL3Engine {
             /** Row Major */
             static inline void mul(Vec4& v, const Mat4& m) {
                 v = m * v;
+            }
+    };
+    class Transform {
+        public:
+            Mat4 model = MatMatrix::identity();
+
+            Transform& mul(const Mat4& m) {
+                model *= m;
+                return *this;
+            }
+            Transform& identity() {
+                MatMatrix::identity(1, &model);
+                return *this;
             }
     };
 }
