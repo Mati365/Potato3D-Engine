@@ -27,9 +27,10 @@ namespace GL3Engine {
     };
     class RenderQuad : public RenderTarget {
         private:
-            GLuint fbo_handle = 0;
+            GLuint fbo_handle = 0,
+                    depth_render_buf = 0;
 
-            unique_ptr<Texture> tex;
+            unique_ptr<Texture> color_tex, depth_tex;
             unique_ptr<Shape2D> quad;
 
         public:
@@ -49,8 +50,11 @@ namespace GL3Engine {
             GLuint getFBO() const {
                 return fbo_handle;
             }
-            Texture& getTexture() {
-                return *tex.get();
+            Texture& getColorTexture() {
+                return *color_tex.get();
+            }
+            Texture& getDepthTexture() {
+                return *depth_tex.get();
             }
 
             ~RenderQuad() {

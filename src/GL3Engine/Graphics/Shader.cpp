@@ -47,18 +47,20 @@ namespace GL3Engine {
     }
 
     /** UNIFORMY */
-    void Shader::setUniform(c_str variable, GLfloat value) {
+    Shader& Shader::setUniform(c_str variable, GLfloat value) {
         glProgramUniform1f(program,
                 UNIFORM_LOC(variable),
                 value);
+        return *this;
     }
-    void Shader::setUniform(c_str variable, GLint value) {
+    Shader& Shader::setUniform(c_str variable, GLint value) {
         glProgramUniform1i(program,
                 UNIFORM_LOC(variable),
                 value);
+        return *this;
     }
-    void Shader::setUniform(c_str variable,
-            const Matrix<GLfloat>& value) {
+    Shader& Shader::setUniform(c_str variable,
+                               const Matrix<GLfloat>& value) {
         GLint loc = UNIFORM_LOC(variable);
         if (value.rows == value.cols) {
             GLuint size = value.rows * value.cols;
@@ -97,15 +99,17 @@ namespace GL3Engine {
                     break;
             }
         }
+        return *this;
     }
 
-    void Shader::setUniform(GLint texture_type, c_str tex, GLint flag,
-            GLuint handle) {
+    Shader& Shader::setUniform(GLint texture_type, c_str tex, GLint flag,
+                               GLuint handle) {
         glActiveTexture(GL_TEXTURE0 + flag);
         glBindTexture(texture_type, handle);
         glProgramUniform1i(program, UNIFORM_LOC(tex), flag);
+        return *this;
     }
-    void Shader::setUniform(c_str variable, const MATERIALS& material) {
+    Shader& Shader::setUniform(c_str variable, const MATERIALS& material) {
         static char array_variable[50], col_buffer[15];
         for (GLuint i = 0; i < material.size(); ++i) {
             Material* mtl = material[i];
@@ -127,6 +131,18 @@ namespace GL3Engine {
         }
         setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
                 material[0]->tex_array->getHandle());
+        return *this;
+    }
+    Shader& Shader::setUniform(
+                               c_str variable,
+                               const GLfloat* data,
+                               GLuint size) {
+        glProgramUniform1fv(
+                program,
+                UNIFORM_LOC(variable),
+                size,
+                data);
+        return *this;
     }
 
     GLuint Shader::bindToSlot(c_str variable, GLuint binding_point) {
@@ -149,8 +165,8 @@ namespace GL3Engine {
         return block_index;
     }
     GLuint Shader::setUBO(c_str variable, void* data,
-            GLuint draw_type,
-            GLuint binding_point) {
+                          GLuint draw_type,
+                          GLuint binding_point) {
         GLuint block_index = bindToSlot(variable, binding_point);
         GLint block_size = 0;
 

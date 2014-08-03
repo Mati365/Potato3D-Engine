@@ -4,34 +4,29 @@
 namespace GL3Engine {
     RenderQuad::RenderQuad(const IPoint2D& _size)
             :
-              RenderTarget(_size),
-              tex(new Texture(_size)) {
-        create();
+              RenderTarget(_size) {
+        setSize(_size);
     }
+
     void RenderQuad::create() {
         if (fbo_handle)
             glDeleteFramebuffers(1, &fbo_handle);
-
         // FBO
         glGenFramebuffers(1, &fbo_handle);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
         {
             // Depth buffer
-            GLuint depth_render_buf;
-            glGenRenderbuffers(1, &depth_render_buf);
-            glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buf);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24,
-                    size.X, size.Y);
-            glBindRenderbuffer(GL_RENDERBUFFER, 0);
             {
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                GL_RENDERBUFFER, depth_render_buf);
+                glFramebufferTexture2D(GL_FRAMEBUFFER,
+                GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+                        depth_tex->getHandle(), 0);
             }
+
             // Texture
             {
                 glFramebufferTexture2D(GL_FRAMEBUFFER,
                 GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                        tex->getHandle(), 0);
+                        color_tex->getHandle(), 0);
             }
             assert(
                     glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
@@ -63,13 +58,15 @@ namespace GL3Engine {
     }
 
     void RenderQuad::passToShader() {
-        effect->setUniform(GL_TEXTURE_2D, "texture", 0,
-                tex->getHandle());
+        effect->setUniform(GL_TEXTURE_2D,
+                "color_texture", 0,
+                color_tex->getHandle())
+                .setUniform(GL_TEXTURE_2D,
+                "depth_texture", 1,
+                depth_tex->getHandle());
     }
     void RenderQuad::draw() {
-        if (!effect)
-            effect = REQUIRE_RES(Shader, DEFAULT_FBO_SHADER);
-        effect->begin();
+        assert(effect);
         {
             passToShader();
             glDisable( GL_CULL_FACE);
@@ -80,7 +77,6 @@ namespace GL3Engine {
             glBindVertexArray(0);
             glEnable( GL_CULL_FACE);
         }
-        effect->end();
         scene->setRenderTarget(this);
     }
 
@@ -96,7 +92,11 @@ namespace GL3Engine {
 
     RenderQuad& RenderQuad::setSize(const IPoint2D& size) {
         this->size = size;
-        this->tex.reset(new Texture(size));
+        this->color_tex.reset(new Texture(size));
+        this->depth_tex.reset(new Texture(size, GL_DEPTH_COMPONENT, GL_FLOAT));
+
+        if (!effect)
+            setEffect(REQUIRE_RES(Shader, DEFAULT_FBO_SHADER));
         create();
         return *this;
     }

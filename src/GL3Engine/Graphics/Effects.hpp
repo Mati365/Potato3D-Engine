@@ -25,16 +25,17 @@ namespace GL3Engine {
             }
 
             /** Uniformy */
-            void setUniform(GLint, c_str, GLint, GLuint);
-            void setUniform(c_str, const vector<Material*>&);
+            Shader& setUniform(GLint, c_str, GLint, GLuint);
+            Shader& setUniform(c_str, const vector<Material*>&);
 
             GLuint setUBO(c_str, void*, GLuint, GLuint);
             GLuint bindToSlot(c_str, GLuint);
             void changeUBOData(GLuint, void*, size_t);
 
-            void setUniform(c_str, GLfloat);
-            void setUniform(c_str, GLint);
-            template<GLuint len> void setUniform(
+            Shader& setUniform(c_str, GLfloat);
+            Shader& setUniform(c_str, GLint);
+
+            template<GLuint len> Shader& setUniform(
                     c_str variable,
                     const array<GLfloat, len>& array) {
                 GLint loc = UNIFORM_LOC(variable);
@@ -52,15 +53,19 @@ namespace GL3Engine {
                         ARRAY_UNIFORM(4);
                         break;
                 }
+                return *this;
             }
+            Shader& setUniform(c_str, const GLfloat*, GLuint);
 
-            void setUniform(c_str, const Matrix<GLfloat>&);
-            inline void setUniform(c_str variable, const FPoint3D& p) {
+            Shader& setUniform(c_str, const Matrix<GLfloat>&);
+            inline Shader& setUniform(c_str variable, const FPoint3D& p) {
                 glProgramUniform4f(program, UNIFORM_LOC(variable), p.X, p.Y,
                         p.Z, 1.f);
+                return *this;
             }
-            inline void setUniform(c_str variable, const Color& p) {
+            inline Shader& setUniform(c_str variable, const Color& p) {
                 setUniform<4>(variable, p.toArray());
+                return *this;
             }
 
             inline GLint getProgram() const {

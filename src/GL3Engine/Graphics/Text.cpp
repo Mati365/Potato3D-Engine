@@ -6,7 +6,11 @@
 namespace GL3Engine {
     using namespace IO;
 
-    // ---------- TextRenderer
+    Text::Text() {
+        setEffect(REQUIRE_RES(Shader, DEFAULT_TEXT_SHADER));
+        createBuffer();
+    }
+
     Text& Text::setPos(const FPoint3D& pos) {
         MatMatrix::translate(this->transform.model, pos);
         return *this;
@@ -96,19 +100,14 @@ namespace GL3Engine {
         MatrixStack& matrix = scene->getWorldMatrix();
         assert(effect);
         {
-            effect->setUniform("matrix.mvp",
+            effect->setUniform("col", col)
+                    .setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle())
+                    .setUniform("matrix.mvp",
                     matrix.vp_matrix * matrix.model * transform.model);
-            effect->setUniform("col", col);
-            effect->setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle());
         }
     }
     void Text::draw() {
-        if (!font || !shape)
-            return;
-
-        if (!effect)
-            effect = REQUIRE_RES(Shader, DEFAULT_TEXT_SHADER);
-        effect->begin();
+        assert(font && shape && effect);
         {
             passToShader();
             glDisable(GL_CULL_FACE);
@@ -123,6 +122,5 @@ namespace GL3Engine {
             }
             glEnable(GL_CULL_FACE);
         }
-        effect->end();
     }
 }

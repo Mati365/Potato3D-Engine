@@ -15,16 +15,17 @@ namespace GL3Engine {
     Texture::Texture(const string& path) {
         loadTexture(path);
     }
-    Texture::Texture(const IPoint2D& size) {
-        generate(size);
+    Texture::Texture(const IPoint2D& size, GLenum type, GLenum bytes) {
+        generate(size, type, bytes);
     }
 
-    void Texture::generate(const IPoint2D& size) {
+    void Texture::generate(const IPoint2D& size, GLenum type, GLenum bytes) {
         glGenTextures(1, &handle);
         glBindTexture(GL_TEXTURE_2D, handle);
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.X, size.Y, 0, GL_RGBA,
-            GL_UNSIGNED_BYTE, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0,
+                    type, size.X, size.Y,
+                    0, type, bytes, 0);
         }
         glBindTexture(GL_TEXTURE_2D, 0);
         configure();

@@ -30,9 +30,7 @@ namespace GL3Engine {
             Shape2D* shape = nullptr;
 
         public:
-            Text() {
-                createBuffer();
-            }
+            Text();
 
             Text& setPos(const FPoint3D&);
             Text& setSize(GLfloat);

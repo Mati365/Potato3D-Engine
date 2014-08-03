@@ -10,6 +10,7 @@ CPP_SRCS += \
 ../src/GL3Engine/Graphics/Matrix.cpp \
 ../src/GL3Engine/Graphics/MatrixStack.cpp \
 ../src/GL3Engine/Graphics/Mesh.cpp \
+../src/GL3Engine/Graphics/Node.cpp \
 ../src/GL3Engine/Graphics/Point.cpp \
 ../src/GL3Engine/Graphics/Primitives.cpp \
 ../src/GL3Engine/Graphics/RenderQuad.cpp \
@@ -26,6 +27,7 @@ OBJS += \
 ./src/GL3Engine/Graphics/Matrix.o \
 ./src/GL3Engine/Graphics/MatrixStack.o \
 ./src/GL3Engine/Graphics/Mesh.o \
+./src/GL3Engine/Graphics/Node.o \
 ./src/GL3Engine/Graphics/Point.o \
 ./src/GL3Engine/Graphics/Primitives.o \
 ./src/GL3Engine/Graphics/RenderQuad.o \
@@ -42,6 +44,7 @@ CPP_DEPS += \
 ./src/GL3Engine/Graphics/Matrix.d \
 ./src/GL3Engine/Graphics/MatrixStack.d \
 ./src/GL3Engine/Graphics/Mesh.d \
+./src/GL3Engine/Graphics/Node.d \
 ./src/GL3Engine/Graphics/Point.d \
 ./src/GL3Engine/Graphics/Primitives.d \
 ./src/GL3Engine/Graphics/RenderQuad.d \

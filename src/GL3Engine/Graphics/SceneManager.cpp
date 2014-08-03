@@ -9,11 +9,11 @@ namespace GL3Engine {
             world_matrix.switchMode(MatrixStack::_3D);
             for (auto& node : nodes)
                 if (node.get() != target)
-                    node.get()->draw();
+                    node.get()->update();
         }
         if (target) {
             target->end();
-            target->draw();
+            target->update();
         }
     }
 }

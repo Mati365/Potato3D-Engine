@@ -35,10 +35,9 @@ namespace Game {
         scene.createSceneNode<Text>()
                 .setText("Test czcionek!")
                 .setPos( { 0.f, 0.5f, 0.f })
-                .setSize(4.f);
+                .setSize(4.f)
+                .setShaderParam("blur", { 1.f / 420.f });
 
-        //RenderQuad* fbo = new RenderQuad({ 420, 320});
-        //scene.addSceneNode(fbo);
         scene.createSceneNode<RenderQuad>()
                 .setSize(scene.getRenderResolution());
     }

@@ -27,10 +27,12 @@ namespace GL3Engine {
                       Texture(_path) {
                 flags = _flags;
             }
-            Texture(const IPoint2D&);
+            Texture(const IPoint2D&,
+                    GLenum type = GL_RGBA,
+                    GLenum bytes = GL_UNSIGNED_BYTE);
 
             void loadTexture(const string&);
-            void generate(const IPoint2D&);
+            void generate(const IPoint2D&, GLenum, GLenum);
 
             GLuint getHandle() const {
                 return handle;
