@@ -35,11 +35,11 @@ namespace Game {
         scene.createSceneNode<Text>()
                 .setText("Test czcionek!")
                 .setPos( { 0.f, 0.5f, 0.f })
-                .setSize(4.f)
-                .setShaderParam("blur", { 1.f / 420.f });
+                .setSize(4.f);
 
         scene.createSceneNode<RenderQuad>()
-                .setSize(scene.getRenderResolution());
+                .setSize(scene.getRenderResolution())
+                .setShaderParam("blur", { 2.f / 420.f });
     }
     void GameScreen::render() {
         scene.draw();
