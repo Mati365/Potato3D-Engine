@@ -22,7 +22,9 @@ src/3D\ engine.d: ../src/3D\ engine.cpp ../src/Game/Game.hpp \
  ../src/Game/../GL3Engine/Graphics/Text.hpp \
  ../src/Game/../GL3Engine/Graphics/Scene.hpp \
  ../src/Game/../GL3Engine/Graphics/Camera.hpp \
- ../src/Game/../GL3Engine/Graphics/Mesh.hpp
+ ../src/Game/../GL3Engine/Graphics/Mesh.hpp \
+ ../src/Game/../GL3Engine/Graphics/RenderTarget.hpp \
+ ../src/Game/../GL3Engine/Graphics/Scene.hpp
 
 ../src/Game/Game.hpp:
 
@@ -75,3 +77,7 @@ src/3D\ engine.d: ../src/3D\ engine.cpp ../src/Game/Game.hpp \
 ../src/Game/../GL3Engine/Graphics/Camera.hpp:
 
 ../src/Game/../GL3Engine/Graphics/Mesh.hpp:
+
+../src/Game/../GL3Engine/Graphics/RenderTarget.hpp:
+
+../src/Game/../GL3Engine/Graphics/Scene.hpp:

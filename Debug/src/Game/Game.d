@@ -23,10 +23,10 @@ src/Game/Game.d: ../src/Game/Game.cpp ../src/Game/Game.hpp \
  ../src/Game/../GL3Engine/Graphics/Scene.hpp \
  ../src/Game/../GL3Engine/Graphics/Camera.hpp \
  ../src/Game/../GL3Engine/Graphics/Mesh.hpp \
- ../src/Game/../GL3Engine/Resources/Resources.hpp \
- ../src/Game/../GL3Engine/Graphics/Light.hpp \
+ ../src/Game/../GL3Engine/Graphics/RenderTarget.hpp \
  ../src/Game/../GL3Engine/Graphics/Scene.hpp \
- ../src/Game/../GL3Engine/Graphics/RenderTarget.hpp
+ ../src/Game/../GL3Engine/Resources/Resources.hpp \
+ ../src/Game/../GL3Engine/Graphics/Light.hpp
 
 ../src/Game/Game.hpp:
 
@@ -80,10 +80,10 @@ src/Game/Game.d: ../src/Game/Game.cpp ../src/Game/Game.hpp \
 
 ../src/Game/../GL3Engine/Graphics/Mesh.hpp:
 
-../src/Game/../GL3Engine/Resources/Resources.hpp:
-
-../src/Game/../GL3Engine/Graphics/Light.hpp:
+../src/Game/../GL3Engine/Graphics/RenderTarget.hpp:
 
 ../src/Game/../GL3Engine/Graphics/Scene.hpp:
 
-../src/Game/../GL3Engine/Graphics/RenderTarget.hpp:
+../src/Game/../GL3Engine/Resources/Resources.hpp:
+
+../src/Game/../GL3Engine/Graphics/Light.hpp:

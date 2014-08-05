@@ -3,18 +3,14 @@
 namespace GL3Engine {
     Node& Node::setShaderParam(
                                c_str variable,
-                               const vector<GLfloat>& data) {
-        shader_params[variable] = data;
+                               const vector<GLfloat>& data,
+                               GLenum type) {
+        effect->setUniform(variable, &data[0], data.size(), type);
         return *this;
     }
     void Node::update() {
-        if (effect) {
+        if (effect)
             effect->begin();
-            for (auto& uniform : shader_params)
-                effect->setUniform(uniform.first,
-                        &uniform.second[0],
-                        uniform.second.size());
-        }
         draw();
         if (effect)
             effect->end();

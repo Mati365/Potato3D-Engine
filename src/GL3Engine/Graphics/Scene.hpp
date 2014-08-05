@@ -16,17 +16,14 @@ namespace GL3Engine {
 
     class SceneManager;
     class RenderTarget;
+
     class Node : public Drawable {
             friend class SceneManager;
-
-        public:
-            using ShaderParams = map<string, vector<GLfloat>>;
 
         protected:
             Node* parent = nullptr;
             SceneManager* scene = nullptr;
 
-            ShaderParams shader_params;
             Transform transform;
             Shader* effect = nullptr;
             GLuint render_mode = GL_TRIANGLES;
@@ -36,21 +33,17 @@ namespace GL3Engine {
                 this->render_mode = render_mode;
                 return *this;
             }
-
-            inline vector<GLfloat>& getShaderParam(c_str param) {
-                return shader_params.at(param);
+            Transform& getTransform() {
+                return transform;
             }
-            Node& setShaderParam(c_str, const vector<GLfloat>&);
 
+            Node& setShaderParam(c_str, const vector<GLfloat>&, GLenum);
             Node& setEffect(Shader* effect) {
                 this->effect = effect;
                 return *this;
             }
             Shader* getEffect() {
                 return effect;
-            }
-            Transform& getTransform() {
-                return transform;
             }
 
             Node& setParent(Node* parent) {

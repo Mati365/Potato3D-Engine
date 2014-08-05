@@ -8,8 +8,6 @@
 namespace GL3Engine {
     class Material;
     class Shader {
-#define UNIFORM_LOC(variable) glGetUniformLocation(program, variable.c_str())
-
         private:
             GLint program = 0;
             map<GLuint, GLuint> ubo; // blockindex handle do bufora
@@ -38,7 +36,7 @@ namespace GL3Engine {
             template<GLuint len> Shader& setUniform(
                     c_str variable,
                     const array<GLfloat, len>& array) {
-                GLint loc = UNIFORM_LOC(variable);
+                GLint loc = getUniformLoc(variable);
 #define ARRAY_UNIFORM(len) \
          glProgramUniform##len##fv(program, loc, 1, &array[0])
 
@@ -55,11 +53,11 @@ namespace GL3Engine {
                 }
                 return *this;
             }
-            Shader& setUniform(c_str, const GLfloat*, GLuint);
+            Shader& setUniform(c_str, const GLfloat*, GLuint, GLenum);
 
             Shader& setUniform(c_str, const Matrix<GLfloat>&);
             inline Shader& setUniform(c_str variable, const FPoint3D& p) {
-                glProgramUniform4f(program, UNIFORM_LOC(variable), p.X, p.Y,
+                glProgramUniform4f(program, getUniformLoc(variable), p.X, p.Y,
                         p.Z, 1.f);
                 return *this;
             }
@@ -70,6 +68,9 @@ namespace GL3Engine {
 
             inline GLint getProgram() const {
                 return program;
+            }
+            inline GLuint getUniformLoc(c_str variable) const {
+                return glGetUniformLocation(program, variable.c_str());
             }
 
             ~Shader();

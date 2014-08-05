@@ -5,6 +5,7 @@
 #include "../GL3Engine/Graphics/Text.hpp"
 #include "../GL3Engine/Graphics/Scene.hpp"
 #include "../GL3Engine/Graphics/Camera.hpp"
+#include "../GL3Engine/Graphics/RenderTarget.hpp"
 
 namespace Game {
     using namespace GL3Engine;
@@ -22,6 +23,8 @@ namespace Game {
 
             SceneManager scene;
             Camera* cam = nullptr;
+            RenderQuad* fbo = nullptr;
+            GLfloat blur = 0.f;
 
         public:
             GameScreen(Window*);

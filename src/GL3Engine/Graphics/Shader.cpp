@@ -6,7 +6,10 @@
 namespace GL3Engine {
     using namespace IO;
 
-    Shader::Shader(c_str frag, c_str vertex, c_str geo) {
+    Shader::Shader(
+                   c_str frag,
+                   c_str vertex,
+                   c_str geo) {
         linkShader(
                 {
                         Shader::compileShader(frag, GL_FRAGMENT_SHADER),
@@ -49,19 +52,19 @@ namespace GL3Engine {
     /** UNIFORMY */
     Shader& Shader::setUniform(c_str variable, GLfloat value) {
         glProgramUniform1f(program,
-                UNIFORM_LOC(variable),
+                getUniformLoc(variable),
                 value);
         return *this;
     }
     Shader& Shader::setUniform(c_str variable, GLint value) {
         glProgramUniform1i(program,
-                UNIFORM_LOC(variable),
+                getUniformLoc(variable),
                 value);
         return *this;
     }
     Shader& Shader::setUniform(c_str variable,
                                const Matrix<GLfloat>& value) {
-        GLint loc = UNIFORM_LOC(variable);
+        GLint loc = getUniformLoc(variable);
         if (value.rows == value.cols) {
             GLuint size = value.rows * value.cols;
 
@@ -106,7 +109,7 @@ namespace GL3Engine {
                                GLuint handle) {
         glActiveTexture(GL_TEXTURE0 + flag);
         glBindTexture(texture_type, handle);
-        glProgramUniform1i(program, UNIFORM_LOC(tex), flag);
+        glProgramUniform1i(program, getUniformLoc(tex), flag);
         return *this;
     }
     Shader& Shader::setUniform(c_str variable, const MATERIALS& material) {
@@ -136,12 +139,49 @@ namespace GL3Engine {
     Shader& Shader::setUniform(
                                c_str variable,
                                const GLfloat* data,
-                               GLuint size) {
-        glProgramUniform1fv(
-                program,
-                UNIFORM_LOC(variable),
-                size,
-                data);
+                               GLuint count,
+                               GLenum type) {
+
+#define DEF_ARRAY_PASS(func_name, variables_per_obj) \
+        func_name( \
+                program, \
+                getUniformLoc(variable), \
+                count / variables_per_obj, \
+                data)
+#define DEF_MATRIX_ARRAY_PASS(func_name, rows, cols) \
+        func_name( \
+                program, \
+                getUniformLoc(variable), \
+                count / (rows * cols), \
+                GL_FALSE, \
+                data)
+
+        switch (type) {
+            /** SKALARY */
+            case GL_FLOAT:
+                DEF_ARRAY_PASS(glProgramUniform1fv, 1);
+                break;
+                /** WEKTORY */
+#define VEC_DEF_PASS(n_count) \
+            case GL_FLOAT_VEC##n_count: { \
+                DEF_ARRAY_PASS(glProgramUniform##n_count##fv, n_count); \
+            } break;
+                {
+                    VEC_DEF_PASS(2)
+                    VEC_DEF_PASS(3)
+                    VEC_DEF_PASS(4)
+                }
+                /** MACIERZE */
+#define MAT_DEF_PASS(n_count) \
+            case GL_FLOAT_MAT##n_count: { \
+                DEF_MATRIX_ARRAY_PASS(glProgramUniformMatrix##n_count##fv, n_count, n_count); \
+            } break;
+                {
+                    MAT_DEF_PASS(2)
+                    MAT_DEF_PASS(3)
+                    MAT_DEF_PASS(4)
+                }
+        }
         return *this;
     }
 

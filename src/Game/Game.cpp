@@ -1,9 +1,7 @@
 #include "Game.hpp"
 
-#include "../GL3Engine/Graphics/Text.hpp"
 #include "../GL3Engine/Resources/Resources.hpp"
 #include "../GL3Engine/Graphics/Light.hpp"
-#include "../GL3Engine/Graphics/RenderTarget.hpp"
 
 namespace Game {
     GameScreen::GameScreen(Window* _wnd)
@@ -37,12 +35,16 @@ namespace Game {
                 .setPos( { 0.f, 0.5f, 0.f })
                 .setSize(4.f);
 
-        scene.createSceneNode<RenderQuad>()
-                .setSize(scene.getRenderResolution())
-                .setShaderParam("blur", { 2.f / 420.f });
+        fbo = dynamic_cast<RenderQuad*>(
+                &scene.createSceneNode<RenderQuad>()
+                        .setSize(scene.getRenderResolution())
+                        .setShaderParam("blur", { 0.f }, GL_FLOAT));
     }
     void GameScreen::render() {
         scene.draw();
+        if (blur > 0.f)
+            blur *= .99f;
+        fbo->setShaderParam("blur", { blur }, GL_FLOAT);
     }
 
     void GameScreen::getKeyEvent(SDL_Keycode key) {
@@ -65,6 +67,9 @@ namespace Game {
                 v = (GLfloat) p.X > 0.f ? -sensinity :
                                           (p.X < 0 ? sensinity : 0.f);
         v *= abs(p.X - last_mouse_pos.X);
+        if (abs(v) > 0)
+            blur = abs(v) * 45.f;
+
         assert(cam);
         {
             MatMatrix::mul(

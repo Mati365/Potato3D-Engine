@@ -1,0 +1,16 @@
+# Potato3D Engine #
+**Potato3D Engine** is simple lightweight 3D Engine written in C++0x and OpenGL 4.x. 
+
+## What's done:
++ 	VBO/VAO
++ 	Render to texture/FBO
++ 	Custom matrix stack implementation
++	Matrix math
++ 	Bitmap fonts
++	Specular/Diffuse/Ambient Lighting
++	Materials
++	****.obj/*.mtl*** mesh loading
++	Normal mapping
+
+## Usage
+

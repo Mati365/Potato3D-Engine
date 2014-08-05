@@ -22,10 +22,9 @@ vec2 pixelize(in float d, in vec2 pos) {
 	return vec2(d * floor(pos.x / d), d * floor(pos.y / d));
 }
 void main(void) {
-	//color =	texture2D(texture, pixelize(0.001, frag.uv));
-	float 	tilt_blur 	=	distance(vec2(0.5, 0.5), frag.uv) * 2.0 * blur;
+	float 	tilt_blur 	=	distance(vec2(0.5, 0.5), frag.uv) * blur;
 	vec4	sum 		= 	vec4(0, 0, 0, 0);
 	for(int i = -4;i <= 4;++i)
-		sum +=	texture2D(color_texture, pixelize(0.008, vec2(frag.uv.x + i * tilt_blur, frag.uv.y))) * blur_array[i + 4];
+		sum +=	texture2D(color_texture, pixelize(0.000008, vec2(frag.uv.x + i * tilt_blur, frag.uv.y))) * blur_array[i + 4];
 	color = sum;
 }
