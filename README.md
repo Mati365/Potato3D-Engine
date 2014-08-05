@@ -12,7 +12,6 @@
 +	*.obj .mtl* mesh loading
 +	Normal mapping
 
--------------------
 ## Usage:
 ```cpp
 [...]
@@ -48,9 +47,11 @@ fbo = dynamic_cast<RenderQuad*>(
 scene.draw();
 ```
 
--------------------
 ## Screens:
 ![](doc/img.png)
+
+## License:
+
 
 
 
