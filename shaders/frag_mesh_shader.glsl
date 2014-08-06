@@ -60,6 +60,9 @@ vec2 pixelize(in float d) {
 	return vec2(d * floor(frag.uv.x / d), d * floor((1.0 - frag.uv.y) / d));
 }
 void calcLight(in Light light) {
+	if(light.pos.x == 2)
+		return;
+	
 	vec3 normal;
 	if(MATERIAL.tex_flag[BUMP])
 		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0);
@@ -68,10 +71,11 @@ void calcLight(in Light light) {
 	
 	// Diffuse
 	vec3	light_normal	=	normalize(abs(frag.pos - light.pos));
-	float	distance		=	length(frag.pos - light.pos);
+	float	dist_prop		=	1.0 / (1.0 + (0.5 * pow(length(frag.pos - light.pos), 2)));
 	float	diffuse			=	max(dot(light_normal, normal), 0.0) 
-									* (1.0 / (1.0 + (0.5 * distance * distance)));
-											
+									* dist_prop;
+	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.0);
+												
 	// Specular
 	if(MATERIAL.tex_flag[SPECULAR]) {
 		vec3 	reflect 	= 	normalize(2 * diffuse * normal - light_normal);
@@ -94,17 +98,16 @@ void calcLight(in Light light) {
 	if(MATERIAL.tex_flag[AMBIENT])	
 		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * 
 						light.ambient_intensity, 0.0);
-	
 	if(MATERIAL.tex_flag[DIFFUSE]) {
 		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE];
 		gl_FragColor += 
 					diffuse_col * 
 					light.diffuse_col * 
 					light.diffuse_intensity * 
-					vec4(diffuse, diffuse, diffuse, 1.0);
+					diff;
 		gl_FragColor.a *= MATERIAL.transparent;
 	} else
-		gl_FragColor =	col;
+		gl_FragColor =	col * diff;
 }
 void main(void) {
 	for(int i = 0;i < light_count;++i)

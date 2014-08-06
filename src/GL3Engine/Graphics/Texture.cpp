@@ -4,19 +4,54 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    void putGLTextureFlags(GLenum type) {
-        glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    void putGLTextureFlags(
+                           GLenum type,
+                           GLuint flags) {
+        {
+            GLenum mag_filter =
+            IS_SET_FLAG(flags, Texture::NEAREST) ? GL_NEAREST :
+            GL_LINEAR;
+            GLboolean use_mipmaps = IS_SET_FLAG(flags,
+                    Texture::MIPMAP_NEAREST | Texture::MIPMAP_LINEAR);
+            if (use_mipmaps)
+                mag_filter =
+                        IS_SET_FLAG(flags, Texture::MIPMAP_NEAREST) ? GL_NEAREST_MIPMAP_NEAREST :
+                                                                      GL_LINEAR_MIPMAP_LINEAR;
 
-        glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(type, GL_TEXTURE_MIN_FILTER, mag_filter);
+            glTexParameteri(type, GL_TEXTURE_MAG_FILTER, mag_filter);
+
+            if (use_mipmaps)
+                glGenerateMipmap(GL_TEXTURE_2D);
+        }
+        {
+            GLenum wrap_filter =
+            IS_SET_FLAG(flags, Texture::CLAMP) ? GL_CLAMP :
+            IS_SET_FLAG(flags, Texture::CLAMP_TO_EDGE) ? GL_CLAMP_TO_EDGE :
+            GL_REPEAT;
+
+            glTexParameteri(type, GL_TEXTURE_WRAP_S, wrap_filter);
+            glTexParameteri(type, GL_TEXTURE_WRAP_T, wrap_filter);
+        }
     }
 
-    Texture::Texture(const string& path) {
+    Texture::Texture(c_str path) {
         loadTexture(path);
     }
-    Texture::Texture(const IPoint2D& size, GLenum type, GLenum bytes) {
-        generate(size, type, bytes);
+    Texture::Texture(c_str path,
+                     GLuint flags)
+            :
+              Texture(path) {
+        this->flags = flags;
+    }
+    Texture::Texture(
+                     const IPoint2D& _size,
+                     GLenum _type,
+                     GLenum _bytes,
+                     GLuint _flags)
+            :
+              flags(_flags) {
+        generate(_size, _type, _bytes);
     }
 
     void Texture::generate(const IPoint2D& size, GLenum type, GLenum bytes) {
@@ -30,7 +65,7 @@ namespace GL3Engine {
         glBindTexture(GL_TEXTURE_2D, 0);
         configure();
     }
-    void Texture::loadTexture(const string& path) {
+    void Texture::loadTexture(c_str path) {
         if (handle != 0)
             glDeleteTextures(1, &handle);
         handle = SOIL_load_OGL_texture
@@ -45,14 +80,7 @@ namespace GL3Engine {
     void Texture::configure() {
         glBindTexture(GL_TEXTURE_2D, handle);
         {
-            putGLTextureFlags(GL_TEXTURE_2D);
-            if (IS_SET_FLAG(flags, USE_MIPMAP_NEAREST | USE_MIPMAP_LINEAR)) {
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                        IS_SET_FLAG(flags, USE_MIPMAP_NEAREST) ?
-                        GL_LINEAR_MIPMAP_NEAREST :
-                                                                 GL_LINEAR_MIPMAP_LINEAR);
-                glGenerateMipmap(GL_TEXTURE_2D);
-            }
+            putGLTextureFlags(GL_TEXTURE_2D, flags);
         }
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,
                 &size.X);
@@ -90,7 +118,8 @@ namespace GL3Engine {
         glGenTextures(1, &handle);
         glBindTexture(GL_TEXTURE_2D_ARRAY, handle);
         {
-            putGLTextureFlags(GL_TEXTURE_2D_ARRAY);
+            putGLTextureFlags(GL_TEXTURE_2D_ARRAY,
+                    Texture::NEAREST | Texture::CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_GENERATE_MIPMAP, GL_TRUE);
         }
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, biggest.X, biggest.Y,

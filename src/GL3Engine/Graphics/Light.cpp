@@ -18,7 +18,7 @@ namespace GL3Engine {
         if (objects.empty())
             return;
 
-        vector<LightData> data(objects.size());
+        vector<LightData> data(objects.size() - 1);
         for (auto& obj : objects)
             if (obj->getState() == LightData::ON)
                 data.push_back(obj->getData());

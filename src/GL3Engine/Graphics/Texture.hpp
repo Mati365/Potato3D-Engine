@@ -10,28 +10,35 @@ namespace GL3Engine {
         public:
             enum Flag
                 : GLuint {
-                    USE_MIPMAP_NEAREST = 1 << 1,
-                USE_MIPMAP_LINEAR = 1 << 2
+                    MIPMAP_NEAREST = 1 << 1,
+                MIPMAP_LINEAR = 1 << 2,
+
+                CLAMP = 1 << 3,
+                CLAMP_TO_EDGE = 1 << 4,
+                REPEAT = 1 << 5,
+
+                LINEAR = 1 << 6,
+                NEAREST = 1 << 7
             };
 
         private:
-            GLuint handle = 0, flags = 0;
+#define DEFAULT_TEX_FLAGS CLAMP_TO_EDGE | NEAREST
+            GLuint handle = 0,
+                    flags = DEFAULT_TEX_FLAGS;
+
             IPoint2D size;
 
         public:
             Texture() {
             }
-            Texture(const string&);
-            Texture(const string& _path, GLuint _flags)
-                    :
-                      Texture(_path) {
-                flags = _flags;
-            }
+            Texture(c_str);
+            Texture(c_str, GLuint);
             Texture(const IPoint2D&,
                     GLenum type = GL_RGBA,
-                    GLenum bytes = GL_UNSIGNED_BYTE);
+                    GLenum bytes = GL_UNSIGNED_BYTE,
+                    GLuint flags = DEFAULT_TEX_FLAGS);
 
-            void loadTexture(const string&);
+            void loadTexture(c_str);
             void generate(const IPoint2D&, GLenum, GLenum);
 
             GLuint getHandle() const {

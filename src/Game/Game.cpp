@@ -12,16 +12,23 @@ namespace Game {
 
     void GameScreen::init() {
         cam = &scene.createSceneNode<Camera>()
-                .setPos( { 0.f, .5f, 1.f, 1.f })
-                .setTarget( { 0.f, .5f, -2.f, 1.f });
+                .setPos( { 0.f, .5f, 0.f, 1.f })
+                .setTarget( { 0.f, .5f, 1.f, 1.f });
         scene.createSceneNode<AxisMesh>();
         scene.createSceneNode<LightBatch>()
                 .regObject(
                 scene.createSceneNode<Light>()
-                        .setPos( { 0.f, 0.5, 0.f })
+                        .setPos( { 1.f, 0.5f, 1.f })
                         .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
-                        .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 1.f)
+                        .setDiffuse( { 1.f, 0.f, 0.f, 1.f, }, 1.f)
+                        )
+                .regObject(
+                scene.createSceneNode<Light>()
+                        .setPos( { 0.f, 0.f, 0.f })
+                        .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
+                        .setDiffuse( { 0.f, 0.f, 1.f, 0.5f, }, 1.f)
                         );
+
         scene.createSceneNode<Mesh>()
                 .setShape(
                 GlobalResourceManager::getInstance().getResource<Shape3D>(
@@ -29,6 +36,13 @@ namespace Game {
                 .getTransform()
                 .mul(MatMatrix::scale( { .2f, .2f, .2f }))
                 .mul(MatMatrix::translate( { 0.f, 0.5f, -10.f }));
+        scene.createSceneNode<Mesh>()
+                .setShape(
+                GlobalResourceManager::getInstance().getResource<Shape3D>(
+                        "mesh/wall/wall.obj"))
+                .getTransform()
+                .mul(MatMatrix::scale( { 1.3f, 1.3f, 1.3f }))
+                .mul(MatMatrix::translate( { 0.f, 0.f, 2.f }));
 
         scene.createSceneNode<Text>()
                 .setText("Test czcionek!")
@@ -43,7 +57,7 @@ namespace Game {
     void GameScreen::render() {
         scene.draw();
         if (blur > 0.f)
-            blur *= .99f;
+            blur *= .98f;
         fbo->setShaderParam("blur", { blur }, GL_FLOAT);
     }
 
