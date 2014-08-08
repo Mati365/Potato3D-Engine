@@ -25,6 +25,6 @@ void main(void) {
 	float 	tilt_blur 	=	distance(vec2(0.5, 0.5), frag.uv) * blur;
 	vec4	sum 		= 	vec4(0, 0, 0, 0);
 	for(int i = -4;i <= 4;++i)
-		sum +=	texture2D(color_texture, pixelize(0.000008, vec2(frag.uv.x + i * tilt_blur, frag.uv.y))) * blur_array[i + 4];
+		sum +=	texture2D(color_texture, pixelize(0.008, vec2(frag.uv.x + i * tilt_blur, frag.uv.y))) * blur_array[i + 4];
 	color = sum;
 }

@@ -9,8 +9,9 @@
 
 namespace Game {
     using namespace GL3Engine;
-
-    class GameScreen : public Renderer {
+    
+    class GameScreen :
+                       public Renderer {
         public:
             enum Flags {
                 DRAW_AXIS = 1 << 1,
@@ -32,7 +33,7 @@ namespace Game {
             inline Window* getWindow() const {
                 return wnd;
             }
-
+            
             void init() override;
             void render() override;
 

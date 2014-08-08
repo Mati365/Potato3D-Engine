@@ -5,26 +5,24 @@
 namespace GL3Engine {
     using namespace Tools;
     using namespace std;
-
+    
     class Texture {
         public:
-            enum Flag
-                : GLuint {
-                    MIPMAP_NEAREST = 1 << 1,
+            enum {
+                MIPMAP_NEAREST = 1 << 1,
                 MIPMAP_LINEAR = 1 << 2,
-
+                
                 CLAMP = 1 << 3,
                 CLAMP_TO_EDGE = 1 << 4,
                 REPEAT = 1 << 5,
-
+                
                 LINEAR = 1 << 6,
                 NEAREST = 1 << 7
             };
 
         private:
 #define DEFAULT_TEX_FLAGS CLAMP_TO_EDGE | NEAREST
-            GLuint handle = 0,
-                    flags = DEFAULT_TEX_FLAGS;
+            GLuint handle = 0, flags = DEFAULT_TEX_FLAGS;
 
             IPoint2D size;
 
@@ -33,10 +31,8 @@ namespace GL3Engine {
             }
             Texture(c_str);
             Texture(c_str, GLuint);
-            Texture(const IPoint2D&,
-                    GLenum type = GL_RGBA,
-                    GLenum bytes = GL_UNSIGNED_BYTE,
-                    GLuint flags = DEFAULT_TEX_FLAGS);
+            Texture(const IPoint2D&, GLenum type = GL_RGBA, GLenum bytes =
+            GL_UNSIGNED_BYTE, GLuint flags = DEFAULT_TEX_FLAGS);
 
             void loadTexture(c_str);
             void generate(const IPoint2D&, GLenum, GLenum);
@@ -47,18 +43,18 @@ namespace GL3Engine {
             const IPoint2D& getSize() const {
                 return size;
             }
-
+            
             ~Texture() {
                 glDeleteTextures(1, &handle);
             }
-
+            
         private:
             Texture(const Texture&) {
             }
             Texture& operator=(const Texture&) {
                 return *this;
             }
-
+            
             void configure();
     };
     class TextureArray {
@@ -73,18 +69,19 @@ namespace GL3Engine {
 
             void create();
 
-            inline void addTexture(c_str str) {
+            TextureArray& addTexture(c_str str) {
                 textures.push_back(str);
+                return *this;
             }
             GLuint getHandle() const {
                 return handle;
             }
-
+            
             ~TextureArray() {
                 glDeleteTextures(1, &handle);
             }
     };
-
+    
     /** Podzielone jako TRIANGLE!!! */
     using TILE_ITER = vector<Vertex2f>::const_iterator;
     class Tile {
@@ -110,25 +107,25 @@ namespace GL3Engine {
             GLuint getHandle() const {
                 return tex->getHandle();
             }
-
+            
             const IPoint2D& getSize() const {
                 return tex->getSize();
             }
             const Texture* getTexture() const {
                 return tex;
             }
-
+            
         private:
             void tokenize();
     };
-
+    
     /** Zwraca tablice bo Material nie
      * sklada sie tylko z danych dla glsl
      */
     using MaterialBufferData = array<GLfloat, 36>;
     struct Material {
             enum TEX_TYPE
-                : GLint {
+                            : GLint {
                     AMBIENT,
                 DIFFUSE,
                 SPECULAR,
@@ -136,8 +133,7 @@ namespace GL3Engine {
                 BUMP
             };
 
-            GLfloat transparent = 1.f,
-                    shine = 1.f;
+            GLfloat transparent = 1.f, shine = 1.f;
             GLbyte illum_model = 0;
             Color col[SPECULAR + 1];
 
@@ -154,7 +150,7 @@ namespace GL3Engine {
 
             MaterialBufferData getMaterialBufferData() const;
     };
-
+    
     using MATERIALS = vector<Material*>;
 }
 

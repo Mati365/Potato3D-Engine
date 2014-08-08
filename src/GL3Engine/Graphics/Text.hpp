@@ -4,13 +4,14 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    class Font : public Tile {
+    class Font :
+                 public Tile {
         public:
             Font(Texture* _tex)
                     :
                       Tile(_tex, IPoint2D(32, 4)) {
             }
-
+            
             inline TILE_ITER getCharacter(char c) const {
                 GLuint index = ((GLuint) c - 32);
                 return {
@@ -18,14 +19,15 @@ namespace GL3Engine {
                 };
             }
     };
-    class Text : public Node {
+    class Text :
+                 public Node {
             static constexpr size_t BUFFER_SIZE = 128;
 
         private:
-            Color col = { 1.f, 1.f, 1.f, 1.f };
-            unique_ptr<Font> font = unique_ptr < Font > (
-                    new Font(
-                            REQUIRE_RES(Texture, FONT_TEXTURE)));
+            Color col = {
+                    1.f, 1.f, 1.f, 1.f };
+            unique_ptr<Font> font = unique_ptr < Font
+                    > (new Font(REQUIRE_RES(Texture, FONT_TEXTURE)));
 
             Shape2D* shape = nullptr;
 

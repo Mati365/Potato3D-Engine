@@ -9,16 +9,37 @@ namespace GL3Engine {
             virtual void draw()=0;
             virtual void passToShader() {
             }
-
+            
             virtual ~Drawable() {
             }
     };
-
+    
     class SceneManager;
     class RenderTarget;
-
-    class Node : public Drawable {
+    
+    class WindowEventListener {
+        public:
+            virtual GLboolean getMouseEvent(const IPoint2D&, GLuint) {
+                return false;
+            }
+            virtual GLboolean getKeyEvent(GLchar) {
+                return false;
+            }
+            virtual ~WindowEventListener() {
+            }
+    };
+    class Node :
+                 public Drawable,
+                 public WindowEventListener {
             friend class SceneManager;
+
+        public:
+            static constexpr GLfloat VIEW_DISTANCE = 6.f;
+            enum class State {
+                NORMAL,
+                DISABLED,
+                DESTROYED
+            };
 
         protected:
             Node* parent = nullptr;
@@ -27,16 +48,17 @@ namespace GL3Engine {
             Transform transform;
             Shader* effect = nullptr;
             GLuint render_mode = GL_TRIANGLES;
+            State state = State::NORMAL;
 
         public:
-            inline Node& setRenderMode(GLuint render_mode) {
+            Node& setRenderMode(GLuint render_mode) {
                 this->render_mode = render_mode;
                 return *this;
             }
             Transform& getTransform() {
                 return transform;
             }
-
+            
             Node& setShaderParam(c_str, const vector<GLfloat>&, GLenum);
             Node& setEffect(Shader* effect) {
                 this->effect = effect;
@@ -45,7 +67,7 @@ namespace GL3Engine {
             Shader* getEffect() {
                 return effect;
             }
-
+            
             Node& setParent(Node* parent) {
                 this->parent = parent;
                 return *this;
@@ -56,11 +78,24 @@ namespace GL3Engine {
             SceneManager* getScene() const {
                 return scene;
             }
-
+            
+            GLboolean isActive() const {
+                return state == State::NORMAL;
+            }
+            Node& setState(State state) {
+                this->state = state;
+                return *this;
+            }
+            State getState() const {
+                return state;
+            }
+            
         private:
             void update();
     };
-    class SceneManager : public Drawable {
+    class SceneManager :
+                         public Drawable,
+                         public WindowEventListener {
         public:
             enum class SceneFlag {
                 LIGHT_SHADER_BINDING,
@@ -73,15 +108,15 @@ namespace GL3Engine {
             RenderTarget* target = nullptr;
 
             SceneFlags flags = {
-                    { SceneFlag::LIGHT_SHADER_BINDING, 0 }
-            };
+                    {
+                            SceneFlag::LIGHT_SHADER_BINDING, 0 } };
 
         public:
             SceneManager(const FPoint2D& res)
                     :
                       world_matrix(res) {
             }
-
+            
             SceneManager& addSceneNode(Node* node) {
                 assert(node);
                 {
@@ -103,8 +138,10 @@ namespace GL3Engine {
                 this->target = target;
                 return *this;
             }
-
+            
             void draw();
+            GLboolean getMouseEvent(const IPoint2D&, GLuint);
+            GLboolean getKeyEvent(GLchar);
 
             SceneFlags& getSceneFlags() {
                 return flags;
@@ -112,7 +149,10 @@ namespace GL3Engine {
             MatrixStack& getWorldMatrix() {
                 return world_matrix;
             }
-            const FPoint2D& getRenderResolution() {
+            Camera* getActiveCam() const {
+                return world_matrix.getActiveCamera();
+            }
+            const FPoint2D& getRenderResolution() const {
                 return world_matrix.getResolution();
             }
     };

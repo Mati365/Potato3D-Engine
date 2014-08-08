@@ -15,11 +15,11 @@ namespace GL3Engine {
     type* GlobalResourceManager::getResource(c_str handle) { \
         return stack.getResource(handle); \
     }
-
+    
     DECLARE_EXTENSION(textures, Texture);
     DECLARE_EXTENSION(shapes, Shape3D);
     DECLARE_EXTENSION(shaders, Shader);
-
+    
     GlobalResourceManager::GlobalResourceManager() {
         registerExtension(new OBJloader, "obj");
         registerExtension(new GLSLloader, "glsl");

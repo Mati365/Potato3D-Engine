@@ -4,13 +4,11 @@
 
 namespace GL3Engine {
     using namespace std;
-
+    
     /** Wektory nie są macierzami ze względów wyadjnosci */
     template<typename T> class Point3D {
         public:
-            T X = 0,
-                    Y = 0,
-                    Z = 0;
+            T X = 0, Y = 0, Z = 0;
 
             Point3D() {
             }
@@ -24,15 +22,15 @@ namespace GL3Engine {
                 Z oper v.Z; \
                 return *this; \
             }
-            POINT3D_OPERATOR(+=)
-            POINT3D_OPERATOR(-=)
+            POINT3D_OPERATOR(+=)POINT3D_OPERATOR(-=)
             POINT3D_OPERATOR(*=)
             POINT3D_OPERATOR(/=)
 
             template<typename C> operator Point3D<C>() const {
                 return Point3D<C>(
                         this->X,
-                        this->Y);
+                        this->Y,
+                        this->Z);
             }
 
             GLboolean operator>(const Point3D<T>&) const;
@@ -60,7 +58,7 @@ namespace GL3Engine {
 
     extern template class Point3D<GLfloat> ;
     extern template class Point3D<GLint> ;
-
+    
 #define VEC_OVERLOAD(oper) \
     template<typename T> Point3D<T> operator oper (const Point3D<T>& l, \
             const Point3D<T>& p) { \
@@ -71,8 +69,9 @@ namespace GL3Engine {
     VEC_OVERLOAD(+)
     VEC_OVERLOAD(-)
     VEC_OVERLOAD(*)
-
-    template<typename T> class Point2D : public Point3D<T> {
+    
+    template<typename T> class Point2D :
+                                         public Point3D<T> {
         public:
             Point2D() {
             }
@@ -82,38 +81,43 @@ namespace GL3Engine {
             template<typename C> operator Point2D<C>() const {
                 return Point2D<C>(
                         this->X,
-                        this->Y
-                        );
+                        this->Y);
             }
             inline array<T, 2> toArray() {
                 return {this->X, this->Y};
             }
     };
-
+    
     extern template class Point2D<GLfloat> ;
     extern template class Point2D<GLint> ;
-
+    
     /** Operacje na wektorach */
     template<typename T> inline Point3D<T> normalize(const Point3D<T>& _p) {
         return Point3D<T>(_p).normalize();
     }
-    template<typename T> Point3D<T> cross(const Point3D<T>& a,
-            const Point3D<T>& b) {
+    template<typename T> inline Point3D<T> cross(
+            const Point3D<T>& a, const Point3D<T>& b) {
         return {
             a.Y * b.Z - a.Z * b.Y,
             a.Z * b.X - a.X * b.Z,
             a.X * b.Y - a.Y * b.X
         };
     }
-    template<typename T> inline T dot(const Point3D<T>& a,
-            const Point3D<T>& b) {
+    template<typename T> inline T dot(
+            const Point3D<T>& a, const Point3D<T>& b) {
         return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
     }
-
+    template<typename T> inline GLfloat distance(
+            const Point3D<T>& p1, const Point3D<T>& p2) {
+        return reinterpret_cast<T>(sqrt(
+                (p1.X - p2.X) * (p1.X - p2.X) + (p1.Y - p2.Y) * (p1.Y - p2.Y)
+                        + (p1.Z - p2.Z) * (p1.Y - p2.Y)));
+    }
+    
     using IPoint2D = Point2D<GLint>;
     using FPoint2D = Point2D<GLfloat>;
     using FPoint3D = Point3D<GLfloat>;
-
+    
 #define BOX_DEFINE(dimensions) \
     template<typename T> class Box##dimensions##D { \
         public: \
@@ -126,8 +130,6 @@ namespace GL3Engine {
                       size(_size) { \
             } \
     }
-    BOX_DEFINE(2);
-    BOX_DEFINE(3);
-}
+    BOX_DEFINE(2);BOX_DEFINE(3);}
 
 #endif

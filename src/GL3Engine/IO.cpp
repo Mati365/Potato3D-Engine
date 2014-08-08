@@ -7,7 +7,7 @@ namespace IO {
     size_t getFileLength(c_str& path) {
         return ifstream(path, ios::binary | ios::ate).tellg();
     }
-
+    
     string getFileContents(c_str& path) {
         ifstream f(path);
         return getFileContents(f, '\n');
@@ -28,7 +28,7 @@ namespace IO {
             if (!line.empty())
                 buf.push_back(line);
     }
-
+    
     char* allocString(c_str& str) {
         char* buf = new char[str.length()];
         for (GLuint i = 0; i < str.length(); ++i)

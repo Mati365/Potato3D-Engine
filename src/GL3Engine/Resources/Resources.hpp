@@ -10,7 +10,7 @@ namespace GL3Engine {
             virtual ~Loader() {
             }
     };
-
+    
     template<typename C>
     class ResourceManager {
         private:
@@ -18,8 +18,7 @@ namespace GL3Engine {
             map<string, unique_ptr<C>> resources;
 
         public:
-            inline void putLoader(Loader<C>* loader,
-                    const string& extension) {
+            inline void putLoader(Loader<C>* loader, const string& extension) {
                 loaders[extension] = unique_ptr<Loader<C>>(loader);
             }
             C* getResource(c_str);
@@ -27,7 +26,8 @@ namespace GL3Engine {
         private:
             C* registerResource(c_str, C*);
     };
-    class GlobalResourceManager : public Singleton<GlobalResourceManager> {
+    class GlobalResourceManager :
+                                  public Singleton<GlobalResourceManager> {
         private:
             ResourceManager<Texture> textures;
             ResourceManager<Shape3D> shapes;

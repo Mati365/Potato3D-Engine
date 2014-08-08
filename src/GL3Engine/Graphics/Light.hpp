@@ -16,11 +16,14 @@ namespace GL3Engine {
     //  4B extra
     // };
     struct LightData {
-            POS pos = { 0.f, 0.f, 0.f };
+            POS pos = {
+                    0.f, 0.f, 0.f };
             GLfloat stride = 0.f; // randomowa liczba
-
-            COL spec_col = { 1.f, 1.f, 1.f, 1.f };
-            COL diff_col = { 1.f, 1.f, 1.f, 1.f };
+            
+            COL spec_col = {
+                    1.f, 1.f, 1.f, 1.f };
+            COL diff_col = {
+                    1.f, 1.f, 1.f, 1.f };
 
             GLfloat ambient_intensity = 1.f;
             GLfloat diffuse_intensity = 1.f;
@@ -28,11 +31,13 @@ namespace GL3Engine {
 
             // extra 4B
             enum State {
-                ON, OFF
+                ON,
+                OFF
             };
             GLfloat state = State::ON;
     };
-    class Light : public Node {
+    class Light :
+                  public Node {
         private:
             LightData data;
 
@@ -59,7 +64,6 @@ namespace GL3Engine {
                 this->data.ambient_intensity = intensity;
                 return *this;
             }
-
             Light& setState(LightData::State state) {
                 data.state = state;
                 return *this;
@@ -71,13 +75,14 @@ namespace GL3Engine {
                 return data;
             }
     };
-
+    
     // layout(std140) uniform LightBlock {
     // Light       lights[MAX_LIGHTS];
     // int         lights_count;
     // };
     template<typename T>
-    class Batch : public Node {
+    class Batch :
+                  public Node {
         protected:
             vector<T*> objects;
 
@@ -89,7 +94,8 @@ namespace GL3Engine {
                 return *this;
             }
     };
-    class LightBatch : public Batch<Light> {
+    class LightBatch :
+                       public Batch<Light> {
         public:
             static constexpr size_t MAX_LIGHTS = 10;
             static constexpr GLuint BINDING_POINT = 0;

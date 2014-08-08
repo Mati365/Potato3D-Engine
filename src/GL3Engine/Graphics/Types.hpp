@@ -6,16 +6,17 @@
 
 namespace GL3Engine {
     using namespace std;
-
+    
     struct Color {
-            GLfloat col[4] = { 0, 0, 0, 0 };
+            GLfloat col[4] = {
+                    0, 0, 0, 0 };
 
             Color() {
             }
             Color(const initializer_list<GLfloat>& _col) {
                 copy(_col.begin(), _col.end(), col);
             }
-
+            
             array<GLfloat, 4> toArray() const {
                 return {
                     col[0],
@@ -31,20 +32,23 @@ namespace GL3Engine {
                 col[3] = 1.f;
                 return *this;
             }
-
-#define RETURN_COLOR(color, var) inline GLfloat color() const { return col[var]; }
+            
+#define RETURN_COLOR(color, var) \
+    GLfloat color() const { \
+            return col[var]; \
+    }
             RETURN_COLOR(r, 0)
             RETURN_COLOR(g, 1)
             RETURN_COLOR(b, 2)
             RETURN_COLOR(a, 3)
-            // Kolory
-    };
 
+    };
+    
     using COL = GLfloat[4];
     using UV = GLfloat[2];
     using NORMAL = GLfloat[3];
     using POS = NORMAL;
-
+    
     struct Vertex2f {
             POS pos;
             UV uv;
@@ -55,7 +59,7 @@ namespace GL3Engine {
             UV uv;
             GLint mtl; // domyślnie solid color wyłączony!
     };
-
+    
     using Cube = Vertex4f[36];
 
 #define BUFFER_OFFSET(i) ((char *)nullptr + (i))

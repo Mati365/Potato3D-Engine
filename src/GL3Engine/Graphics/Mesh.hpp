@@ -10,7 +10,7 @@
 
 namespace GL3Engine {
     using namespace std;
-
+    
     struct GL_BUFFER_DATA {
             const GLvoid* data;
             size_t len;
@@ -20,29 +20,25 @@ namespace GL3Engine {
             GLuint vbo_draw_type;
     };
     GLint genGLBuffer(const GL_BUFFER_DATA&, bool bind = false);
-
+    
     template<typename T> class VAOpolygon {
         private:
-            GLuint vao = 0,
-                    vbo = 0,
-                    indices = 0,
-                    vertices_count = 0,
+            GLuint vao = 0, vbo = 0, indices = 0, vertices_count = 0,
                     indices_count = 0;
             Color col;
             MATERIALS materials;
 
         public:
             VAOpolygon(
-                       const GL_BUFFER_DATA& vertices,
-                       const GL_BUFFER_DATA& indices,
-                       const Color& _col = { },
-                       const MATERIALS& _materials = { })
+                    const GL_BUFFER_DATA& vertices,
+                    const GL_BUFFER_DATA& indices, const Color& _col = { },
+                    const MATERIALS& _materials = { })
                     :
                       col(_col),
                       materials(_materials) {
                 create(vertices, indices);
             }
-
+            
             GLuint getVAO() const {
                 return vao;
             }
@@ -52,30 +48,31 @@ namespace GL3Engine {
             GLuint getIndices() const {
                 return indices;
             }
-
+            
             GLuint getVerticesCount() const {
                 return vertices_count;
             }
             GLuint getIndicesCount() const {
                 return indices_count;
             }
-
+            
             MATERIALS& getMaterials() {
                 return materials;
             }
             GLboolean hasMaterials() const {
                 return !materials.empty();
             }
-
+            
             Color& getColor() {
                 return col;
             }
             GLboolean usingElementBuffer() const {
                 return indices_count > 0;
             }
-
-            void changeData(const GL_BUFFER_DATA& vertices,
-                            const GL_BUFFER_DATA& indices);
+            
+            void changeData(
+                    const GL_BUFFER_DATA& vertices,
+                    const GL_BUFFER_DATA& indices);
 
             ~VAOpolygon();
 
@@ -84,11 +81,12 @@ namespace GL3Engine {
     };
     extern template class VAOpolygon<Vertex4f> ;
     extern template class VAOpolygon<Vertex2f> ;
-
+    
     using Shape3D = VAOpolygon<Vertex4f>;
     using Shape2D = VAOpolygon<Vertex2f>;
-
-    class Mesh : public Node {
+    
+    class Mesh :
+                 public Node {
         private:
             Shape3D* shape = nullptr;
 
@@ -107,7 +105,7 @@ namespace GL3Engine {
             const Shape3D* getShape() const {
                 return shape;
             }
-
+            
         protected:
             void updateMaterialsCache(Shader*);
             void passToShader();

@@ -6,22 +6,25 @@
 namespace GL3Engine {
     using namespace IO;
     using LOADER_ITERATOR = vector<string>::iterator;
-
+    
     /** SHADER */
-    class GLSLloader : public Loader<Shader> {
+    class GLSLloader :
+                       public Loader<Shader> {
         public:
             static string putToFileName(string, c_str&);
             Shader* load(c_str&);
     };
-    class Textureloader : public Loader<Texture> {
+    class Textureloader :
+                          public Loader<Texture> {
         public:
             Texture* load(c_str& str) {
                 return new Texture(str);
             }
     };
-
+    
     /** MESHE */
-    template<typename T> class ASCIIMeshLoader : public Loader<T> {
+    template<typename T> class ASCIIMeshLoader :
+                                                 public Loader<T> {
         protected:
             map<string, GLint> headers;
 
@@ -30,7 +33,7 @@ namespace GL3Engine {
                     :
                       headers(_headers) {
             }
-
+            
             virtual void onNewHeader(GLint, vector<string>&) = 0;
             virtual void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&) = 0;
 
@@ -40,42 +43,39 @@ namespace GL3Engine {
             static FPoint3D getVec3D(LOADER_ITERATOR& iter) {
                 FPoint3D v;
                 sscanf((*iter + " " + *(iter + 1) + " " + *(iter + 2)).c_str(),
-                        "%f %f %f",
-                        &v.X, &v.Y, &v.Z
-                        );
+                        "%f %f %f", &v.X, &v.Y, &v.Z);
                 iter += 2;
                 return v;
             }
             static FPoint2D getVec2D(LOADER_ITERATOR& iter) {
                 FPoint2D v;
-                sscanf((*iter + " " + *(iter + 1)).c_str(),
-                        "%f %f",
-                        &v.X, &v.Y
-                        );
+                sscanf((*iter + " " + *(iter + 1)).c_str(), "%f %f", &v.X,
+                        &v.Y);
                 iter++;
                 return v;
             }
-
+            
             T* load(c_str&);
             virtual ~ASCIIMeshLoader() {
             }
-
+            
         private:
             T* selfCreateObject();
     };
-    class MTLloader : public ASCIIMeshLoader<MATERIALS> {
+    class MTLloader :
+                      public ASCIIMeshLoader<MATERIALS> {
         private:
             enum HEADER
-                : GLint {
+                            : GLint {
                     NONE,
                 NAME,
                 SHINE,
                 TRANSPARENT,
-
+                
                 AMBIENT_COL,
                 DIFFUSE_COL,
                 SPECULAR_COL,
-
+                
                 AMBIENT_TEX,
                 DIFFUSE_TEX,
                 SPECULAR_TEX,
@@ -101,22 +101,22 @@ namespace GL3Engine {
                 packTextures();
                 return new MATERIALS(mtl);
             }
-
+            
             void releaseMemory() {
                 mtl.clear();
                 textures.clear();
             }
-
+            
         private:
             void packTextures();
     };
-    class OBJloader : public ASCIIMeshLoader<Shape3D> {
+    class OBJloader :
+                      public ASCIIMeshLoader<Shape3D> {
         private:
             using HEADER_STACK = vector<FPoint3D>;
 
             struct ParseStack {
-                    HEADER_STACK normals,
-                            vertices;
+                    HEADER_STACK normals, vertices;
                     vector<FPoint2D> uv;
 
                     void clear() {
@@ -126,13 +126,13 @@ namespace GL3Engine {
                     }
             };
             enum HEADER
-                : GLint {
+                            : GLint {
                     NONE,
                 VERTEX,
                 NORMAL,
                 TEXTURE,
                 FACE,
-
+                
                 LOAD_MATERIAL,
                 USE_MATERIAL
             };
@@ -157,11 +157,11 @@ namespace GL3Engine {
 
         private:
             void finalizePolygon() {
-                vertex_array.insert(vertex_array.end(),
-                        polygon.begin(), polygon.end());
+                vertex_array.insert(vertex_array.end(), polygon.begin(),
+                        polygon.end());
                 polygon.clear();
             }
-
+            
             Vertex4f getVertex(LOADER_ITERATOR& iter);
     };
 }

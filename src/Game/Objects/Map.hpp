@@ -10,9 +10,9 @@ namespace Game {
      */
     struct CMapHeader {
 #define FILE_HEADER 'xyz'
-            GLchar  file_header[3];
-            GLuint  ver;
-            GLuint  size[2];
+            GLchar file_header[3];
+            GLuint ver;
+            GLuint size[2];
     };
 }
 

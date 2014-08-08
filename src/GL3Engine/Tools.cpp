@@ -5,7 +5,7 @@
 
 namespace Tools {
     deque<Log> Log::logs;
-
+    
     void showGLErrors() {
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR)
@@ -13,12 +13,10 @@ namespace Tools {
     }
     void Log::putLog(Log::Flag flag, const string& str) {
         static const char* flag_caption[] = {
-                "> !CRITICAL!",
-                "> !WARNING!",
-                "> !ERROR!"
-        };
-
-        logs.push_back( { flag, str });
+                "> !CRITICAL!", "> !WARNING!", "> !ERROR!" };
+        
+        logs.push_back( {
+                flag, str });
         cout << string(flag_caption[static_cast<GLint>(flag)]) + " " + str
                 << endl;
     }

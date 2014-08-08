@@ -7,10 +7,8 @@ namespace GL3Engine {
         return path;
     }
     Shader* GLSLloader::load(c_str& path) {
-        return new Shader(
-                getFileContents(putToFileName(path, "frag_")),
+        return new Shader(getFileContents(putToFileName(path, "frag_")),
                 getFileContents(putToFileName(path, "vert_")),
-                getFileContents(putToFileName(path, "geo_"))
-                        );
+                getFileContents(putToFileName(path, "geo_")));
     }
 }

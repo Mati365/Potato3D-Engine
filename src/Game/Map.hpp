@@ -4,7 +4,7 @@
 
 namespace Game {
     using namespace GL3Engine;
-
+    
     struct MapNode {
             enum Flag {
                 COLLISION = 1 << 0,
@@ -12,7 +12,7 @@ namespace Game {
     };
     class Map {
         public:
-
+            
     };
 }
 

@@ -11,17 +11,17 @@ namespace GL3Engine {
         private:
             GLint program = 0;
             map<GLuint, GLuint> ubo; // blockindex handle do bufora
-
+            
         public:
             Shader(c_str, c_str, c_str);
 
-            inline void begin() const {
+            void begin() const {
                 glUseProgram(program);
             }
-            inline void end() const {
+            void end() const {
                 glUseProgram(0);
             }
-
+            
             /** Uniformy */
             Shader& setUniform(GLint, c_str, GLint, GLuint);
             Shader& setUniform(c_str, const vector<Material*>&);
@@ -34,12 +34,11 @@ namespace GL3Engine {
             Shader& setUniform(c_str, GLint);
 
             template<GLuint len> Shader& setUniform(
-                    c_str variable,
-                    const array<GLfloat, len>& array) {
+                    c_str variable, const array<GLfloat, len>& array) {
                 GLint loc = getUniformLoc(variable);
 #define ARRAY_UNIFORM(len) \
          glProgramUniform##len##fv(program, loc, 1, &array[0])
-
+                
                 switch (len) {
                     case 2:
                         ARRAY_UNIFORM(2);
@@ -56,23 +55,23 @@ namespace GL3Engine {
             Shader& setUniform(c_str, const GLfloat*, GLuint, GLenum);
 
             Shader& setUniform(c_str, const Matrix<GLfloat>&);
-            inline Shader& setUniform(c_str variable, const FPoint3D& p) {
+            Shader& setUniform(c_str variable, const FPoint3D& p) {
                 glProgramUniform4f(program, getUniformLoc(variable), p.X, p.Y,
                         p.Z, 1.f);
                 return *this;
             }
-            inline Shader& setUniform(c_str variable, const Color& p) {
+            Shader& setUniform(c_str variable, const Color& p) {
                 setUniform<4>(variable, p.toArray());
                 return *this;
             }
-
-            inline GLint getProgram() const {
+            
+            GLint getProgram() const {
                 return program;
             }
             inline GLuint getUniformLoc(c_str variable) const {
                 return glGetUniformLocation(program, variable.c_str());
             }
-
+            
             ~Shader();
 
         private:

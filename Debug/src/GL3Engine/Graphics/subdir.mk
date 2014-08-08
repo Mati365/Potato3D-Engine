@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/GL3Engine/Graphics/FPSCamera.cpp \
 ../src/GL3Engine/Graphics/Light.cpp \
 ../src/GL3Engine/Graphics/MatMatrix.cpp \
 ../src/GL3Engine/Graphics/Material.cpp \
@@ -21,6 +22,7 @@ CPP_SRCS += \
 ../src/GL3Engine/Graphics/VAOpolygon.cpp 
 
 OBJS += \
+./src/GL3Engine/Graphics/FPSCamera.o \
 ./src/GL3Engine/Graphics/Light.o \
 ./src/GL3Engine/Graphics/MatMatrix.o \
 ./src/GL3Engine/Graphics/Material.o \
@@ -38,6 +40,7 @@ OBJS += \
 ./src/GL3Engine/Graphics/VAOpolygon.o 
 
 CPP_DEPS += \
+./src/GL3Engine/Graphics/FPSCamera.d \
 ./src/GL3Engine/Graphics/Light.d \
 ./src/GL3Engine/Graphics/MatMatrix.d \
 ./src/GL3Engine/Graphics/Material.d \

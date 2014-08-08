@@ -15,19 +15,19 @@
 namespace GL3Engine {
     using namespace std;
     using namespace Tools;
-
+    
     /** Matrix ROW MAJOR! */
     template<typename T> class Matrix {
         public:
             T* matrix = nullptr;
-            GLuint cols = 0,
-                    rows = 0;
+            GLuint cols = 0, rows = 0;
 
             Matrix(const Matrix<T>& matrix) {
                 *this = matrix;
             }
             Matrix(GLuint, GLuint);
             Matrix(GLuint, GLuint, const initializer_list<T>&);
+            Matrix(const Point3D<T>&);
 
             void print() const;
 
@@ -54,7 +54,7 @@ namespace GL3Engine {
                     matrix[1]
                 };
             }
-
+            
             Matrix<T> getCut(GLuint, GLuint);
 
             T get(GLuint x, GLuint y) {
@@ -63,26 +63,32 @@ namespace GL3Engine {
             T& operator[](GLuint i) {
                 return matrix[i];
             }
-            inline GLint getLength() const {
+            GLint getLength() const {
                 return rows * cols;
             }
-
+            
             ~Matrix() {
                 safeDelete(matrix, true);
             }
     };
     extern template class Matrix<GLfloat> ;
-
+    
     using FMat = Matrix<GLfloat>;
-
-    template<typename T> Matrix<T> operator*(const Matrix<T>& l,
-                                             const Matrix<T>& r) {
-        Matrix<T> temp = l;
-        temp *= r;
-        return temp;
+    
+#define DEF_EXTERN_MAT_OPER(oper) \
+    template<typename T> inline Matrix<T> operator oper(const Matrix<T>& l, \
+                                             const Matrix<T>& r) { \
+        Matrix<T> temp = l; \
+        temp oper##= r; \
+        return temp; \
     }
-    template<typename T, GLuint COLS, GLuint ROWS> class t_Matrix : public Matrix<
-            T> {
+    DEF_EXTERN_MAT_OPER(-)
+    DEF_EXTERN_MAT_OPER(+)
+    DEF_EXTERN_MAT_OPER(*)
+    
+    template<typename T, GLuint COLS, GLuint ROWS> class t_Matrix :
+                                                                    public Matrix<
+                                                                            T> {
         public:
             t_Matrix()
                     :
@@ -96,21 +102,21 @@ namespace GL3Engine {
                     :
                       Matrix<T>(COLS, ROWS, array) {
             }
-
+            
             t_Matrix<T, COLS, ROWS>& operator=(const Matrix<T>& matrix) {
                 Matrix<T>::operator =(matrix);
                 return *this;
             }
     };
-
+    
     using Mat4 = t_Matrix<GLfloat, 4, 4>;
     using Mat3 = t_Matrix<GLfloat, 3, 3>;
     using Mat2 = t_Matrix<GLfloat, 2, 2>;
-
+    
     using Vec4 = t_Matrix<GLfloat, 1, 4>;
     using Vec3 = t_Matrix<GLfloat, 1, 3>;
     using Vec2 = t_Matrix<GLfloat, 1, 2>;
-
+    
     /** Obliczenia */
     class MatMatrix {
         public:
@@ -120,15 +126,11 @@ namespace GL3Engine {
             static inline GLfloat cotan(GLfloat rad) {
                 return 1.f / tan(rad);
             }
-
+            
             /** Operacje na macierzy macierzy [ x, y, z, w ] */
             static Mat4 identity() {
                 return Mat4( {
-                        1, 0, 0, 0,
-                        0, 1, 0, 0,
-                        0, 0, 1, 0,
-                        0, 0, 0, 1
-                });
+                        1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 });
             }
             static void identity(GLuint, ...);
 
@@ -147,8 +149,8 @@ namespace GL3Engine {
              * http://www.3dcpptutorials.sk/index.php?id=2
              */
             static Mat4 perspective(GLfloat, GLfloat, GLfloat, GLfloat);
-            static Mat4 lookAt(const FPoint3D&, const FPoint3D&,
-                               const FPoint3D&);
+            static Mat4 lookAt(
+                    const FPoint3D&, const FPoint3D&, const FPoint3D&);
             static Mat4 orthof(const array<FPoint2D, 3>&);
 
             /** Obliczenia dla normal matrix */
@@ -158,9 +160,13 @@ namespace GL3Engine {
             static void inverse(Mat3*);
             static Mat3 inverse(const Mat3&);
 
-            /** Row Major */
+            /** Z shadera */
             static inline void mul(Vec4& v, const Mat4& m) {
                 v = m * v;
+            }
+            static inline void mul(vector<Vec4*> v, const Mat4& m) {
+                for (auto& _v : v)
+                    *_v = m * (*_v);
             }
     };
     class Transform {

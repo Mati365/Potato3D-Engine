@@ -7,7 +7,7 @@ namespace GL3Engine {
               RenderTarget(_size) {
         setSize(_size);
     }
-
+    
     void RenderQuad::create() {
         if (fbo_handle)
             glDeleteFramebuffers(1, &fbo_handle);
@@ -17,69 +17,55 @@ namespace GL3Engine {
         {
             // Depth buffer
             {
-                glFramebufferTexture2D(GL_FRAMEBUFFER,
-                GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                        depth_tex->getHandle(), 0);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                GL_TEXTURE_2D, depth_tex->getHandle(), 0);
             }
-
+            
             // Texture
             {
-                glFramebufferTexture2D(GL_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                        color_tex->getHandle(), 0);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                GL_TEXTURE_2D, color_tex->getHandle(), 0);
             }
             assert(
-                    glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+                    glCheckFramebufferStatus(GL_FRAMEBUFFER)
+                    == GL_FRAMEBUFFER_COMPLETE);
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        
         // QUAD
         vector<Vertex2f> vertex_array = {
-                { -1.f, -1.f, 0.f, 0.f, 0.f },
-                { 1.f, -1.f, 0.f, 1.f, 0.f },
-                { 1.f, 1.f, 0.f, 1.f, 1.f },
-                { -1.f, 1.f, 0.f, 0.f, 1.f },
-        };
-        quad.reset(new Shape2D(
                 {
-                        &vertex_array[0],
-                        vertex_array.size() * sizeof(Vertex2f),
-                        GL_ARRAY_BUFFER,
-                        0,
-                        GL_STATIC_DRAW
-                },
-                {
-                        Tile::quad_indices,
-                        6 * sizeof(GLfloat),
-                        GL_ELEMENT_ARRAY_BUFFER,
-                        0,
-                        GL_STATIC_DRAW
-                }));
+                        -1.f, -1.f, 0.f, 0.f, 0.f }, {
+                        1.f, -1.f, 0.f, 1.f, 0.f }, {
+                        1.f, 1.f, 0.f, 1.f, 1.f }, {
+                        -1.f, 1.f, 0.f, 0.f, 1.f }, };
+        quad.reset(new Shape2D( {
+                &vertex_array[0], vertex_array.size() * sizeof(Vertex2f),
+                GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW }, {
+                Tile::quad_indices, 6 * sizeof(GLfloat),
+                GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW }));
     }
-
+    
     void RenderQuad::passToShader() {
-        effect->setUniform(GL_TEXTURE_2D,
-                "color_texture", 0,
-                color_tex->getHandle())
-                .setUniform(GL_TEXTURE_2D,
-                "depth_texture", 1,
-                depth_tex->getHandle());
+        effect->setUniform(GL_TEXTURE_2D, "color_texture", 0,
+                color_tex->getHandle()).setUniform(GL_TEXTURE_2D,
+                "depth_texture", 1, depth_tex->getHandle());
     }
     void RenderQuad::draw() {
         assert(effect);
         {
             passToShader();
-            glDisable( GL_CULL_FACE);
+            glDisable(GL_CULL_FACE);
             glBindVertexArray(quad->getVAO());
             {
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
             }
             glBindVertexArray(0);
-            glEnable( GL_CULL_FACE);
+            glEnable(GL_CULL_FACE);
         }
         scene->setRenderTarget(this);
     }
-
+    
     void RenderQuad::begin() {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
         glViewport(0, 0, size.X, size.Y);
@@ -89,12 +75,12 @@ namespace GL3Engine {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, size.X, size.Y);
     }
-
+    
     RenderQuad& RenderQuad::setSize(const IPoint2D& size) {
         this->size = size;
         this->color_tex.reset(new Texture(size));
         this->depth_tex.reset(new Texture(size, GL_DEPTH_COMPONENT, GL_FLOAT));
-
+        
         if (!effect)
             setEffect(REQUIRE_RES(Shader, DEFAULT_FBO_SHADER));
         create();

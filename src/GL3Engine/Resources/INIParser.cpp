@@ -6,13 +6,13 @@
 namespace GL3Engine {
     using namespace boost;
     using namespace IO;
-
+    
     /** Dostep: Header/ID i zwraca wartosc */
     void INIParser::load(c_str& path) {
         vector<string> lines;
         string header;
         data.clear();
-
+        
         getFileContents(path, lines);
         for (string& str : lines)
             if (str[0] == '[')
@@ -20,7 +20,7 @@ namespace GL3Engine {
             else if (str[0] != ';') {
                 size_t s = str.find('=');
                 string v = str.substr(s + 1);
-
+                
                 if (v.find_first_of('"') != string::npos)
                     v = v.substr(v.find_first_of('"') + 1,
                             v.find_last_of('"') - 1);

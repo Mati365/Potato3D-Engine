@@ -60,9 +60,6 @@ vec2 pixelize(in float d) {
 	return vec2(d * floor(frag.uv.x / d), d * floor((1.0 - frag.uv.y) / d));
 }
 void calcLight(in Light light) {
-	if(light.pos.x == 2)
-		return;
-	
 	vec3 normal;
 	if(MATERIAL.tex_flag[BUMP])
 		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0);
@@ -71,7 +68,7 @@ void calcLight(in Light light) {
 	
 	// Diffuse
 	vec3	light_normal	=	normalize(abs(frag.pos - light.pos));
-	float	dist_prop		=	1.0 / (1.0 + (0.5 * pow(length(frag.pos - light.pos), 2)));
+	float	dist_prop		=	1.0 / (1.0 + (0.5 * pow(length(frag.pos - light.pos), 1)));
 	float	diffuse			=	max(dot(light_normal, normal), 0.0) 
 									* dist_prop;
 	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.0);
@@ -96,8 +93,7 @@ void calcLight(in Light light) {
 	
 	// Całość
 	if(MATERIAL.tex_flag[AMBIENT])	
-		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * 
-						light.ambient_intensity, 0.0);
+		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.0);
 	if(MATERIAL.tex_flag[DIFFUSE]) {
 		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE];
 		gl_FragColor += 

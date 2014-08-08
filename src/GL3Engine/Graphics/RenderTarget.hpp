@@ -4,16 +4,18 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    class RenderTarget : public Node {
+    class RenderTarget :
+                         public Node {
         protected:
             IPoint2D size;
 
         public:
-            RenderTarget(const IPoint2D& _size = { 0, 0 })
+            RenderTarget(const IPoint2D& _size = {
+                    0, 0 })
                     :
                       size(_size) {
             }
-
+            
             virtual void begin() = 0;
             virtual void end() = 0;
 
@@ -21,14 +23,14 @@ namespace GL3Engine {
                 this->size = size;
                 return *this;
             }
-
+            
             virtual ~RenderTarget() {
             }
     };
-    class RenderQuad : public RenderTarget {
+    class RenderQuad :
+                       public RenderTarget {
         private:
-            GLuint fbo_handle = 0,
-                    depth_render_buf = 0;
+            GLuint fbo_handle = 0, depth_render_buf = 0;
 
             unique_ptr<Texture> color_tex, depth_tex;
             unique_ptr<Shape2D> quad;
@@ -46,7 +48,7 @@ namespace GL3Engine {
             const IPoint2D& getSize() const {
                 return size;
             }
-
+            
             GLuint getFBO() const {
                 return fbo_handle;
             }
@@ -56,11 +58,11 @@ namespace GL3Engine {
             Texture& getDepthTexture() {
                 return *depth_tex.get();
             }
-
+            
             ~RenderQuad() {
                 glDeleteFramebuffers(1, &fbo_handle);
             }
-
+            
         protected:
             void create();
             void passToShader();

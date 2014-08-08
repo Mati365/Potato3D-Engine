@@ -12,7 +12,7 @@
 
 namespace GL3Engine {
     using namespace Tools;
-
+    
     class Component {
         public:
             virtual size_t getClassHash() const = 0;
@@ -20,7 +20,7 @@ namespace GL3Engine {
             }
     };
     using TypePtr = type_index;
-
+    
 #define RTTI_REG_CLASS(type) \
     public: \
     type() {} \
@@ -30,7 +30,7 @@ namespace GL3Engine {
     }
 #define CHECK_CTYPE(type) \
     static_assert(is_base_of<Component, type>::value, "Bad Component type!")
-
+    
     template<typename T>
     class MessagingSystem {
         public:
@@ -38,7 +38,7 @@ namespace GL3Engine {
             virtual ~MessagingSystem() {
             }
     };
-
+    
     class Entity {
             friend class CWorld;
 
@@ -57,14 +57,14 @@ namespace GL3Engine {
                     return dynamic_cast<C*>(components[hash].get());
                 }
             }
-
+            
             template<typename T> inline GLboolean has() const {
                 return IS_IN_MAP(components, typeid(T).hash_code());
             }
             inline GLboolean has(TypePtr ptr) const {
                 return IS_IN_MAP(components, ptr.hash_code());
             }
-
+            
             template<typename C> Entity& add() {
                 CHECK_CTYPE(C);
                 {
@@ -97,7 +97,7 @@ namespace GL3Engine {
                     :
                       c_types(_c_types) {
             }
-
+            
         protected:
             CWorld* world = nullptr;
 
@@ -109,10 +109,9 @@ namespace GL3Engine {
             CWorld* getWorld() {
                 return world;
             }
-
+            
             CSystem& delEntity(Entity* c) {
-                entities.erase(
-                        remove(entities.begin(), entities.end(), c),
+                entities.erase(remove(entities.begin(), entities.end(), c),
                         entities.end());
                 return *this;
             }
@@ -127,25 +126,28 @@ namespace GL3Engine {
             vector<Entity*>& getEntities() {
                 return entities;
             }
-
+            
             virtual void logic(Entity*) = 0;
             virtual void update() {
                 for (auto* c : entities)
                     logic(c);
             }
-
+            
             virtual ~CSystem() {
             }
     };
-
-    template<typename ... T> class CTSystem : public CSystem {
+    
+    template<typename ... T> class CTSystem :
+                                              public CSystem {
         public:
             CTSystem()
                     :
-                      CSystem( { typeid(T)... }) {
+                      CSystem( {
+                              typeid(T)... }) {
             }
     };
-    class CWorld : public Singleton<CWorld> {
+    class CWorld :
+                   public Singleton<CWorld> {
             using SystemMap = map<TypePtr, unique_ptr<CSystem>>;
             using Entities = vector<unique_ptr<Entity>>;
 
@@ -159,8 +161,7 @@ namespace GL3Engine {
                 T* obj = new T;
                 obj->setCWorld(this);
                 systems.insert(
-                        make_pair<TypePtr, unique_ptr<CSystem>>(
-                                typeid(T),
+                        make_pair<TypePtr, unique_ptr<CSystem>>(typeid(T),
                                 unique_ptr<CSystem>(obj)));
                 return *this;
             }
@@ -171,7 +172,7 @@ namespace GL3Engine {
                 }
                 return dynamic_cast<T*>(systems[typeid(T)].get());
             }
-
+            
             CWorld& regEntity(Entity* e) {
                 assert(e);
                 {
@@ -189,24 +190,25 @@ namespace GL3Engine {
                         sys.second->delEntity(e);
                     auto p = remove_if(entities.begin(), entities.end(),
                             [e](const unique_ptr<Entity>& v)
-                            {
+                            {   
                                 return v.get() == e;
                             });
                     entities.erase(p, entities.end());
                 }
                 return *this;
             }
-
+            
             inline void update() {
                 for (auto& sys : systems)
                     sys.second->update();
             }
     };
-
+    
     template<typename T> Component* createInstance() {
         return dynamic_cast<Component*>(new T);
     }
-    class CTypeManager : public Singleton<CTypeManager> {
+    class CTypeManager :
+                         public Singleton<CTypeManager> {
         protected:
             using C_INSTANCE_PTR = Component*(*)();
             map<string, C_INSTANCE_PTR> handles;

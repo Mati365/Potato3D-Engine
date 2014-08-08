@@ -40,7 +40,7 @@ namespace GL3Engine {
                 if (!initialize())
                     throw "Nie mogłem otworzyć okna!";
             }
-
+            
             void open() {
                 run();
             }
@@ -50,11 +50,11 @@ namespace GL3Engine {
             Renderer* getRenderer() {
                 return renderer;
             }
-
+            
             const FPoint2D& getBounds() const {
                 return bounds;
             }
-
+            
             ~Window();
 
         protected:
