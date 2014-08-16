@@ -17,7 +17,7 @@ namespace GL3Engine {
         
         vector<LightData> data(objects.size() - 1);
         for (auto& obj : objects)
-            if (obj->getState() == LightData::ON)
+            if (IS_SET_FLAG(obj->getType(), LightData::ENABLED))
                 data.push_back(obj->getData());
         objects.clear();
         
@@ -26,7 +26,7 @@ namespace GL3Engine {
         {
             glBufferSubData(GL_UNIFORM_BUFFER, 0, data_len, &data[0]);
             glBufferSubData(GL_UNIFORM_BUFFER,
-                    MAX_LIGHTS * sizeof(LightData) - sizeof(GLfloat),
+                    MAX_LIGHTS * sizeof(LightData),
                     sizeof(GLfloat), &size);
         }
         glBindBuffer(GL_UNIFORM_BUFFER, 0);

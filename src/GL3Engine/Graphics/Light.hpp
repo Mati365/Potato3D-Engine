@@ -16,8 +16,7 @@ namespace GL3Engine {
     //  4B extra
     // };
     struct LightData {
-            POS pos = {
-                    0.f, 0.f, 0.f };
+            POS pos = { 0.f, 0.f, 0.f };
             GLfloat stride = 0.f; // randomowa liczba
             
             COL spec_col = {
@@ -30,22 +29,24 @@ namespace GL3Engine {
             GLfloat specular_intensity = 1.f;
 
             // extra 4B
-            enum State {
-                ON,
-                OFF
+            enum Type {
+                ENABLED = 1 << 0,
+                DISABLED = 1 << 1,
+                POINT = 1 << 2,
+                DIRECT = 1 << 3
             };
-            GLfloat state = State::ON;
+            GLint type = Type::ENABLED | Type::POINT;
     };
     class Light :
                   public Node {
-        private:
+        protected:
             LightData data;
 
         public:
             void draw() override;
 
 #define ARRAY_LIGHT_SETTER(ret_type, array_size, target_variable, name) \
-            ret_type& set##name(const array<GLfloat, array_size>& array) { \
+            virtual ret_type& set##name(const array<GLfloat, array_size>& array) { \
                 memcpy(data.target_variable, &array[0], sizeof(GLfloat) * array_size); \
                 return *this; \
             }
@@ -64,18 +65,31 @@ namespace GL3Engine {
                 this->data.ambient_intensity = intensity;
                 return *this;
             }
-            Light& setState(LightData::State state) {
-                data.state = state;
+            Light& setType(GLint type) {
+                data.type = type;
                 return *this;
             }
-            GLfloat getState() const {
-                return data.state;
+            GLint getType() const {
+                return data.type;
             }
             LightData& getData() {
                 return data;
             }
     };
-    
+    // Pos przeznaczony jako kierunek padania
+    class DirectLight :
+                        public Light {
+        public:
+            DirectLight() {
+                setType(LightData::ENABLED | LightData::DIRECT);
+            }
+            ARRAY_LIGHT_SETTER(DirectLight, 3, pos, Dir)
+
+        private:
+            Light& setPos(const array<GLfloat, 3>&) {
+                return *this;
+            }
+    };
     // layout(std140) uniform LightBlock {
     // Light       lights[MAX_LIGHTS];
     // int         lights_count;
@@ -107,7 +121,7 @@ namespace GL3Engine {
             LightBatch() {
                 createBuffer();
             }
-            void draw();
+            void draw() override;
 
         private:
             void createBuffer();

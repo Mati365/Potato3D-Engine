@@ -187,20 +187,20 @@ namespace GL3Engine {
     GLuint Shader::bindToSlot(c_str variable, GLuint binding_point) {
         GLuint block_index = glGetUniformBlockIndex(program, variable.c_str());
         glUniformBlockBinding(program, block_index, binding_point);
-        // if (variable == "LightBlock") {
-        //  GLint block_size;
-        //    glGetActiveUniformBlockiv(program, block_index,
-        //    GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
-        //     const GLchar *uniformNames[1] =
-        //            {
-        //                    "light_count"
-        //            };
-        //    GLuint uniformIndices;
-        //    glGetUniformIndices(program, 1, uniformNames, &uniformIndices);
-        //    GLint uniformOffsets[1];
-        //    glGetActiveUniformsiv(program, 1, &uniformIndices,
-        //    GL_UNIFORM_OFFSET, uniformOffsets);
-        // }
+//         if (variable == "LightBlock") {
+//          GLint block_size;
+//            glGetActiveUniformBlockiv(program, block_index,
+//            GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
+//             const GLchar *uniformNames[1] =
+//                    {
+//                            "light_count"
+//                    };
+//            GLuint uniformIndices;
+//            glGetUniformIndices(program, 1, uniformNames, &uniformIndices);
+//            GLint uniformOffsets[1];
+//            glGetActiveUniformsiv(program, 1, &uniformIndices,
+//            GL_UNIFORM_OFFSET, uniformOffsets);
+//         }
         return block_index;
     }
     GLuint Shader::setUBO(

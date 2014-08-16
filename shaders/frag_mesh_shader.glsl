@@ -20,7 +20,10 @@ in FragInfo {
 // std140
 // tablica wielkosc * sizeof vec4
 // chunk vec4
-#define MAX_LIGHTS	10
+// Flagi mają dodane 1 bo enabled jest 1 + flaga
+#define MAX_LIGHTS		10
+#define	POINT_LIGHT		5
+#define	DIRECT_LIGHT	9
 struct Light {
 	vec3	pos;							//	16B
 	vec4	specular_col;					//	16B
@@ -29,7 +32,8 @@ struct Light {
 	float	ambient_intensity;				// 	4B
 	float	diffuse_intensity;	 			// 	4B
 	float	specular_intensity;  			// 	4B
-											//	4B extra
+	
+	int		type;							//	4B extra
 };
 layout(std140) uniform LightBlock {
 	Light		lights[MAX_LIGHTS];
@@ -67,8 +71,19 @@ void calcLight(in Light light) {
 		normal = normalize(frag.normal);
 	
 	// Diffuse
-	vec3	light_normal	=	normalize(abs(frag.pos - light.pos));
-	float	dist_prop		=	1.f / (1.f + (.5 * pow(length(frag.pos - light.pos), 1.f)));
+	vec3	light_normal; 
+	float	dist_prop;
+	switch(light.type) {
+		case POINT_LIGHT:
+			light_normal	= 	normalize(abs(frag.pos - light.pos));
+			dist_prop		=  	1.f / (1.f + (.5 * pow(length(frag.pos - light.pos), 1.f)));
+		break;
+		case DIRECT_LIGHT:
+			light_normal	=	frag.pos;
+			dist_prop		=	1.f;
+		break;
+	};
+	
 	float	diffuse			=	max(dot(light_normal, normal), 0.f) 
 									* dist_prop;
 	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.f);

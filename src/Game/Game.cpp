@@ -19,15 +19,17 @@ namespace Game {
         scene.createSceneNode<LightBatch>()
                 .regObject(
                 scene.createSceneNode<Light>()
-                        .setPos( { 1.f, 0.5f, 1.f })
-                        .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
-                        .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 6.f)
-                        )
-                .regObject(
-                scene.createSceneNode<Light>()
-                        .setPos( { 1.f, 0.5f, 1.f })
+                        .setPos( { 1.f, 2.5f, 1.f })
                         .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
                         .setDiffuse( { 1.f, 0.f, 0.f, 1.f, }, 1.f)
+                        .setType(LightData::ENABLED | LightData::POINT)
+                        )
+                .regObject(
+                scene.createSceneNode<DirectLight>()
+                        .setDir( { 0.f, .5f, 0.f })
+                        .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
+                        .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 3.f)
+                        .setType(LightData::ENABLED | LightData::DIRECT)
                         );
         scene.createSceneNode<Mesh>()
                 .setShape(
