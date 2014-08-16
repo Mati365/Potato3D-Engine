@@ -5,7 +5,7 @@ namespace GL3Engine {
         SDL_Init(SDL_INIT_VIDEO);
         window = SDL_CreateWindow("Debug 3D",
         SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED, bounds.X, bounds.Y, SDL_WINDOW_OPENGL);
+        SDL_WINDOWPOS_UNDEFINED, bounds.X(), bounds.Y(), SDL_WINDOW_OPENGL);
         SDL_SetRelativeMouseMode(SDL_TRUE);
         return window != nullptr;
     }
@@ -43,8 +43,10 @@ namespace GL3Engine {
                         
                     case SDL_MOUSEBUTTONDOWN:
                         case SDL_MOUSEMOTION: {
-                        IPoint2D pos;
-                        SDL_GetRelativeMouseState(&pos.X, &pos.Y);
+                        Vec2i pos;
+                        SDL_GetRelativeMouseState(
+                                &pos[0],
+                                &pos[1]);
                         renderer->getMouseEvent(pos, event.button.button);
                     }
                         break;
@@ -56,7 +58,7 @@ namespace GL3Engine {
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
-            renderer->render();
+            renderer->draw();
             
             SDL_GL_SwapWindow(window);
         }

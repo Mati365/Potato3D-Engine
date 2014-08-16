@@ -2,7 +2,7 @@
 #include "Camera.hpp"
 
 namespace GL3Engine {
-    MatrixStack::MatrixStack(const FPoint2D& _resolution)
+    MatrixStack::MatrixStack(const Vec2i& _resolution)
             :
               resolution(_resolution) {
         switchMode(Mode::_3D);
@@ -17,7 +17,7 @@ namespace GL3Engine {
                 glEnable(GL_DEPTH_TEST);
                 {
                     projection = MatMatrix::perspective(45.f,
-                            resolution.X / resolution.Y, .1f, 100.f);
+                            resolution[0] / resolution[1], .1f, 100.f);
                     MatMatrix::identity(1, &model);
                     updateCameraCoords();
                 }
@@ -30,12 +30,10 @@ namespace GL3Engine {
                 glDisable(GL_DEPTH_TEST);
                 {
                     projection = MatMatrix::orthof( {
-                            FPoint2D {
-                                    -resolution.X / 2, resolution.X / 2 },
-                            FPoint2D {
-                                    -resolution.Y / 2, resolution.Y / 2 },
-                            FPoint2D {
-                                    0.f, 1.f }, });
+                            Vec2 { -resolution[0] / 2.f, resolution[0] / 2.f },
+                            Vec2 { -resolution[1] / 2.f, resolution[1] / 2.f },
+                            Vec2 { 0.f, 1.f },
+                    });
                     vp_matrix = projection;
                     MatMatrix::identity(2, &view, &model);
                 }
@@ -50,13 +48,13 @@ namespace GL3Engine {
                 { 0, 1, 0 });
         vp_matrix = projection * view;
     }
-    
     MatrixStack& MatrixStack::setCam(Camera* active_cam) {
         this->active_cam = active_cam;
         updateCameraCoords();
         return *this;
 
     }
+
     void MatrixStack::pushTransform() {
         M_STACK_ARRAY array;
         memcpy(array.array, model.matrix, 16 * sizeof(GLfloat));

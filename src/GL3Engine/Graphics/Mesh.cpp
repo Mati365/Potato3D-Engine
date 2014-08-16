@@ -17,8 +17,8 @@ namespace GL3Engine {
         
         for (Material* mat : shape->getMaterials())
             material_cache.push_back(mat->getMaterialBufferData());
-        ubo_handle = effect->setUBO("MaterialBlock", nullptr,
-                GL_DYNAMIC_DRAW, 1);
+        ubo_handle = effect->setUBO("MaterialBlock", nullptr, GL_DYNAMIC_DRAW,
+                1);
     }
     
     void Mesh::passToShader() {
@@ -40,13 +40,14 @@ namespace GL3Engine {
                 .setUniform("matrix.normal",
                         MatMatrix::inverse(matrix.model.getCut(3, 3)))
 
-                .setUniform("matrix.cam", matrix.getActiveCamera()->getPos());
+                .setUniform("matrix.cam",
+                        matrix.getActiveCamera()->getPos());
             }
             if (shape->getMaterials().empty())
                 effect->setUniform("col", shape->getColor());
             else {
                 effect->setUniform(
-                        GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
+                GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
                         shape->getMaterials()[0]->tex_array->getHandle());
                 effect->changeUBOData(ubo_handle, &material_cache[0],
                         material_cache.size() * sizeof(MaterialBufferData));
@@ -63,7 +64,7 @@ namespace GL3Engine {
                 glDrawArrays(render_mode, 0, shape->getVerticesCount());
             else
                 glDrawElements(render_mode, shape->getIndicesCount(),
-                        GL_UNSIGNED_SHORT, nullptr);
+                GL_UNSIGNED_SHORT, nullptr);
             glBindVertexArray(0);
         }
     }

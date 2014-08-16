@@ -11,159 +11,184 @@ namespace GL3Engine {
     class GLSLloader :
                        public Loader<Shader> {
         public:
-            static string putToFileName(string, c_str&);
-            Shader* load(c_str&);
+            static string putToFileName(string, c_str);
+            Shader* load(c_str);
     };
     class Textureloader :
                           public Loader<Texture> {
         public:
-            Texture* load(c_str& str) {
+            Texture* load(c_str str) {
                 return new Texture(str);
             }
     };
     
     /** MESHE */
-    template<typename T> class ASCIIMeshLoader :
-                                                 public Loader<T> {
-        protected:
-            map<string, GLint> headers;
+    namespace OBJ {
+        using HEADER_STACK = vector<Vec3>;
+        struct IndexStack {
+                HEADER_STACK normals, vertices;
+                vector<Vec2> uv;
+        };
 
-        public:
-            ASCIIMeshLoader(const map<string, GLint>& _headers)
-                    :
-                      headers(_headers) {
-            }
-            
-            virtual void onNewHeader(GLint, vector<string>&) = 0;
-            virtual void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&) = 0;
+        template<typename T> class ASCIIMeshLoader :
+                                                     public Loader<T>,
+                                                     public MemAlloc<T> {
+            protected:
+                map<string, GLint> headers;
 
-            virtual T* createObject() = 0;
-            virtual void releaseMemory() = 0;
+            public:
+                ASCIIMeshLoader(const map<string, GLint>& _headers)
+                        :
+                          headers(_headers) {
+                }
 
-            static FPoint3D getVec3D(LOADER_ITERATOR& iter) {
-                FPoint3D v;
-                sscanf((*iter + " " + *(iter + 1) + " " + *(iter + 2)).c_str(),
-                        "%f %f %f", &v.X, &v.Y, &v.Z);
-                iter += 2;
-                return v;
-            }
-            static FPoint2D getVec2D(LOADER_ITERATOR& iter) {
-                FPoint2D v;
-                sscanf((*iter + " " + *(iter + 1)).c_str(), "%f %f", &v.X,
-                        &v.Y);
-                iter++;
-                return v;
-            }
-            
-            T* load(c_str&);
-            virtual ~ASCIIMeshLoader() {
-            }
-            
-        private:
-            T* selfCreateObject();
-    };
-    class MTLloader :
-                      public ASCIIMeshLoader<MATERIALS> {
-        private:
-            enum HEADER
-                            : GLint {
-                    NONE,
-                NAME,
-                SHINE,
-                TRANSPARENT,
+                virtual void onNewHeader(GLint, vector<string>&) = 0;
+                virtual void onHeaderArgument(c_str, GLint,
+                        LOADER_ITERATOR&) = 0;
+
+                static Vec3 getVec3D(LOADER_ITERATOR&);
+                static Vec2 getVec2D(LOADER_ITERATOR&);
                 
-                AMBIENT_COL,
-                DIFFUSE_COL,
-                SPECULAR_COL,
+                T* load(c_str&);
+                virtual ~ASCIIMeshLoader() {
+                }
                 
-                AMBIENT_TEX,
-                DIFFUSE_TEX,
-                SPECULAR_TEX,
-                ALPHA_TEX,
-                BUMP_TEX
-            };
+            private:
+                T* selfCreateObject();
+        };
+        class MTLloader :
+                          public ASCIIMeshLoader<MATERIALS> {
+            private:
+                enum HEADER
+                                    : GLint {
+                        NONE,
+                    NAME,
+                    SHINE,
+                    TRANSPARENT,
 
-            vector<Material*> mtl;
-            vector<string> textures;
+                    AMBIENT_COL,
+                    DIFFUSE_COL,
+                    SPECULAR_COL,
 
-        public:
-            MTLloader();
+                    AMBIENT_TEX,
+                    DIFFUSE_TEX,
+                    SPECULAR_TEX,
+                    ALPHA_TEX,
+                    BUMP_TEX
+                };
+                MATERIALS mtl;
 
-            void onNewHeader(GLint, vector<string>&) {
-            }
-            void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
+            public:
+                MTLloader();
 
-            /** Zwraca ostatni element!!! */
-            GLuint getSize() {
-                return mtl.size();
-            }
-            MATERIALS* createObject() {
-                packTextures();
-                return new MATERIALS(mtl);
-            }
-            
-            void releaseMemory() {
-                mtl.clear();
-                textures.clear();
-            }
-            
-        private:
-            void packTextures();
-    };
-    class OBJloader :
-                      public ASCIIMeshLoader<Shape3D> {
-        private:
-            using HEADER_STACK = vector<FPoint3D>;
+                void onNewHeader(GLint, vector<string>&) {
+                }
+                void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
+                static TextureArray* packTextures(MATERIALS&);
 
-            struct ParseStack {
-                    HEADER_STACK normals, vertices;
-                    vector<FPoint2D> uv;
-
-                    void clear() {
-                        normals.clear();
-                        vertices.clear();
-                        uv.clear();
-                    }
-            };
-            enum HEADER
-                            : GLint {
-                    NONE,
-                VERTEX,
-                NORMAL,
-                TEXTURE,
-                FACE,
+                /** Zwraca ostatni element!!! */
+                GLuint getSize() {
+                    return mtl.size();
+                }
+                MATERIALS* createObject() {
+                    MTLloader::packTextures(mtl);
+                    return new MATERIALS(mtl);
+                }
                 
-                LOAD_MATERIAL,
-                USE_MATERIAL
-            };
+                void releaseMemory() {
+                    mtl.clear();
+                }
+        };
+        class OBJloader :
+                          public ASCIIMeshLoader<Shape3D> {
+            private:
+                enum HEADER
+                                    : GLint {
+                        NONE,
+                    VERTEX,
+                    NORMAL,
+                    TEXTURE,
+                    FACE,
 
-            // Dane z pliku *.obj
-            ParseStack indices;
-            vector<Vertex4f> polygon, vertex_array;
+                    LOAD_MATERIAL,
+                    USE_MATERIAL
+                };
 
-            // Dane z pliku *.mtl
-            unique_ptr<MTLloader> mtl_loader;
-            MATERIALS materials;
-            GLint used_material = -1;
+                // OBJ
+                IndexStack indices;
+                vector<Vertex4f> polygon, vertex_array;
 
-        public:
-            OBJloader();
+                // MTL
+                unique_ptr<MTLloader> mtl_loader;
+                MATERIALS materials;
+                GLint used_material = -1;
 
-            void onNewHeader(GLint, vector<string>&);
-            void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
+            public:
+                OBJloader();
 
-            Shape3D* createObject();
-            void releaseMemory();
+                void onNewHeader(GLint, vector<string>&);
+                void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
 
-        private:
-            void finalizePolygon() {
-                vertex_array.insert(vertex_array.end(), polygon.begin(),
-                        polygon.end());
-                polygon.clear();
-            }
-            
-            Vertex4f getVertex(LOADER_ITERATOR& iter);
-    };
+                Shape3D* createObject();
+                void releaseMemory();
+
+            private:
+                void finalizePolygon() {
+                    vertex_array.insert(vertex_array.end(), polygon.begin(),
+                            polygon.end());
+                    polygon.clear();
+                }
+
+                Vertex4f getVertex(LOADER_ITERATOR& iter);
+        };
+    }
+    namespace MD5 {
+        struct Joint {
+                string name;
+                GLint parent_index;
+                POS pos;
+                Vec4 orient;
+        };
+        struct Vertex {
+                GLuint index;
+                UV uv;
+                GLuint start_weight;
+                GLuint weight_count;
+        };
+        struct Weight {
+                GLuint index;
+                GLuint joint_index;
+                GLfloat bias;
+                POS pos;
+        };
+        struct Pack {
+                string shader_path;
+                deque<Vertex> vertices;
+                deque<Vec3> tris;
+                deque<Weight> weights;
+        };
+        struct MeshInfo {
+                deque<Joint> joints;
+                deque<Pack> meshes;
+
+                inline Pack& lastMesh() {
+                    return meshes.back();
+                }
+        };
+
+        class MD5loader :
+                          public Loader<Shape3D> {
+            private:
+                vector<Vertex4f> vertices;
+                MeshInfo mesh;
+
+            public:
+                Shape3D* load(c_str&);
+
+            private:
+                void loadMeshInfo(ifstream&);
+        };
+    }
 }
 
 #endif

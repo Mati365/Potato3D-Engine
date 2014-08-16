@@ -10,15 +10,6 @@ namespace GL3Engine {
         memset(matrix, 0, rows * cols * sizeof(GLfloat));
     }
     template<typename T>
-    Matrix<T>::Matrix(const Point3D<T>& point)
-            :
-              Matrix(1, 4) {
-        matrix[0] = point.X;
-        matrix[1] = point.Y;
-        matrix[2] = point.Z;
-        matrix[3] = 1.f;
-    }
-    template<typename T>
     Matrix<T>::Matrix(
             GLuint _cols, GLuint _rows, const initializer_list<T>& array)
             :
@@ -26,6 +17,8 @@ namespace GL3Engine {
         for (GLuint i = 0; i < array.size(); ++i)
             matrix[i] = *(array.begin() + i);
     }
+
+#ifdef DEBUG
     template<typename T>
     void Matrix<T>::print() const {
         for (GLuint i = 0; i < rows; ++i) {
@@ -34,6 +27,7 @@ namespace GL3Engine {
             cout << endl;
         }
     }
+#endif
     
     /** OPERATORY */
     template<typename T>
@@ -53,10 +47,9 @@ namespace GL3Engine {
                             * matrix.matrix[k * matrix.cols + i];
                 temp[j * matrix.cols + i] = sum;
             }
-        
-        safeDelete<GLfloat>(this->matrix, true);
-        
         cols = matrix.cols;
+        
+        safeDelete(this->matrix, true);
         this->matrix = temp;
         
         return *this;
@@ -65,27 +58,35 @@ namespace GL3Engine {
     template<typename T> Matrix<T>& addMat(
             Matrix<T>& a, const Matrix<T>& b, GLfloat m) {
         for (GLuint i = 0; i < a.rows; ++i)
-            for (GLuint j = 0, index = 0; j < a.cols;
-                    ++j, index = i * a.cols + j)
+            for (GLuint j = 0; j < b.cols; ++j) {
+                GLuint index = i * a.cols + j;
                 a.matrix[index] += b.matrix[index] * m;
+            }
         return a;
     }
     template<typename T>
     Matrix<T>& Matrix<T>::operator+=(const Matrix<T>& matrix) {
-        return addMat(*this, matrix, 1);;
+        return addMat(*this, matrix, 1.f);
     }
     template<typename T>
     Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& matrix) {
-        return addMat(*this, matrix, -1);
+        return addMat(*this, matrix, -1.f);
+    }
+    template<typename T>
+    Matrix<T> Matrix<T>::operator-() const {
+        Matrix<T> mat(cols, rows);
+        for (GLuint i = 0; i < cols * rows; ++i)
+            mat[i] = -matrix[i];
+        return mat;
     }
     
     template<typename T>
     Matrix<T>& Matrix<T>::operator=(const Matrix<T>& matrix) {
-        if (rows != matrix.rows && cols != matrix.cols) {
+        if (rows != matrix.rows || cols != matrix.cols) {
             rows = matrix.rows;
             cols = matrix.cols;
             
-            safeDelete<GLfloat>(this->matrix, true);
+            safeDelete(this->matrix, true);
             this->matrix = new T[rows * cols];
         }
         memcpy(this->matrix, matrix.matrix, rows * cols * sizeof(GLfloat));
@@ -93,7 +94,7 @@ namespace GL3Engine {
     }
     template<typename T>
     Matrix<T>& Matrix<T>::operator=(T* dynamic_array) {
-        safeDelete<GLfloat>(this->matrix, true);
+        safeDelete(this->matrix, true);
         this->matrix = dynamic_array;
         return *this;
     }
@@ -112,5 +113,6 @@ namespace GL3Engine {
     }
     
     template class Matrix<GLfloat> ;
+    template class Matrix<GLint> ;
 }
 

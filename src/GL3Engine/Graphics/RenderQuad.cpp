@@ -2,7 +2,7 @@
 #include "../Resources/Resources.hpp"
 
 namespace GL3Engine {
-    RenderQuad::RenderQuad(const IPoint2D& _size)
+    RenderQuad::RenderQuad(const Vec2i& _size)
             :
               RenderTarget(_size) {
         setSize(_size);
@@ -68,15 +68,15 @@ namespace GL3Engine {
     
     void RenderQuad::begin() {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
-        glViewport(0, 0, size.X, size.Y);
+        glViewport(0, 0, size[0], size[1]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     void RenderQuad::end() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, size.X, size.Y);
+        glViewport(0, 0, size[0], size[1]);
     }
     
-    RenderQuad& RenderQuad::setSize(const IPoint2D& size) {
+    RenderQuad& RenderQuad::setSize(const Vec2i& size) {
         this->size = size;
         this->color_tex.reset(new Texture(size));
         this->depth_tex.reset(new Texture(size, GL_DEPTH_COMPONENT, GL_FLOAT));

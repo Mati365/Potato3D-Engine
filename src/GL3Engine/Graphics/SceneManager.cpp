@@ -23,7 +23,7 @@ namespace GL3Engine {
             n->func_name(__VA_ARGS__)) \
             return true; \
     return false;
-    GLboolean SceneManager::getMouseEvent(const IPoint2D& p, GLuint btn) {
+    GLboolean SceneManager::getMouseEvent(const Vec2i& p, GLuint btn) {
         ITER_DEF(getMouseEvent, p, btn)
     }
     GLboolean SceneManager::getKeyEvent(GLchar c) {

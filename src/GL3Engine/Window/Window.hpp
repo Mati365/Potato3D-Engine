@@ -6,16 +6,11 @@
 #include "../Graphics/Primitives.hpp"
 
 namespace GL3Engine {
-    class Renderer {
+    class Renderer :
+                     public Drawable,
+                     public WindowEventListener {
         public:
             virtual void init() = 0;
-
-            virtual void getKeyEvent(SDL_Keycode) {
-            }
-            virtual void getMouseEvent(const IPoint2D&, GLuint) {
-            }
-            virtual void render() = 0;
-
             virtual ~Renderer() {
             }
     };
@@ -30,11 +25,11 @@ namespace GL3Engine {
             GLuint flags = Flags::RUNNING;
 
             SDL_Window* window;
-            FPoint2D bounds;
+            Vec2i bounds;
             Renderer* renderer = nullptr;
 
         public:
-            Window(const FPoint2D& _bounds)
+            Window(const Vec2i& _bounds)
                     :
                       bounds(_bounds) {
                 if (!initialize())
@@ -51,7 +46,7 @@ namespace GL3Engine {
                 return renderer;
             }
             
-            const FPoint2D& getBounds() const {
+            const Vec2i& getBounds() const {
                 return bounds;
             }
             

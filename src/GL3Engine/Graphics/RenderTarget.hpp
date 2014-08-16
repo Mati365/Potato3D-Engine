@@ -7,11 +7,10 @@ namespace GL3Engine {
     class RenderTarget :
                          public Node {
         protected:
-            IPoint2D size;
+            Vec2i size;
 
         public:
-            RenderTarget(const IPoint2D& _size = {
-                    0, 0 })
+            RenderTarget(const Vec2i& _size = { 0, 0 })
                     :
                       size(_size) {
             }
@@ -19,7 +18,7 @@ namespace GL3Engine {
             virtual void begin() = 0;
             virtual void end() = 0;
 
-            virtual RenderTarget& setSize(const IPoint2D& size) {
+            virtual RenderTarget& setSize(const Vec2i& size) {
                 this->size = size;
                 return *this;
             }
@@ -38,14 +37,14 @@ namespace GL3Engine {
         public:
             RenderQuad() {
             }
-            RenderQuad(const IPoint2D&);
-            void draw();
+            RenderQuad(const Vec2i&);
 
+            void draw() override;
             void begin();
             void end();
 
-            RenderQuad& setSize(const IPoint2D&);
-            const IPoint2D& getSize() const {
+            RenderQuad& setSize(const Vec2i&) override;
+            const Vec2i& getSize() const {
                 return size;
             }
             

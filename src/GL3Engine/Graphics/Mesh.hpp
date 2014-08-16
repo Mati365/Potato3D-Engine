@@ -74,7 +74,7 @@ namespace GL3Engine {
                     const GL_BUFFER_DATA& vertices,
                     const GL_BUFFER_DATA& indices);
 
-            ~VAOpolygon();
+            virtual ~VAOpolygon();
 
         private:
             void create(const GL_BUFFER_DATA&, const GL_BUFFER_DATA&);
@@ -95,7 +95,7 @@ namespace GL3Engine {
 
         public:
             Mesh(Shape3D* _shape = nullptr);
-            void draw();
+            void draw() override;
 
             Mesh& setShape(Shape3D* shape) {
                 this->shape = shape;

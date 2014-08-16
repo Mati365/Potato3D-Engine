@@ -11,13 +11,13 @@ namespace GL3Engine {
         createBuffer();
     }
     
-    Text& Text::setPos(const FPoint3D& pos) {
+    Text& Text::setPos(const Vec3& pos) {
         MatMatrix::translate(this->transform.model, pos);
         return *this;
     }
     Text& Text::setSize(GLfloat size) {
-        MatMatrix::scale(this->transform.model, {
-                size, size / font->getCells().Y, 1.f });
+        MatMatrix::scale(this->transform.model,
+                { size, size / font->getCells().Y(), 1.f });
         return *this;
     }
     Text& Text::setText(const string& text) {
@@ -27,13 +27,13 @@ namespace GL3Engine {
         vector<Vertex2f> vertex_buffer;
         vector<GLuint> index_buffer;
         
-        FPoint2D cursor(0.f, 0.f);
-        FPoint2D cell_size = font->getCellSize();
+        Vec2 cursor = { 0.f, 0.f };
+        Vec2 cell_size = font->getCellSize();
         
         for (char c : text) {
             if (c == '\n') {
-                cursor.X = 0.f;
-                cursor.Y -= cell_size.Y;
+                cursor[0] = 0.f;
+                cursor[1] -= cell_size[1];
                 continue;
             }
             TILE_ITER iter = font->getCharacter(c);
@@ -42,18 +42,16 @@ namespace GL3Engine {
                 for (GLuint i = 0; i < 4; ++i) {
                     TILE_ITER _v = iter + i;
                     vertex_buffer.push_back(
-                            {
-                                    {
-                                            _v->pos[0] + cursor.X, _v->pos[1]
-                                                    + cursor.Y, _v->pos[2] }, {
-                                            _v->uv[0], _v->uv[1] } });
+                            { { _v->pos[0] + cursor[0], _v->pos[1]
+                                    + cursor[1], _v->pos[2] },
+                                    { _v->uv[0], _v->uv[1] } });
                 }
                 // Index
                 for (GLuint i = 0; i < 6; ++i)
                     index_buffer.push_back(
                             Tile::quad_indices[i] + vertex_buffer.size() - 4);
             }
-            cursor.X += cell_size.X;
+            cursor[0] += cell_size[0];
         }
         shape->changeData( {
                 &vertex_buffer[0], vertex_buffer.size() * sizeof(Vertex2f),

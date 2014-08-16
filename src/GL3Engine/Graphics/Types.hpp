@@ -25,11 +25,8 @@ namespace GL3Engine {
                     col[3]
                 };
             }
-            Color& operator=(const FPoint3D& p) {
-                col[0] = p.X;
-                col[1] = p.Y;
-                col[2] = p.Z;
-                col[3] = 1.f;
+            Color& operator=(const Vec4& p) {
+                memcpy(col, p.matrix, 4 * sizeof(GLfloat));
                 return *this;
             }
             

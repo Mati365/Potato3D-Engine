@@ -2,15 +2,13 @@
 #define MATRIX_HPP_
 #include <string.h>
 #include <list>
-#include <math.h>
+#include <cmath>
 #include <array>
 #include <utility>
 #include <GL/glew.h>
 #include <GL/glu.h>
 
 #include "../Tools.hpp"
-#include "Dimensions.hpp"
-#include "ECS.hpp"
 
 namespace GL3Engine {
     using namespace std;
@@ -27,9 +25,10 @@ namespace GL3Engine {
             }
             Matrix(GLuint, GLuint);
             Matrix(GLuint, GLuint, const initializer_list<T>&);
-            Matrix(const Point3D<T>&);
 
+#ifdef DEBUG
             void print() const;
+            #endif
 
             /** Operacje na macierzach */
             Matrix<T>& operator*=(T);
@@ -41,28 +40,23 @@ namespace GL3Engine {
             Matrix<T>& operator=(const Matrix<T>&);
             Matrix<T>& operator=(T*);
 
-            operator Point3D<T>() const {
-                return {
-                    matrix[0],
-                    matrix[1],
-                    matrix[2]
-                };
-            }
-            operator Point2D<T>() const {
-                return {
-                    matrix[0],
-                    matrix[1]
-                };
-            }
-            
+            Matrix<T> operator-() const;
             Matrix<T> getCut(GLuint, GLuint);
 
-            T get(GLuint x, GLuint y) {
+            inline void copyTo(T* array, GLuint len) {
+                memcpy(array, matrix, len * sizeof(T));
+            }
+
+            T get(GLuint index) const {
+                return matrix[index];
+            }
+            T get(GLuint x, GLuint y) const {
                 return matrix[y * cols + x];
             }
             T& operator[](GLuint i) {
                 return matrix[i];
             }
+
             GLint getLength() const {
                 return rows * cols;
             }
@@ -72,9 +66,10 @@ namespace GL3Engine {
             }
     };
     extern template class Matrix<GLfloat> ;
+    extern template class Matrix<GLint> ;
     
-    using FMat = Matrix<GLfloat>;
-    
+    using fMat = Matrix<GLfloat>;
+
 #define DEF_EXTERN_MAT_OPER(oper) \
     template<typename T> inline Matrix<T> operator oper(const Matrix<T>& l, \
                                              const Matrix<T>& r) { \
@@ -107,6 +102,16 @@ namespace GL3Engine {
                 Matrix<T>::operator =(matrix);
                 return *this;
             }
+
+#define VEC_GETTER(name, index) \
+            T name() const { return this->matrix[index]; } \
+            t_Matrix<T, COLS, ROWS>& set##name(T obj) { this->matrix[index] = obj; return *this; }
+
+            VEC_GETTER(X, 0)
+            VEC_GETTER(Y, 1)
+            VEC_GETTER(Z, 2)
+            VEC_GETTER(W, 3)
+
     };
     
     using Mat4 = t_Matrix<GLfloat, 4, 4>;
@@ -117,6 +122,10 @@ namespace GL3Engine {
     using Vec3 = t_Matrix<GLfloat, 1, 3>;
     using Vec2 = t_Matrix<GLfloat, 1, 2>;
     
+    using Vec2i = t_Matrix<GLint, 1, 2>;
+    using Vec3i = t_Matrix<GLint, 1, 3>;
+    using Vec4i = t_Matrix<GLint, 1, 4>;
+
     /** Obliczenia */
     class MatMatrix {
         public:
@@ -134,14 +143,14 @@ namespace GL3Engine {
             }
             static void identity(GLuint, ...);
 
-            static const Mat4& translate(const FPoint3D&);
-            static void translate(FMat&, const FPoint3D&);
+            static const Mat4& translate(const Vec3&);
+            static void translate(fMat&, const Vec3&);
 
-            static const Mat4& scale(const FPoint3D&);
-            static void scale(FMat&, const FPoint3D&);
+            static const Mat4& scale(const Vec3&);
+            static void scale(fMat&, const Vec3&);
 
-            static const Mat4& rotate(GLfloat, const FPoint3D&);
-            static void rotate(FMat&, GLfloat, const FPoint3D&);
+            static const Mat4& rotate(GLfloat, const Vec3&);
+            static void rotate(fMat&, GLfloat, const Vec3&);
 
             /**
              * Obiliczenia dla MVP
@@ -149,18 +158,27 @@ namespace GL3Engine {
              * http://www.3dcpptutorials.sk/index.php?id=2
              */
             static Mat4 perspective(GLfloat, GLfloat, GLfloat, GLfloat);
-            static Mat4 lookAt(
-                    const FPoint3D&, const FPoint3D&, const FPoint3D&);
-            static Mat4 orthof(const array<FPoint2D, 3>&);
+            static Mat4 lookAt(const Vec4&, const Vec4&, const Vec4&);
+            static Mat4 orthof(const array<Vec2, 3>&);
 
             /** Obliczenia dla normal matrix */
-            static void transpose(const FMat&, GLfloat*);
-            static FMat transpose(const FMat&);
+            static void transpose(const fMat&, GLfloat*);
+            static fMat transpose(const fMat&);
 
             static void inverse(Mat3*);
             static Mat3 inverse(const Mat3&);
 
-            /** Z shadera */
+            static inline GLfloat length(const Vec3& v) {
+                return sqrt(v.X() * v.X() + v.Y() * v.Y() + v.Z() * v.Z());
+            }
+            static GLfloat distance(const Vec3&, const Vec3&);
+
+            static void normalize(Vec4&);
+            static Vec4 normalize(const Vec4&);
+
+            static Vec4 cross(const Vec3&, const Vec3&);
+            static GLfloat dot(const Vec3&, const Vec3&);
+
             static inline void mul(Vec4& v, const Mat4& m) {
                 v = m * v;
             }
@@ -168,6 +186,9 @@ namespace GL3Engine {
                 for (auto& _v : v)
                     *_v = m * (*_v);
             }
+
+            static void calcW(Vec4&);
+            static Vec4 calcW(const Vec4&);
     };
     class Transform {
         public:

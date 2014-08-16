@@ -46,6 +46,17 @@ namespace GL3Engine {
     }
     
     /** UNIFORMY */
+    Shader& Shader::setUniform(c_str variable, const Vec4& p) {
+        glProgramUniform4f(
+                program,
+                getUniformLoc(variable),
+                p.X(),
+                p.Y(),
+                p.Z(),
+                p.W());
+        return *this;
+    }
+
     Shader& Shader::setUniform(c_str variable, GLfloat value) {
         glProgramUniform1f(program, getUniformLoc(variable), value);
         return *this;

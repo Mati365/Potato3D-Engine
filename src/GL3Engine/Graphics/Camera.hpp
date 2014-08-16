@@ -9,8 +9,7 @@ namespace GL3Engine {
             static constexpr GLfloat VIEW_DISTANCE = 6.f;
 
         protected:
-            Vec4 pos;
-            Vec4 target;
+            Vec4 pos, target;
 
         public:
             Camera() {
@@ -32,7 +31,7 @@ namespace GL3Engine {
             SET_VEC4_VALUE(Pos, pos)
             SET_VEC4_VALUE(Target, target)
 
-            void draw() {
+            void draw() override {
                 scene->getWorldMatrix().setCam(this);
             }
     };
@@ -57,8 +56,8 @@ namespace GL3Engine {
                       Camera(_pos, _target) {
             }
             
-            GLboolean getMouseEvent(const IPoint2D&, GLuint);
-            GLboolean getKeyEvent(GLchar);
+            GLboolean getMouseEvent(const Vec2i&, GLuint) override;
+            GLboolean getKeyEvent(GLchar) override;
 
             GLuint getFlags() const {
                 return flags;

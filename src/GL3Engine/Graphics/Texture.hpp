@@ -24,23 +24,25 @@ namespace GL3Engine {
 #define DEFAULT_TEX_FLAGS CLAMP_TO_EDGE | NEAREST
             GLuint handle = 0, flags = DEFAULT_TEX_FLAGS;
 
-            IPoint2D size;
+            Vec2i size;
 
         public:
             Texture() {
             }
             Texture(c_str);
             Texture(c_str, GLuint);
-            Texture(const IPoint2D&, GLenum type = GL_RGBA, GLenum bytes =
-            GL_UNSIGNED_BYTE, GLuint flags = DEFAULT_TEX_FLAGS);
+            Texture(const Vec2i&,
+                    GLenum type = GL_RGBA,
+                    GLenum bytes = GL_UNSIGNED_BYTE,
+                    GLuint flags = DEFAULT_TEX_FLAGS);
 
             void loadTexture(c_str);
-            void generate(const IPoint2D&, GLenum, GLenum);
+            void generate(const Vec2i&, GLenum, GLenum);
 
             GLuint getHandle() const {
                 return handle;
             }
-            const IPoint2D& getSize() const {
+            const Vec2i& getSize() const {
                 return size;
             }
             
@@ -90,25 +92,25 @@ namespace GL3Engine {
 
         protected:
             Texture* tex;
-            IPoint2D cells;
-            FPoint2D cell_size;
+            Vec2i cells;
+            Vec2 cell_size;
 
             vector<Vertex2f> uv;
 
         public:
-            Tile(Texture*, IPoint2D);
+            Tile(Texture*, const Vec2i&);
 
-            const IPoint2D& getCells() const {
+            const Vec2i& getCells() const {
                 return cells;
             }
-            const FPoint2D& getCellSize() const {
+            const Vec2& getCellSize() const {
                 return cell_size;
             }
             GLuint getHandle() const {
                 return tex->getHandle();
             }
             
-            const IPoint2D& getSize() const {
+            const Vec2i& getSize() const {
                 return tex->getSize();
             }
             const Texture* getTexture() const {

@@ -3,6 +3,8 @@
 #include "Loaders.hpp"
 
 namespace GL3Engine {
+    using namespace OBJ;
+
     /* MATERIAŁY */
     MTLloader::MTLloader()
             :
@@ -48,7 +50,7 @@ namespace GL3Engine {
         DEFINE_1DTEX(ALPHA_TEX, Material::ALPHA);
         DEFINE_1DTEX(BUMP_TEX, Material::BUMP);
     }
-    void MTLloader::packTextures() {
+    TextureArray* MTLloader::packTextures(MATERIALS& mtl) {
         vector<string> textures;
         for (Material* material : mtl)
             for (string& str : material->tex)
@@ -57,6 +59,7 @@ namespace GL3Engine {
         TextureArray* array = new TextureArray(textures);
         for (Material* material : mtl)
             material->tex_array.reset(array);
+        return array;
     }
     
     /* SIATKI */
@@ -129,20 +132,20 @@ namespace GL3Engine {
                 materials);
     }
     void OBJloader::releaseMemory() {
-        indices.clear();
+        indices = {};
         polygon.clear();
         vertex_array.clear();
         materials.clear();
         used_material = -1;
     }
-    
+
     Vertex4f OBJloader::getVertex(LOADER_ITERATOR& iter) {
-        Vertex4f v = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0, 0 }, -1 };
+        Vertex4f v = { { 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f }, { 0.f, 0.f }, -1 };
         string param = *iter;
         GLfloat args[3];
         
 #define SHORT_COPY(size, arg_index, variable, destination_variable) \
-                   arrayToRaw<GLfloat,size>(indices.variable[args[arg_index] - 1].toArray(), v.destination_variable)
+                    indices.variable[args[arg_index] - 1].copyTo(v.destination_variable, size)
         
         switch (count(param.begin(), param.end(), '/')) {
             // v1

@@ -3,6 +3,13 @@
 
 #include "Tools.hpp"
 
+namespace GL3Engine {
+    GLuint operator*(GLuint number, std::function<void(void)> func) {
+        for (GLuint i = 0; i < number; ++i)
+            func();
+        return number;
+    }
+}
 namespace Tools {
     deque<Log> Log::logs;
     
@@ -13,12 +20,16 @@ namespace Tools {
     }
     void Log::putLog(Log::Flag flag, const string& str) {
         static const char* flag_caption[] = {
-                "> !CRITICAL!", "> !WARNING!", "> !ERROR!" };
-        
+                "> !CRITICAL!",
+                "> !WARNING!",
+                "> !ERROR!"
+        };
         logs.push_back( {
                 flag, str });
         cout << string(flag_caption[static_cast<GLint>(flag)]) + " " + str
                 << endl;
+        if (flag == Log::CRITICAL)
+            exit(1);
     }
     vector<string> tokenize(const string& line, char sep) {
         vector<string> buf;

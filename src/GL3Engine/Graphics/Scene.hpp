@@ -13,13 +13,9 @@ namespace GL3Engine {
             virtual ~Drawable() {
             }
     };
-    
-    class SceneManager;
-    class RenderTarget;
-    
     class WindowEventListener {
         public:
-            virtual GLboolean getMouseEvent(const IPoint2D&, GLuint) {
+            virtual GLboolean getMouseEvent(const Vec2i&, GLuint) {
                 return false;
             }
             virtual GLboolean getKeyEvent(GLchar) {
@@ -28,6 +24,10 @@ namespace GL3Engine {
             virtual ~WindowEventListener() {
             }
     };
+    
+    class SceneManager;
+    class RenderTarget;
+    
     class Node :
                  public Drawable,
                  public WindowEventListener {
@@ -108,11 +108,11 @@ namespace GL3Engine {
             RenderTarget* target = nullptr;
 
             SceneFlags flags = {
-                    {
-                            SceneFlag::LIGHT_SHADER_BINDING, 0 } };
+                    { SceneFlag::LIGHT_SHADER_BINDING, 0 }
+            };
 
         public:
-            SceneManager(const FPoint2D& res)
+            SceneManager(const Vec2i& res)
                     :
                       world_matrix(res) {
             }
@@ -121,7 +121,7 @@ namespace GL3Engine {
                 assert(node);
                 {
                     node->scene = this;
-                    nodes.push_back(unique_ptr < Node > (node));
+                    nodes.push_back(unique_ptr<Node>(node));
                 }
                 return *this;
             }
@@ -139,9 +139,9 @@ namespace GL3Engine {
                 return *this;
             }
             
-            void draw();
-            GLboolean getMouseEvent(const IPoint2D&, GLuint);
-            GLboolean getKeyEvent(GLchar);
+            void draw() override;
+            GLboolean getMouseEvent(const Vec2i&, GLuint) override;
+            GLboolean getKeyEvent(GLchar) override;
 
             SceneFlags& getSceneFlags() {
                 return flags;
@@ -152,7 +152,7 @@ namespace GL3Engine {
             Camera* getActiveCam() const {
                 return world_matrix.getActiveCamera();
             }
-            const FPoint2D& getRenderResolution() const {
+            const Vec2i& getRenderResolution() const {
                 return world_matrix.getResolution();
             }
     };

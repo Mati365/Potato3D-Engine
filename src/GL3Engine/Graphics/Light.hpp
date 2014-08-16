@@ -42,7 +42,7 @@ namespace GL3Engine {
             LightData data;
 
         public:
-            void draw();
+            void draw() override;
 
 #define ARRAY_LIGHT_SETTER(ret_type, array_size, target_variable, name) \
             ret_type& set##name(const array<GLfloat, array_size>& array) { \

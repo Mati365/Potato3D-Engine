@@ -29,16 +29,15 @@ namespace Game {
 
         public:
             GameScreen(Window*);
+            void init() override;
+            void draw() override;
+
+            GLboolean getMouseEvent(const Vec2i&, GLuint) override;
+            GLboolean getKeyEvent(GLchar) override;
 
             inline Window* getWindow() const {
                 return wnd;
             }
-            
-            void init() override;
-            void render() override;
-
-            void getMouseEvent(const IPoint2D&, GLuint) override;
-            void getKeyEvent(SDL_Keycode) override;
     };
 }
 

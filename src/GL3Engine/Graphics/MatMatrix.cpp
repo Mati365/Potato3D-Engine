@@ -3,51 +3,53 @@
 #include "Matrix.hpp"
 
 namespace GL3Engine {
-    const Mat4& MatMatrix::translate(const FPoint3D& v) {
+    const Mat4& MatMatrix::translate(const Vec3& v) {
         // 1, 0, 0, v.X,
         // 0, 1, 0, v.Y,
         // 0, 0, 1, v.Z,
         // 0, 0, 0, 1
         static Mat4 t = identity();
         {
-            t[3] = v.X;
-            t[7] = v.Y;
-            t[11] = v.Z;
+            t[3] = v.X();
+            t[7] = v.Y();
+            t[11] = v.Z();
         }
         return t;
     }
-    const Mat4& MatMatrix::scale(const FPoint3D& scale) {
+    const Mat4& MatMatrix::scale(const Vec3& scale) {
         // scale.X, 0, 0, 0,
         // 0, scale.Y, 0, 0,
         // 0, 0, scale.Z, 0,
         // 0, 0, 0, 1
         static Mat4 t = identity();
         {
-            t[0] = scale.X;
-            t[5] = scale.Y;
-            t[10] = scale.Z;
+            t[0] = scale.X();
+            t[5] = scale.Y();
+            t[10] = scale.Z();
         }
         return t;
     }
-    const Mat4& MatMatrix::rotate(GLfloat theta, const FPoint3D& axis) {
+    const Mat4& MatMatrix::rotate(GLfloat theta, const Vec3& axis) {
         // 1 0 0 0
         // 0 1 0 0
         // 0 0 1 0
         // 0 0 0 1
         static Mat4 t = identity();
         
-        GLfloat c = cosf(theta), s = sinf(theta), m_c = 1.0 - c;
-        t[0] = (GLfloat) pow(axis.X, 2) * m_c + c;
-        t[1] = axis.X * axis.Y * m_c - axis.Z * s;
-        t[2] = axis.X * axis.Z * m_c + axis.Y * s;
+        GLfloat c = cosf(theta),
+                s = sinf(theta),
+                m_c = 1.0 - c;
+        t[0] = powf(axis.X(), 2) * m_c + c;
+        t[1] = axis.X() * axis.Y() * m_c - axis.Z() * s;
+        t[2] = axis.X() * axis.Z() * m_c + axis.Y() * s;
         
-        t[4] = axis.X * axis.Y * m_c + axis.Z * s;
-        t[5] = (GLfloat) pow(axis.Y, 2) * m_c + c;
-        t[6] = axis.Y * axis.Z * m_c - axis.X * s;
+        t[4] = axis.X() * axis.Y() * m_c + axis.Z() * s;
+        t[5] = powf(axis.Y(), 2) * m_c + c;
+        t[6] = axis.Y() * axis.Z() * m_c - axis.X() * s;
         
-        t[8] = axis.X * axis.Z * m_c - axis.Y * s;
-        t[9] = axis.Y * axis.Z * m_c + axis.X * s;
-        t[10] = (GLfloat) pow(axis.Z, 2) * m_c + c;
+        t[8] = axis.X() * axis.Z() * m_c - axis.Y() * s;
+        t[9] = axis.Y() * axis.Z() * m_c + axis.X() * s;
+        t[10] = powf(axis.Z(), 2) * m_c + c;
         
         return t;
     }
@@ -62,42 +64,50 @@ namespace GL3Engine {
         GLfloat c = cotan(angle / 2.0);
         return Mat4(
                 {
-                        c / aspect, 0, 0, 0, 0, c, 0, 0, 0, 0, (far + near)
-                                / (near - far), (2 * far * near) / (near - far),
+                        c / aspect, 0, 0, 0,
+                        0, c, 0, 0,
+                        0, 0, (far + near) / (near - far), (2 * far * near)
+                                / (near - far),
                         0, 0, -1, 0 });
     }
     Mat4 MatMatrix::lookAt(
-            const FPoint3D& _eye, const FPoint3D& _target,
-            const FPoint3D& _dir) {
-        FPoint3D z_c = normalize(_eye - _target);
-        FPoint3D y_c = normalize(_dir);
-        FPoint3D x_c = normalize(cross(y_c, z_c));
+            const Vec4& _eye, const Vec4& _target, const Vec4& _dir) {
+        Vec4 eye = -_eye;
+        Vec4 z_c = normalize(_eye - _target);
+        Vec4 y_c = normalize(_dir);
+        Vec4 x_c = normalize(cross(y_c, z_c));
+
         y_c = cross(z_c, x_c);
-        
+        eye[3] = 1.f;
+
         return Mat4(
                 {
-                        x_c.X, x_c.Y, x_c.Z, dot(x_c, -_eye), y_c.X, y_c.Y, y_c
-                                .Z, dot(y_c, -_eye), z_c.X, z_c.Y, z_c.Z, dot(
-                                z_c, -_eye), 0, 0, 0, 1 });
+                        x_c[0], x_c[1], x_c[2], dot(x_c, eye),
+                        y_c[0], y_c[1], y_c[2], dot(y_c, eye),
+                        z_c[0], z_c[1], z_c[2], dot(z_c, eye),
+                        0, 0, 0, 1 }
+                );
     }
-    Mat4 MatMatrix::orthof(const array<FPoint2D, 3>& array) {
-        GLfloat _x = array[0].Y - array[0].X, _y = array[1].Y - array[1].X, _z =
-                array[2].Y - array[2].X;
+    Mat4 MatMatrix::orthof(const array<Vec2, 3>& array) {
+        GLfloat _x = array[0].Y() - array[0].X(),
+                _y = array[1].Y() - array[1].X(),
+                _z = array[2].Y() - array[2].X();
         return Mat4(
                 {
-                        2.f / _x, 0, 0, -(array[0].Y + array[0].X) / _x, 0, 2.f
-                                / _y, 0, -(array[1].Y + array[1].X) / _y, 0, 0,
-                        -2.f / _z, -(array[2].Y + array[2].X) / _z, 0, 0, 0, 1.f });
+                        2.f / _x, 0, 0, -(array[0].Y() + array[0].X()) / _x,
+                        0, 2.f / _y, 0, -(array[1].Y() + array[1].X()) / _y,
+                        0, 0, -2.f / _z, -(array[2].Y() + array[2].X()) / _z,
+                        0, 0, 0, 1.f });
     }
     
     /** Obliczenia dla normal matrix */
-    void MatMatrix::transpose(const FMat& matrix, GLfloat* array) {
+    void MatMatrix::transpose(const fMat& matrix, GLfloat* array) {
         for (GLuint i = 0; i < matrix.cols; ++i)
             for (GLuint j = 0; j < matrix.rows; ++j)
                 array[i * matrix.rows + j] = matrix.matrix[j * matrix.cols + i];
     }
-    FMat MatMatrix::transpose(const FMat& matrix) {
-        FMat result(matrix.rows, matrix.cols);
+    fMat MatMatrix::transpose(const fMat& matrix) {
+        fMat result(matrix.rows, matrix.cols);
         transpose(matrix, result.matrix);
         return result;
     }
@@ -137,18 +147,57 @@ namespace GL3Engine {
         va_list vl;
         va_start(vl, count);
         for (GLuint i = 0; i < count; ++i)
-            memcpy(va_arg(vl, FMat*) ->matrix, mat, 16 * sizeof(GLfloat));
+            memcpy(va_arg(vl, fMat*) ->matrix, mat, 16 * sizeof(GLfloat));
         va_end(vl);
     }
     
-    void MatMatrix::translate(FMat& matrix, const FPoint3D& v) {
+    void MatMatrix::translate(fMat& matrix, const Vec3& v) {
         matrix *= translate(v);
     }
-    void MatMatrix::scale(FMat& matrix, const FPoint3D& _scale) {
+    void MatMatrix::scale(fMat& matrix, const Vec3& _scale) {
         matrix *= scale(_scale);
     }
-    void MatMatrix::rotate(FMat& matrix, GLfloat theta, const FPoint3D& axis) {
+    void MatMatrix::rotate(fMat& matrix, GLfloat theta, const Vec3& axis) {
         matrix *= rotate(theta, axis);
+    }
+
+    /** Dla quaternionów */
+    void MatMatrix::calcW(Vec4& v) {
+        GLfloat t = 1.0f - length(v);
+        v[3] = t < 0.f ? 0.f : -sqrtf(t);
+    }
+    Vec4 MatMatrix::calcW(const Vec4& v) {
+        Vec4 _v = v;
+        calcW(_v);
+        return _v;
+    }
+
+    void MatMatrix::normalize(Vec4& v) {
+        GLfloat l = length(v);
+        for (GLuint i = 0; i < 3; ++i)
+            v[i] /= l;
+    }
+    Vec4 MatMatrix::normalize(const Vec4& v) {
+        Vec4 _v = v;
+        normalize(_v);
+        return _v;
+    }
+
+    Vec4 MatMatrix::cross(const Vec3& a, const Vec3& b) {
+        return {
+            a.Y() * b.Z() - a.Z() * b.Y(),
+            a.Z() * b.X() - a.X() * b.Z(),
+            a.X() * b.Y() - a.Y() * b.X()
+        };
+    }
+    GLfloat MatMatrix::dot(
+            const Vec3& a, const Vec3& b) {
+        return a.X() * b.X() + a.Y() * b.Y() + a.Z() * b.Z();
+    }
+    GLfloat MatMatrix::distance(const Vec3& a, const Vec3& b) {
+        return sqrt((a.X() - b.X()) * (a.X() - b.X()) +
+                (a.Y() - b.Y()) * (a.Y() - b.Y()) +
+                (a.Z() - b.Z()) * (a.Z() - b.Z()));
     }
 }
 

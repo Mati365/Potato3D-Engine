@@ -36,6 +36,15 @@ namespace Game {
                 .getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { -1.f, .5f, 1.f }));
+
+        scene.createSceneNode<Mesh>()
+                .setShape(
+                GlobalResourceManager::getInstance().getResource<Shape3D>(
+                        "mesh/bob/bob_lamp_update.md5mesh"))
+                .getTransform()
+                .mul(MatMatrix::scale( { .03f, .03f, .03f }))
+                .mul(MatMatrix::translate( { -1.f, 3.5f, 0.5f }));
+
         scene.createSceneNode<Mesh>()
                 .setShape(
                 GlobalResourceManager::getInstance().getResource<Shape3D>(
@@ -50,18 +59,18 @@ namespace Game {
                         .setSize(scene.getRenderResolution())
                         .setShaderParam("blur", { 0.f }, GL_FLOAT));
     }
-    void GameScreen::render() {
+    void GameScreen::draw() {
         scene.draw();
         if (blur > 0.f)
             blur *= .98f;
         fbo->setShaderParam("blur", { blur }, GL_FLOAT);
     }
     
-    void GameScreen::getKeyEvent(SDL_Keycode key) {
-        scene.getKeyEvent('w');
+    GLboolean GameScreen::getKeyEvent(GLchar key) {
+        return scene.getKeyEvent(key);
     }
-    void GameScreen::getMouseEvent(const IPoint2D& p, GLuint btn) {
-        scene.getMouseEvent(p, btn);
+    GLboolean GameScreen::getMouseEvent(const Vec2i& p, GLuint btn) {
+        return scene.getMouseEvent(p, btn);
     }
 }
 

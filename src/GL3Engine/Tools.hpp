@@ -12,6 +12,19 @@
 
 #include <type_traits>
 
+namespace std {
+    template<typename T> inline T* begin(const pair<T*, T*>& p)
+            {
+        return p.first;
+    }
+    template<typename T> inline T* end(const pair<T*, T*>& p)
+            {
+        return p.second;
+    }
+}
+namespace GL3Engine {
+    GLuint operator*(GLuint, std::function<void(void)>);
+}
 namespace Tools {
     using namespace std;
     
@@ -43,7 +56,7 @@ namespace Tools {
     template<typename T> T toRad(const T& v) {
         return v * 180.f / 3.145f;
     }
-    template<typename T, GLint size> inline void arrayToRaw(
+    template<typename T, GLint size> inline void copyToRaw(
             const array<T, size>& source, T* destination) {
         copy(source.begin(), source.end(), destination);
     }
@@ -86,6 +99,13 @@ namespace Tools {
     
     extern void showGLErrors();
     
+    template<typename T> class MemAlloc {
+        public:
+            virtual T* createObject() = 0;
+            virtual void releaseMemory() = 0;
+            virtual ~MemAlloc() {
+            }
+    };
     template<typename T> class Singleton {
         protected:
             Singleton() {

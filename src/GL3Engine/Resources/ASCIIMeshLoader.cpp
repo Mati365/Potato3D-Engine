@@ -1,6 +1,8 @@
 #include "Loaders.hpp"
 
 namespace GL3Engine {
+    using namespace OBJ;
+
     template<typename T>
     T* ASCIIMeshLoader<T>::load(c_str& path) {
         vector<string> lines;
@@ -24,11 +26,31 @@ namespace GL3Engine {
     }
     template<typename T>
     T* ASCIIMeshLoader<T>::selfCreateObject() {
-        T* obj = createObject();
-        releaseMemory();
+        T* obj = this->createObject();
+        this->releaseMemory();
         return obj;
     }
-    
+
+    template<typename T>
+    Vec3 ASCIIMeshLoader<T>::getVec3D(LOADER_ITERATOR& iter) {
+        Vec3 v;
+        sscanf(
+                (*iter + " " + *(iter + 1) + " " + *(iter + 2))
+                        .c_str(),
+                "%f %f %f", &v[0], &v[1], &v[2]);
+        iter += 2;
+        return v;
+    }
+    template<typename T>
+    Vec2 ASCIIMeshLoader<T>::getVec2D(LOADER_ITERATOR& iter) {
+        Vec2 v;
+        sscanf(
+                (*iter + " " + *(iter + 1)).c_str(),
+                "%f %f", &v[0], &v[1]);
+        iter++;
+        return v;
+    }
+
     template class ASCIIMeshLoader<MATERIALS> ;
     template class ASCIIMeshLoader<Shape3D> ;
 }

@@ -22,13 +22,12 @@ namespace GL3Engine {
         
         return MaterialBufferData {
                 COL_DEFINE(AMBIENT), COL_DEFINE(DIFFUSE), COL_DEFINE(SPECULAR),
-
-                TEX_USAGE_DEFINE(AMBIENT), TEX_USAGE_DEFINE(DIFFUSE),
-                TEX_USAGE_DEFINE(SPECULAR), TEX_USAGE_DEFINE(ALPHA),
+                TEX_USAGE_DEFINE(AMBIENT),
+                TEX_USAGE_DEFINE(DIFFUSE),
+                TEX_USAGE_DEFINE(SPECULAR),
+                TEX_USAGE_DEFINE(ALPHA),
                 TEX_USAGE_DEFINE(BUMP),
-
                 transparent, shine,
-
                 0.f, 0.f };
     }
 }

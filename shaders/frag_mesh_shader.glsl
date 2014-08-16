@@ -52,33 +52,33 @@ uniform	sampler2DArray		texture_pack;
 uniform	vec4				col;
 
 #define	GET_MATERIAL_UV_TEX(uv, type)	texture(texture_pack, vec3(uv , frag.mtl * (BUMP+1) + type))
-#define	GET_MATERIAL_TEX(type)			GET_MATERIAL_UV_TEX(vec2(frag.uv.x, 1.0 - frag.uv.y), type)
+#define	GET_MATERIAL_TEX(type)			GET_MATERIAL_UV_TEX(vec2(frag.uv.x, 1.f - frag.uv.y), type)
 
 Material 	MATERIAL 	= 	material[int(frag.mtl)];
 
 vec2 pixelize(in float d) {
-	return vec2(d * floor(frag.uv.x / d), d * floor((1.0 - frag.uv.y) / d));
+	return vec2(d * floor(frag.uv.x / d), d * floor((1.f - frag.uv.y) / d));
 }
 void calcLight(in Light light) {
 	vec3 normal;
 	if(MATERIAL.tex_flag[BUMP])
-		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.0 - 1.0);
+		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.f - 1.f);
 	else
 		normal = normalize(frag.normal);
 	
 	// Diffuse
 	vec3	light_normal	=	normalize(abs(frag.pos - light.pos));
-	float	dist_prop		=	1.0 / (1.0 + (0.5 * pow(length(frag.pos - light.pos), 1)));
-	float	diffuse			=	max(dot(light_normal, normal), 0.0) 
+	float	dist_prop		=	1.f / (1.f + (.5 * pow(length(frag.pos - light.pos), 1.f)));
+	float	diffuse			=	max(dot(light_normal, normal), 0.f) 
 									* dist_prop;
-	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.0);
+	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.f);
 												
 	// Specular
 	if(MATERIAL.tex_flag[SPECULAR]) {
-		vec3 	reflect 	= 	normalize(2 * diffuse * normal - light_normal);
+		vec3 	reflect 	= 	normalize(2.f * diffuse * normal - light_normal);
 		vec3 	viewDir 	=	normalize(abs(frag.cam - frag.pos));
-		float 	aspect 		=	pow(max(dot(viewDir, reflect), 0.0), 2);
-		float 	specular 	= 	0.0;
+		float 	aspect 		=	pow(max(dot(viewDir, reflect), 0.f), 2.f);
+		float 	specular 	= 	0.f;
 		vec3 	spec_tex 	= 	GET_MATERIAL_TEX(SPECULAR).rgb;
 		specular = (spec_tex.r + spec_tex.g + spec_tex.b) * 
 							aspect * 
@@ -88,14 +88,15 @@ void calcLight(in Light light) {
 						(MATERIAL.col[SPECULAR] * 
 						specular * 
 						light.specular_col * 
-						light.specular_intensity).rgb, 0.0);
+						light.specular_intensity).rgb, 0.f);
 	}
 	
 	// Całość
 	if(MATERIAL.tex_flag[AMBIENT])	
-		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.0);
+		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);
 	if(MATERIAL.tex_flag[DIFFUSE]) {
 		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE];
+		diffuse_col.a = 1.f;
 		gl_FragColor += 
 					diffuse_col * 
 					light.diffuse_col * 

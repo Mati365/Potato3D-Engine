@@ -55,11 +55,7 @@ namespace GL3Engine {
             Shader& setUniform(c_str, const GLfloat*, GLuint, GLenum);
 
             Shader& setUniform(c_str, const Matrix<GLfloat>&);
-            Shader& setUniform(c_str variable, const FPoint3D& p) {
-                glProgramUniform4f(program, getUniformLoc(variable), p.X, p.Y,
-                        p.Z, 1.f);
-                return *this;
-            }
+            Shader& setUniform(c_str, const Vec4&);
             Shader& setUniform(c_str variable, const Color& p) {
                 setUniform<4>(variable, p.toArray());
                 return *this;

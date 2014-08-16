@@ -21,7 +21,8 @@ namespace GL3Engine {
     DECLARE_EXTENSION(shaders, Shader);
     
     GlobalResourceManager::GlobalResourceManager() {
-        registerExtension(new OBJloader, "obj");
+        registerExtension(new MD5::MD5loader, "md5mesh");
+        registerExtension(new OBJ::OBJloader, "obj");
         registerExtension(new GLSLloader, "glsl");
         registerExtension(new Textureloader, "png");
     }

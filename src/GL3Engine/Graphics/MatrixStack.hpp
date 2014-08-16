@@ -17,12 +17,12 @@ namespace GL3Engine {
         private:
             Camera* active_cam = nullptr;
             list<M_STACK_ARRAY> stack; // pushTransform i popTransform
-            FPoint2D resolution;
+            Vec2i resolution;
 
         public:
             Mat4 projection, view, model, vp_matrix; // cache z mnożenia view * projection
                     
-            MatrixStack(const FPoint2D&);
+            MatrixStack(const Vec2i&);
 
             void switchMode(Mode);
             void updateCameraCoords();
@@ -31,7 +31,7 @@ namespace GL3Engine {
             Camera* getActiveCamera() const {
                 return active_cam;
             }
-            const FPoint2D& getResolution() const {
+            const Vec2i& getResolution() const {
                 return resolution;
             }
             
