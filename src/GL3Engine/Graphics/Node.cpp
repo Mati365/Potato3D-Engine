@@ -2,18 +2,20 @@
 
 namespace GL3Engine {
     Node& Node::setShaderParam(
-            c_str variable, const vector<GLfloat>& data, GLenum type) {
-        effect->setUniform(variable, &data[0], data.size(), type);
+            c_str variable, const ShaderParam& param) {
+        effect_params[variable] = param;
         return *this;
     }
     void Node::update() {
         if (state == State::DISABLED)
             return;
-        if (effect)
+        if (effect) {
             effect->begin();
-        {
-            draw();
+            for (auto& el : effect_params)
+                effect->setUniform(el.first, &el.second.data[0],
+                        el.second.data.size(), el.second.type);
         }
+        draw();
         if (effect)
             effect->end();
     }

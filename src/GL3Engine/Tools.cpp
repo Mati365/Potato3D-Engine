@@ -18,7 +18,7 @@ namespace Tools {
         while ((err = glGetError()) != GL_NO_ERROR)
             cout << "OpenGL error: " << err << endl;
     }
-    void Log::putLog(Log::Flag flag, const string& str) {
+    void Log::putLog(Log::Flag flag, c_str str) {
         static const char* flag_caption[] = {
                 "> !CRITICAL!",
                 "> !WARNING!",
@@ -31,13 +31,17 @@ namespace Tools {
         if (flag == Log::CRITICAL)
             exit(1);
     }
-    vector<string> tokenize(const string& line, char sep) {
+    vector<string> tokenize(c_str line, char sep) {
         vector<string> buf;
         istringstream iss(line);
         string tok;
         while (getline(iss, tok, sep))
             buf.push_back(tok);
         return buf;
+    }
+    size_t hashString(c_str str) {
+        static hash<string> _hash;
+        return _hash(str);
     }
 }
 

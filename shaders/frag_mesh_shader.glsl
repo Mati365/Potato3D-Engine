@@ -76,7 +76,7 @@ void calcLight(in Light light) {
 	switch(light.type) {
 		case POINT_LIGHT:
 			light_normal	= 	normalize(abs(frag.pos - light.pos));
-			dist_prop		=  	1.f / (1.f + (.5 * pow(length(frag.pos - light.pos), 1.f)));
+			dist_prop		=  	1.f / (1.f + (.5 * pow(length(abs(frag.pos - light.pos)), 1.f)));
 		break;
 		case DIRECT_LIGHT:
 			light_normal	=	frag.pos;

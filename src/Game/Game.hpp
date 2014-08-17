@@ -23,9 +23,9 @@ namespace Game {
             Window* wnd;
 
             SceneManager scene;
-            Camera* cam = nullptr;
             RenderQuad* fbo = nullptr;
             GLfloat blur = 0.f;
+            Mesh* mesh;
 
         public:
             GameScreen(Window*);

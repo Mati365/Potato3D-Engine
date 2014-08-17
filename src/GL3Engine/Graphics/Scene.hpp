@@ -50,6 +50,16 @@ namespace GL3Engine {
             GLuint render_mode = GL_TRIANGLES;
             State state = State::NORMAL;
 
+            struct ShaderParam {
+                    vector<GLfloat> data;
+                    GLenum type;
+
+                    GLfloat& operator[](GLuint index) {
+                        return data[index];
+                    }
+            };
+            map<string, ShaderParam> effect_params;
+
         public:
             Node& setRenderMode(GLuint render_mode) {
                 this->render_mode = render_mode;
@@ -59,7 +69,10 @@ namespace GL3Engine {
                 return transform;
             }
             
-            Node& setShaderParam(c_str, const vector<GLfloat>&, GLenum);
+            ShaderParam& getShaderParam(c_str key) {
+                return effect_params[key];
+            }
+            Node& setShaderParam(c_str, const ShaderParam&);
             Node& setEffect(Shader* effect) {
                 this->effect = effect;
                 return *this;
@@ -90,6 +103,16 @@ namespace GL3Engine {
                 return state;
             }
             
+            virtual inline size_t getHash()=0;
+
+#define CLASS_HASH(T) \
+            constHash(#T)
+#define DECLARE_NODE_TYPE(T) \
+            public: \
+            inline size_t getHash() override { \
+                return CLASS_HASH(T); \
+            }
+
         private:
             void update();
     };
@@ -101,9 +124,10 @@ namespace GL3Engine {
                 LIGHT_SHADER_BINDING,
             };
             using SceneFlags = map<SceneManager::SceneFlag, GLuint>;
+            using NodeList = vector<unique_ptr<Node>>;
 
         private:
-            vector<unique_ptr<Node>> nodes;
+            NodeList nodes;
             MatrixStack world_matrix;
             RenderTarget* target = nullptr;
 
@@ -117,6 +141,13 @@ namespace GL3Engine {
                       world_matrix(res) {
             }
             
+            inline NodeList::iterator begin() {
+                return nodes.begin();
+            }
+            inline NodeList::iterator end() {
+                return nodes.end();
+            }
+
             SceneManager& addSceneNode(Node* node) {
                 assert(node);
                 {

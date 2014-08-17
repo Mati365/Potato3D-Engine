@@ -9,6 +9,7 @@
 #include <sstream>
 #include <memory>
 #include <assert.h>
+#include <functional>
 
 #include <type_traits>
 
@@ -38,10 +39,17 @@ namespace Tools {
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
 #define IS_IN_MAP(map, key) (map.find(key) != map.cend())
     
-    extern vector<string> tokenize(const string&, char);
+    constexpr GLint constHash(const GLchar* input) {
+        return *input ?
+                        static_cast<GLuint>(*input)
+                                + 33 * constHash(input + 1) :
+                        5381;
+    }
+    extern size_t hashString(c_str);
+    extern vector<string> tokenize(c_str, char);
     
     /** Konwersje */
-    template<typename T> T stringTo(const string& str) {
+    template<typename T> T stringTo(c_str str) {
         T num;
         istringstream iss(str);
         iss >> num;

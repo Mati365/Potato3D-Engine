@@ -87,6 +87,8 @@ namespace GL3Engine {
     
     class Mesh :
                  public Node {
+        DECLARE_NODE_TYPE(Mesh)
+
         private:
             Shape3D* shape = nullptr;
 

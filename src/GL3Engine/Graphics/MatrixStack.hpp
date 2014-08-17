@@ -11,7 +11,8 @@ namespace GL3Engine {
                 _2D
             };
             struct M_STACK_ARRAY {
-                    GLfloat array[16];
+                    using MatArray = GLfloat[16];
+                    MatArray projection, view, model;
             };
 
         private:

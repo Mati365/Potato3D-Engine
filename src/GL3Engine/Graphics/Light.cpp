@@ -38,6 +38,9 @@ namespace GL3Engine {
     void Light::draw() {
         if (parent)
             dynamic_cast<LightBatch*>(parent)->regObject(*this);
+        for(auto& node : *scene) {
+
+        }
     }
 }
 

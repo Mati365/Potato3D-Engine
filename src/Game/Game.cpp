@@ -11,33 +11,26 @@ namespace Game {
     }
     
     void GameScreen::init() {
-        cam =
-                &scene.createSceneNode<FPSCamera>()
-                        .setPos( { 0.f, .5f, 0.f, 1.f })
-                        .setTarget( { 0.f, .5f, .01f, 1.f });
+        scene.createSceneNode<FPSCamera>()
+                .setPos( { 0.f, .5f, 0.f, 1.f })
+                .setTarget( { 0.f, .5f, .01f, 1.f });
         scene.createSceneNode<AxisMesh>();
         scene.createSceneNode<LightBatch>()
                 .regObject(
                 scene.createSceneNode<Light>()
-                        .setPos( { 1.f, 2.5f, 1.f })
+                        .setPos( { 0.f, 1.5f, 0.f })
                         .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
-                        .setDiffuse( { 1.f, 0.f, 0.f, 1.f, }, 1.f)
+                        .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 6.f)
                         .setType(LightData::ENABLED | LightData::POINT)
-                        )
-                .regObject(
-                scene.createSceneNode<DirectLight>()
-                        .setDir( { 0.f, .5f, 0.f })
-                        .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
-                        .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 3.f)
-                        .setType(LightData::ENABLED | LightData::DIRECT)
                         );
-        scene.createSceneNode<Mesh>()
+
+        mesh = &scene.createSceneNode<Mesh>()
                 .setShape(
                 GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "mesh/wall/wall.obj"))
-                .getTransform()
+                        "mesh/wall/wall.obj"));
+        mesh->getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
-                .mul(MatMatrix::translate( { -1.f, .5f, 1.f }));
+                .mul(MatMatrix::translate( { 0.f, .5f, 1.f }));
 
         scene.createSceneNode<Mesh>()
                 .setShape(
@@ -59,19 +52,22 @@ namespace Game {
                 dynamic_cast<RenderQuad*>(
                 &scene.createSceneNode<RenderQuad>()
                         .setSize(scene.getRenderResolution())
-                        .setShaderParam("blur", { 0.f }, GL_FLOAT));
+                        .setShaderParam("blur", { { blur }, GL_FLOAT }));
     }
     void GameScreen::draw() {
         scene.draw();
         if (blur > 0.f)
             blur *= .98f;
-        fbo->setShaderParam("blur", { blur }, GL_FLOAT);
+        fbo->getShaderParam("blur")[0] = blur;
+
+        mesh->getTransform().mul(MatMatrix::rotate(.0001f,  { 0.f, 1.f, 0.f }));
     }
     
     GLboolean GameScreen::getKeyEvent(GLchar key) {
         return scene.getKeyEvent(key);
     }
     GLboolean GameScreen::getMouseEvent(const Vec2i& p, GLuint btn) {
+        blur = .015f;
         return scene.getMouseEvent(p, btn);
     }
 }

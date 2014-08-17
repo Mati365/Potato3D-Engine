@@ -5,6 +5,8 @@
 namespace GL3Engine {
     class Camera :
                    public Node {
+        DECLARE_NODE_TYPE(Camera)
+
         public:
             static constexpr GLfloat VIEW_DISTANCE = 6.f;
 
@@ -37,6 +39,8 @@ namespace GL3Engine {
     };
     class FPSCamera :
                       public Camera {
+        DECLARE_NODE_TYPE(FPSCamera)
+
         public:
             enum {
                 NONE = 1 << 0,

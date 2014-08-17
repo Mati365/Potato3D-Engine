@@ -39,6 +39,8 @@ namespace GL3Engine {
     };
     class Light :
                   public Node {
+        DECLARE_NODE_TYPE(Light)
+
         protected:
             LightData data;
 
@@ -79,6 +81,8 @@ namespace GL3Engine {
     // Pos przeznaczony jako kierunek padania
     class DirectLight :
                         public Light {
+        DECLARE_NODE_TYPE(DirectLight)
+
         public:
             DirectLight() {
                 setType(LightData::ENABLED | LightData::DIRECT);
@@ -110,6 +114,8 @@ namespace GL3Engine {
     };
     class LightBatch :
                        public Batch<Light> {
+        DECLARE_NODE_TYPE(LightBatch)
+
         public:
             static constexpr size_t MAX_LIGHTS = 10;
             static constexpr GLuint BINDING_POINT = 0;

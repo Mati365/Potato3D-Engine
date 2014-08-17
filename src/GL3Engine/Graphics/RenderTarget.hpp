@@ -6,6 +6,8 @@
 namespace GL3Engine {
     class RenderTarget :
                          public Node {
+        DECLARE_NODE_TYPE(RenderTarget)
+
         protected:
             Vec2i size;
 
@@ -28,11 +30,19 @@ namespace GL3Engine {
     };
     class RenderQuad :
                        public RenderTarget {
+        DECLARE_NODE_TYPE(RenderQuad)
+
         private:
             GLuint fbo_handle = 0, depth_render_buf = 0;
 
             unique_ptr<Texture> color_tex, depth_tex;
             unique_ptr<Shape2D> quad;
+
+            enum Flags {
+                USE_COLOR_BUFFER = 1 << 0,
+                USE_DEPTH_BUFFER = 1 << 1
+            };
+            GLuint flags = USE_COLOR_BUFFER | USE_DEPTH_BUFFER;
 
         public:
             RenderQuad() {
@@ -41,8 +51,13 @@ namespace GL3Engine {
 
             void draw() override;
             void begin();
+            void begin(GLuint, GLuint);
             void end();
 
+            RenderQuad& setFlags(GLuint flags) {
+                this->flags = flags;
+                return *this;
+            }
             RenderQuad& setSize(const Vec2i&) override;
             const Vec2i& getSize() const {
                 return size;

@@ -57,13 +57,25 @@ namespace GL3Engine {
 
     void MatrixStack::pushTransform() {
         M_STACK_ARRAY array;
-        memcpy(array.array, model.matrix, 16 * sizeof(GLfloat));
+#define MEMCPY_PUSH(variable) \
+        memcpy(array.variable, variable.matrix, 16 * sizeof(GLfloat))
+        {
+            MEMCPY_PUSH(projection);
+            MEMCPY_PUSH(view);
+            MEMCPY_PUSH(model);
+        }
         stack.push_back(array);
     }
     void MatrixStack::popTransform() {
         if (stack.empty())
             return;
-        memcpy(model.matrix, stack.back().array, 16 * sizeof(GLfloat));
+#define MEMCPY_POP(variable) \
+        memcpy(variable.matrix, stack.back().variable, 16 * sizeof(GLfloat))
+        {
+            MEMCPY_POP(projection);
+            MEMCPY_POP(view);
+            MEMCPY_POP(model);
+        }
         stack.pop_back();
     }
     void MatrixStack::loadMatrix(const Mat4& mem) {

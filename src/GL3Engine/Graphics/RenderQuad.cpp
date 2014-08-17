@@ -16,19 +16,18 @@ namespace GL3Engine {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
         {
             // Depth buffer
-            {
+            if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags)) {
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                 GL_TEXTURE_2D, depth_tex->getHandle(), 0);
             }
             
             // Texture
-            {
+            if (IS_SET_FLAG(USE_COLOR_BUFFER, flags)) {
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, color_tex->getHandle(), 0);
             }
             assert(
-                    glCheckFramebufferStatus(GL_FRAMEBUFFER)
-                    == GL_FRAMEBUFFER_COMPLETE);
+                    glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
@@ -39,17 +38,20 @@ namespace GL3Engine {
                         1.f, -1.f, 0.f, 1.f, 0.f }, {
                         1.f, 1.f, 0.f, 1.f, 1.f }, {
                         -1.f, 1.f, 0.f, 0.f, 1.f }, };
-        quad.reset(new Shape2D( {
-                &vertex_array[0], vertex_array.size() * sizeof(Vertex2f),
-                GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW }, {
-                Tile::quad_indices, 6 * sizeof(GLfloat),
-                GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW }));
+        quad.reset(
+                new Shape2D(
+                        { &vertex_array[0], vertex_array.size()
+                                * sizeof(Vertex2f), GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW },
+                        { Tile::quad_indices, 6 * sizeof(GLfloat), GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW }));
     }
     
     void RenderQuad::passToShader() {
-        effect->setUniform(GL_TEXTURE_2D, "color_texture", 0,
-                color_tex->getHandle()).setUniform(GL_TEXTURE_2D,
-                "depth_texture", 1, depth_tex->getHandle());
+        if (IS_SET_FLAG(USE_COLOR_BUFFER, flags))
+            effect->setUniform(GL_TEXTURE_2D,
+                    "color_texture", 0, color_tex->getHandle());
+        if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags))
+            effect->setUniform(GL_TEXTURE_2D,
+                    "depth_texture", 1, depth_tex->getHandle());
     }
     void RenderQuad::draw() {
         assert(effect);
@@ -70,6 +72,14 @@ namespace GL3Engine {
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
         glViewport(0, 0, size[0], size[1]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+    void RenderQuad::begin(GLuint face, GLuint tex) {
+        if (!tex)
+            return;
+        begin();
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                face, tex, 0);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
     void RenderQuad::end() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

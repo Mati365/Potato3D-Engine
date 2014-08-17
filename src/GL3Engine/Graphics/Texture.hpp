@@ -1,14 +1,17 @@
 #ifndef TEXTURE_HPP_
 #define TEXTURE_HPP_
+#include <SOIL/SOIL.h>
+
 #include "Types.hpp"
 
 namespace GL3Engine {
     using namespace Tools;
     using namespace std;
     
+    extern void putGLTextureFlags(GLenum, GLuint);
     class Texture {
         public:
-            enum {
+            enum Flags {
                 MIPMAP_NEAREST = 1 << 1,
                 MIPMAP_LINEAR = 1 << 2,
                 
@@ -20,9 +23,11 @@ namespace GL3Engine {
                 NEAREST = 1 << 7
             };
 
-        private:
+        protected:
 #define DEFAULT_TEX_FLAGS CLAMP_TO_EDGE | NEAREST
-            GLuint handle = 0, flags = DEFAULT_TEX_FLAGS;
+            GLuint handle = 0,
+                    flags = DEFAULT_TEX_FLAGS,
+                    tex_type = GL_TEXTURE_2D;
 
             Vec2i size;
 
@@ -36,9 +41,12 @@ namespace GL3Engine {
                     GLenum bytes = GL_UNSIGNED_BYTE,
                     GLuint flags = DEFAULT_TEX_FLAGS);
 
-            void loadTexture(c_str);
-            void generate(const Vec2i&, GLenum, GLenum);
+            virtual void loadTexture(c_str);
+            virtual void generate(const Vec2i&, GLenum, GLenum);
 
+            GLuint getTexType() const {
+                return tex_type;
+            }
             GLuint getHandle() const {
                 return handle;
             }
@@ -46,7 +54,7 @@ namespace GL3Engine {
                 return size;
             }
             
-            ~Texture() {
+            virtual ~Texture() {
                 glDeleteTextures(1, &handle);
             }
             
@@ -57,7 +65,8 @@ namespace GL3Engine {
                 return *this;
             }
             
-            void configure();
+        protected:
+            virtual void configure();
     };
     class TextureArray {
         private:
@@ -81,6 +90,21 @@ namespace GL3Engine {
             
             ~TextureArray() {
                 glDeleteTextures(1, &handle);
+            }
+    };
+    class CubeTexture :
+                        public Texture {
+        public:
+            CubeTexture(const Vec2i&,
+                    GLenum type = GL_RGBA,
+                    GLenum bytes = GL_UNSIGNED_BYTE,
+                    GLuint flags = DEFAULT_TEX_FLAGS);
+
+            void generate(const Vec2i&, GLenum, GLenum) override;
+
+        private:
+            // TODO: Wczytywanie paczki tekstur
+            void loadTexture(c_str) override {
             }
     };
     
