@@ -9,13 +9,20 @@ namespace GL3Engine {
     MTLloader::MTLloader()
             :
               ASCIIMeshLoader(
-                      { { "newmtl", NAME },
-
-                      { "Ka", AMBIENT_COL }, { "Kd", DIFFUSE_COL }, { "Ks", SPECULAR_COL },
-
-                      { "map_Ka", AMBIENT_TEX }, { "map_Kd", DIFFUSE_TEX }, { "map_Ks", SPECULAR_TEX }, { "map_d", ALPHA_TEX }, { "map_bump", BUMP_TEX }, { "bump", BUMP_TEX },
-
-                      { "Ns", SHINE }, { "d", TRANSPARENT }, { "Tr", TRANSPARENT } }) {
+                      {
+                              { "newmtl", NAME },
+                              { "Ka", AMBIENT_COL },
+                              { "Kd", DIFFUSE_COL },
+                              { "Ks", SPECULAR_COL },
+                              { "map_Ka", AMBIENT_TEX },
+                              { "map_Kd", DIFFUSE_TEX },
+                              { "map_Ks", SPECULAR_TEX },
+                              { "map_d", ALPHA_TEX },
+                              { "map_bump", BUMP_TEX },
+                              { "bump", BUMP_TEX },
+                              { "Ns", SHINE },
+                              { "d", TRANSPARENT },
+                              { "Tr", TRANSPARENT } }) {
     }
     
     void MTLloader::onHeaderArgument(

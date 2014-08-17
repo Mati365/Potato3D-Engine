@@ -44,6 +44,7 @@ namespace GL3Engine {
         protected:
             Node* parent = nullptr;
             SceneManager* scene = nullptr;
+            MatrixStack* world = nullptr;
 
             Transform transform;
             Shader* effect = nullptr;
@@ -148,14 +149,7 @@ namespace GL3Engine {
                 return nodes.end();
             }
 
-            SceneManager& addSceneNode(Node* node) {
-                assert(node);
-                {
-                    node->scene = this;
-                    nodes.push_back(unique_ptr<Node>(node));
-                }
-                return *this;
-            }
+            SceneManager& addSceneNode(Node*);
             template<typename T>
             T& createSceneNode() {
                 static_assert(is_base_of<Node, T>::value, "Bad node type!");

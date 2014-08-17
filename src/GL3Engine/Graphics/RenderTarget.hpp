@@ -32,16 +32,18 @@ namespace GL3Engine {
                        public RenderTarget {
         DECLARE_NODE_TYPE(RenderQuad)
 
+        public:
+            enum Flags {
+                USE_COLOR_BUFFER = 1 << 0,
+                USE_DEPTH_BUFFER = 1 << 1
+            };
+
         private:
             GLuint fbo_handle = 0, depth_render_buf = 0;
 
             unique_ptr<Texture> color_tex, depth_tex;
             unique_ptr<Shape2D> quad;
 
-            enum Flags {
-                USE_COLOR_BUFFER = 1 << 0,
-                USE_DEPTH_BUFFER = 1 << 1
-            };
             GLuint flags = USE_COLOR_BUFFER | USE_DEPTH_BUFFER;
 
         public:

@@ -1,6 +1,7 @@
 #ifndef LIGHT_HPP_
 #define LIGHT_HPP_
 #include "Scene.hpp"
+#include "RenderTarget.hpp"
 
 namespace GL3Engine {
     // GLSL:
@@ -43,9 +44,12 @@ namespace GL3Engine {
 
         protected:
             LightData data;
+            Light() {
+            }
 
         public:
             void draw() override;
+            virtual void drawShadows() = 0;
 
 #define ARRAY_LIGHT_SETTER(ret_type, array_size, target_variable, name) \
             virtual ret_type& set##name(const array<GLfloat, array_size>& array) { \
@@ -67,16 +71,31 @@ namespace GL3Engine {
                 this->data.ambient_intensity = intensity;
                 return *this;
             }
-            Light& setType(GLint type) {
-                data.type = type;
-                return *this;
-            }
             GLint getType() const {
                 return data.type;
             }
             LightData& getData() {
                 return data;
             }
+
+        protected:
+            Light& setType(GLint type) {
+                data.type = type;
+                return *this;
+            }
+    };
+    // Najwooolniejsze światło
+    class PointLight :
+                       public Light {
+        DECLARE_NODE_TYPE(PointLight)
+
+        private:
+            CubeTexture cube;
+            RenderQuad fbo;
+
+        public:
+            PointLight();
+            void drawShadows() override;
     };
     // Pos przeznaczony jako kierunek padania
     class DirectLight :
@@ -87,6 +106,9 @@ namespace GL3Engine {
             DirectLight() {
                 setType(LightData::ENABLED | LightData::DIRECT);
             }
+            void drawShadows() override {
+            }
+
             ARRAY_LIGHT_SETTER(DirectLight, 3, pos, Dir)
 
         private:

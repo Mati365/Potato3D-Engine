@@ -39,9 +39,9 @@ namespace Tools {
 #define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
 #define IS_IN_MAP(map, key) (map.find(key) != map.cend())
     
-    constexpr GLint constHash(const GLchar* input) {
+    constexpr size_t constHash(const GLchar* input) {
         return *input ?
-                        static_cast<GLuint>(*input)
+                        static_cast<size_t>(*input)
                                 + 33 * constHash(input + 1) :
                         5381;
     }
@@ -86,9 +86,7 @@ namespace Tools {
                 buf++;
         return buf;
     }
-    template<typename T, typename E> GLboolean instanceOf(T* obj) {
-        return dynamic_cast<E*>(&obj);
-    }
+#define INSTANCE_OF(a, type) dynamic_cast<type*>(a)
     
     struct Log {
             enum Flag {
@@ -123,6 +121,19 @@ namespace Tools {
             static inline T& getInstance() {
                 static T t;
                 return t;
+            }
+    };
+    template<typename T> class NonCopyable {
+        public:
+            NonCopyable() {
+            }
+            virtual ~NonCopyable() {
+            }
+        private:
+            NonCopyable& operator=(const NonCopyable&) {
+                return *this;
+            }
+            NonCopyable(const NonCopyable&) {
             }
     };
 }

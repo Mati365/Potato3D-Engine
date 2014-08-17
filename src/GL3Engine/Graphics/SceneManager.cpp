@@ -16,6 +16,15 @@ namespace GL3Engine {
             target->update();
         }
     }
+    SceneManager& SceneManager::addSceneNode(Node* node) {
+        assert(node);
+        {
+            node->scene = this;
+            node->world = &world_matrix;
+            nodes.push_back(unique_ptr<Node>(node));
+        }
+        return *this;
+    }
     
 #define ITER_DEF(func_name, ...) \
     for (auto& n : nodes) \

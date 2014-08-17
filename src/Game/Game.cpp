@@ -17,12 +17,10 @@ namespace Game {
         scene.createSceneNode<AxisMesh>();
         scene.createSceneNode<LightBatch>()
                 .regObject(
-                scene.createSceneNode<Light>()
+                scene.createSceneNode<PointLight>()
                         .setPos( { 0.f, 1.5f, 0.f })
                         .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
-                        .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 6.f)
-                        .setType(LightData::ENABLED | LightData::POINT)
-                        );
+                        .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 6.f));
 
         mesh = &scene.createSceneNode<Mesh>()
                 .setShape(
@@ -60,7 +58,7 @@ namespace Game {
             blur *= .98f;
         fbo->getShaderParam("blur")[0] = blur;
 
-        mesh->getTransform().mul(MatMatrix::rotate(.0001f,  { 0.f, 1.f, 0.f }));
+        mesh->getTransform().mul(MatMatrix::rotate(.0001f, { 0.f, 1.f, 0.f }));
     }
     
     GLboolean GameScreen::getKeyEvent(GLchar key) {

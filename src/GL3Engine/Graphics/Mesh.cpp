@@ -22,38 +22,36 @@ namespace GL3Engine {
     }
     
     void Mesh::passToShader() {
-        MatrixStack& matrix = scene->getWorldMatrix();
         if (material_cache.empty())
             updateMaterialsCache(effect);
         
-        matrix.pushTransform();
+        world->pushTransform();
         {
-            matrix.model *= transform.model;
+            world->model *= transform.model;
             effect->bindToSlot("LightBlock",
                     scene->getSceneFlags()[SceneManager::SceneFlag::LIGHT_SHADER_BINDING]);
             {
                 effect->setUniform("matrix.mvp",
-                        matrix.vp_matrix * matrix.model)
+                        world->vp_matrix * world->model)
 
-                .setUniform("matrix.m", matrix.model)
+                .setUniform("matrix.m", world->model)
 
                 .setUniform("matrix.normal",
-                        MatMatrix::inverse(matrix.model.getCut(3, 3)))
+                        MatMatrix::inverse(world->model.getCut(3, 3)))
 
                 .setUniform("matrix.cam",
-                        matrix.getActiveCamera()->getPos());
+                        world->getActiveCamera()->getPos());
             }
             if (shape->getMaterials().empty())
                 effect->setUniform("col", shape->getColor());
             else {
-                effect->setUniform(
-                GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
+                effect->setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
                         shape->getMaterials()[0]->tex_array->getHandle());
                 effect->changeUBOData(ubo_handle, &material_cache[0],
                         material_cache.size() * sizeof(MaterialBufferData));
             }
         }
-        matrix.popTransform();
+        world->popTransform();
     }
     void Mesh::draw() {
         assert(effect);

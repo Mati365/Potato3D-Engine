@@ -21,6 +21,8 @@ namespace GL3Engine {
     };
     class Text :
                  public Node {
+            DECLARE_NODE_TYPE(Text)
+
             static constexpr size_t BUFFER_SIZE = 128;
 
         private:

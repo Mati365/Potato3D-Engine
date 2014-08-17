@@ -73,12 +73,11 @@ namespace GL3Engine {
     }
     
     void Text::passToShader() {
-        MatrixStack& matrix = scene->getWorldMatrix();
         assert(effect);
         {
             effect->setUniform("col", col).setUniform(GL_TEXTURE_2D, "texture",
                     0, font->getHandle()).setUniform("matrix.mvp",
-                    matrix.vp_matrix * matrix.model * transform.model);
+                    world->vp_matrix * world->model * transform.model);
         }
     }
     void Text::draw() {
@@ -88,8 +87,7 @@ namespace GL3Engine {
             glDisable(GL_CULL_FACE);
             {
                 glBindVertexArray(shape->getVAO());
-                glDrawElements(
-                GL_TRIANGLES, shape->getIndicesCount(),
+                glDrawElements(GL_TRIANGLES, shape->getIndicesCount(),
                 GL_UNSIGNED_INT, nullptr);
                 glBindVertexArray(0);
             }

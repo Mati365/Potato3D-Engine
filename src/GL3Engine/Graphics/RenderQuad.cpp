@@ -68,7 +68,9 @@ namespace GL3Engine {
         scene->setRenderTarget(this);
     }
     
+    GLint last_fbo = 0;
     void RenderQuad::begin() {
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &last_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
         glViewport(0, 0, size[0], size[1]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -82,7 +84,7 @@ namespace GL3Engine {
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
     void RenderQuad::end() {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, last_fbo);
         glViewport(0, 0, size[0], size[1]);
     }
     
@@ -90,7 +92,7 @@ namespace GL3Engine {
         this->size = size;
         this->color_tex.reset(new Texture(size));
         this->depth_tex.reset(new Texture(size, GL_DEPTH_COMPONENT, GL_FLOAT));
-        
+
         if (!effect)
             setEffect(REQUIRE_RES(Shader, DEFAULT_FBO_SHADER));
         create();

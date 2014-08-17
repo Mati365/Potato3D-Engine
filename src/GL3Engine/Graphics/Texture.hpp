@@ -9,7 +9,8 @@ namespace GL3Engine {
     using namespace std;
     
     extern void putGLTextureFlags(GLenum, GLuint);
-    class Texture {
+    class Texture :
+                    public NonCopyable<Texture> {
         public:
             enum Flags {
                 MIPMAP_NEAREST = 1 << 1,
@@ -58,17 +59,11 @@ namespace GL3Engine {
                 glDeleteTextures(1, &handle);
             }
             
-        private:
-            Texture(const Texture&) {
-            }
-            Texture& operator=(const Texture&) {
-                return *this;
-            }
-            
         protected:
             virtual void configure();
     };
-    class TextureArray {
+    class TextureArray :
+                         public NonCopyable<TextureArray> {
         private:
             GLuint handle = 0;
             vector<string> textures;
@@ -94,6 +89,9 @@ namespace GL3Engine {
     };
     class CubeTexture :
                         public Texture {
+        public:
+            static constexpr GLuint CUBE_TEX_FACES = 6;
+
         public:
             CubeTexture(const Vec2i&,
                     GLenum type = GL_RGBA,
