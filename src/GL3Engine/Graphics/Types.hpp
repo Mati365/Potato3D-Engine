@@ -55,9 +55,14 @@ namespace GL3Engine {
             NORMAL normal;
             UV uv;
             GLint mtl; // domyślnie solid color wyłączony!
+            POS tangent;
     };
     
     using Cube = Vertex4f[36];
+    using VertexArray = vector<Vertex4f>;
+
+    extern void calcTangents(VertexArray&);
+    extern void calcTangents(const array<Vertex4f*, 3>&);
 
 #define BUFFER_OFFSET(i) ((char *)nullptr + (i))
 #define VERTEX_ATTR_PTR(loc, count, strip, type) \

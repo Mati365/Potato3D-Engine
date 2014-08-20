@@ -38,7 +38,7 @@ namespace GL3Engine {
             Matrix<T>& operator-=(const Matrix<T>&);
 
             Matrix<T>& operator=(const Matrix<T>&);
-            Matrix<T>& operator=(T*);
+            Matrix<T>& operator=(const T*);
 
             Matrix<T> operator-() const;
             Matrix<T> getCut(GLuint, GLuint);
@@ -52,6 +52,10 @@ namespace GL3Engine {
             }
             T get(GLuint x, GLuint y) const {
                 return matrix[y * cols + x];
+            }
+            Matrix<T>& set(GLuint x, GLuint y, T val) {
+                matrix[y * cols + x] = val;
+                return *this;
             }
             T& operator[](GLuint i) {
                 return matrix[i];
@@ -81,6 +85,12 @@ namespace GL3Engine {
     DEF_EXTERN_MAT_OPER(+)
     DEF_EXTERN_MAT_OPER(*)
     
+    template<typename T> inline Matrix<T> operator *(const Matrix<T>& l,
+            T val) {
+        Matrix<T> temp = l;
+        temp *= val;
+        return temp;
+    }
     template<typename T, GLuint COLS, GLuint ROWS> class t_Matrix :
                                                                     public Matrix<
                                                                             T> {
@@ -97,6 +107,11 @@ namespace GL3Engine {
                     :
                       Matrix<T>(COLS, ROWS, array) {
             }
+            t_Matrix(const T* array)
+                    :
+                      Matrix<T>(COLS, ROWS) {
+                memcpy(this->matrix, array, ROWS * COLS * sizeof(T));
+            }
             
             t_Matrix<T, COLS, ROWS>& operator=(const Matrix<T>& matrix) {
                 Matrix<T>::operator =(matrix);
@@ -112,6 +127,9 @@ namespace GL3Engine {
             VEC_GETTER(Z, 2)
             VEC_GETTER(W, 3)
 
+            static constexpr GLuint index(GLuint x, GLuint y) {
+                return y * COLS + x;
+            }
     };
     
     using Mat4 = t_Matrix<GLfloat, 4, 4>;
@@ -162,7 +180,7 @@ namespace GL3Engine {
             static Mat4 orthof(const array<Vec2, 3>&);
 
             /** Obliczenia dla normal matrix */
-            static void transpose(const fMat&, GLfloat*);
+            static void transpose(GLfloat*, GLuint, GLuint);
             static fMat transpose(const fMat&);
 
             static void inverse(Mat3*);

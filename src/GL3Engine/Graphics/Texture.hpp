@@ -10,7 +10,7 @@ namespace GL3Engine {
     
     extern void putGLTextureFlags(GLenum, GLuint);
     class Texture :
-                    public NonCopyable<Texture> {
+                    public NonCopyable {
         public:
             enum Flags {
                 MIPMAP_NEAREST = 1 << 1,
@@ -63,7 +63,7 @@ namespace GL3Engine {
             virtual void configure();
     };
     class TextureArray :
-                         public NonCopyable<TextureArray> {
+                         public NonCopyable {
         private:
             GLuint handle = 0;
             vector<string> textures;

@@ -5,7 +5,7 @@
 
 namespace GL3Engine {
     using namespace IO;
-    using LOADER_ITERATOR = vector<string>::iterator;
+    using LoaderIterator = vector<string>::iterator;
     
     /** SHADER */
     class GLSLloader :
@@ -24,9 +24,9 @@ namespace GL3Engine {
     
     /** MESHE */
     namespace OBJ {
-        using HEADER_STACK = vector<Vec3>;
+        using HeaderStack = vector<Vec3>;
         struct IndexStack {
-                HEADER_STACK normals, vertices;
+                HeaderStack normals, vertices;
                 vector<Vec2> uv;
         };
 
@@ -44,11 +44,11 @@ namespace GL3Engine {
 
                 virtual void onNewHeader(GLint, vector<string>&) = 0;
                 virtual void onHeaderArgument(c_str, GLint,
-                        LOADER_ITERATOR&) = 0;
+                        LoaderIterator&) = 0;
 
-                static Vec3 getVec3D(LOADER_ITERATOR&);
-                static Vec2 getVec2D(LOADER_ITERATOR&);
-                
+                static Vec3 getVec3D(LoaderIterator&);
+                static Vec2 getVec2D(LoaderIterator&);
+
                 T* load(c_str&);
                 virtual ~ASCIIMeshLoader() {
                 }
@@ -83,7 +83,7 @@ namespace GL3Engine {
 
                 void onNewHeader(GLint, vector<string>&) {
                 }
-                void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
+                void onHeaderArgument(c_str, GLint, LoaderIterator&);
                 static TextureArray* packTextures(MATERIALS&);
 
                 /** Zwraca ostatni element!!! */
@@ -116,7 +116,7 @@ namespace GL3Engine {
 
                 // OBJ
                 IndexStack indices;
-                vector<Vertex4f> polygon, vertex_array;
+                VertexArray polygon, vertex_array;
 
                 // MTL
                 unique_ptr<MTLloader> mtl_loader;
@@ -127,19 +127,15 @@ namespace GL3Engine {
                 OBJloader();
 
                 void onNewHeader(GLint, vector<string>&);
-                void onHeaderArgument(c_str, GLint, LOADER_ITERATOR&);
+                void onHeaderArgument(c_str, GLint, LoaderIterator&);
 
                 Shape3D* createObject();
                 void releaseMemory();
 
             private:
-                void finalizePolygon() {
-                    vertex_array.insert(vertex_array.end(), polygon.begin(),
-                            polygon.end());
-                    polygon.clear();
-                }
+                void finalizePolygon();
 
-                Vertex4f getVertex(LOADER_ITERATOR& iter);
+                Vertex4f getVertex(LoaderIterator& iter);
         };
     }
     namespace MD5 {

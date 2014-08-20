@@ -10,10 +10,10 @@
 
 in FragInfo {
 	vec2		uv;
-	vec3		normal;
-	vec3		pos;
-	vec3		cam;
 	float		mtl;
+	mat3		surface2view;
+	vec3		pos; // w model view
+	mat4		v;
 } frag;
 
 // ------------- UNIFORMY -----------------
@@ -68,44 +68,52 @@ void calcLight(in Light light) {
 	if(MATERIAL.tex_flag[BUMP])
 		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.f - 1.f);
 	else
-		normal = normalize(frag.normal);
-	
+		normal = normalize(
+					vec3(
+						frag.surface2view[0][1], 
+						frag.surface2view[1][1], 
+						frag.surface2view[2][1]));
+		
 	// Diffuse
-	vec3	light_normal; 
+	vec3	light_viewspace	=	(vec4(light.pos, 1.f) * frag.v).xyz;
+	vec3	light_normal;
 	float	dist_prop;
+		
 	switch(light.type) {
 		case POINT_LIGHT:
-			light_normal	= 	normalize(abs(frag.pos - light.pos));
-			dist_prop		=  	1.f / (1.f + (.5 * pow(length(abs(frag.pos - light.pos)), 1.f)));
+			light_normal 	= 	normalize(light_viewspace - frag.pos) * frag.surface2view;
+			dist_prop 		= 	1.f / (1.f + (.5f * pow(length(abs(frag.pos - light_viewspace)), 1.f)));
 		break;
+		
 		case DIRECT_LIGHT:
-			light_normal	=	frag.pos;
+			light_normal	=	frag.pos * frag.surface2view;
 			dist_prop		=	1.f;
 		break;
 	};
 	
-	float	diffuse			=	max(dot(light_normal, normal), 0.f) 
-									* dist_prop;
+	float	diffuse			=	max(dot(light_normal, normal), 0.f) * dist_prop;
 	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.f);
-												
+	
 	// Specular
 	if(MATERIAL.tex_flag[SPECULAR]) {
-		vec3 	reflect 	= 	normalize(2.f * diffuse * normal - light_normal);
-		vec3 	viewDir 	=	normalize(abs(frag.cam - frag.pos));
-		float 	aspect 		=	pow(max(dot(viewDir, reflect), 0.f), 2.f);
-		float 	specular 	= 	0.f;
+		vec3 	view_dir 		= 	normalize(frag.pos);
+		vec3	reflection 		= 	reflect(light_normal, normal);
+		float 	aspect 			=	pow(max(dot(reflection, view_dir), 0.f), 8.f);
+		
 		vec3 	spec_tex 	= 	GET_MATERIAL_TEX(SPECULAR).rgb;
-		specular = (spec_tex.r + spec_tex.g + spec_tex.b) * 
-							aspect * 
-							light.specular_intensity;
-		gl_FragColor +=	
-					vec4(
-						(MATERIAL.col[SPECULAR] * 
-						specular * 
-						light.specular_col * 
-						light.specular_intensity).rgb, 0.f);
+		float	specular 	=	(spec_tex.r + spec_tex.g + spec_tex.b) * 
+									aspect * 
+									light.specular_intensity;
+		if(dot(reflection, view_dir) > 0.f)
+			gl_FragColor +=	
+						vec4(
+							(MATERIAL.col[SPECULAR] * 
+							specular * 
+							dist_prop *
+							light.specular_col * 
+							light.specular_intensity).rgb, 0.f);
 	}
-	
+							
 	// Całość
 	if(MATERIAL.tex_flag[AMBIENT])	
 		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);

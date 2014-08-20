@@ -18,7 +18,7 @@ namespace Game {
         scene.createSceneNode<LightBatch>()
                 .regObject(
                 scene.createSceneNode<PointLight>()
-                        .setPos( { 0.f, 1.5f, 0.f })
+                        .setPos( { 0.f, .5f, 0.f })
                         .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
                         .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 6.f));
 
@@ -28,7 +28,31 @@ namespace Game {
                         "mesh/wall/wall.obj"));
         mesh->getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
-                .mul(MatMatrix::translate( { 0.f, .5f, 1.f }));
+                .mul(MatMatrix::translate( { 2.f, .5f, 1.f }));
+
+        scene.createSceneNode<Mesh>()
+                .setShape(
+                GlobalResourceManager::getInstance().getResource<Shape3D>(
+                        "mesh/wall/wall.obj"))
+                .getTransform()
+                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
+                .mul(MatMatrix::translate( { -2.f, .5f, 1.f }));
+
+        scene.createSceneNode<Mesh>()
+                .setShape(
+                GlobalResourceManager::getInstance().getResource<Shape3D>(
+                        "mesh/wall/wall.obj"))
+                .getTransform()
+                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
+                .mul(MatMatrix::translate( { 2.f, .5f, -3.f }));
+
+        scene.createSceneNode<Mesh>()
+                .setShape(
+                GlobalResourceManager::getInstance().getResource<Shape3D>(
+                        "mesh/wall/wall.obj"))
+                .getTransform()
+                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
+                .mul(MatMatrix::translate( { -2.f, .5f, -3.f }));
 
         scene.createSceneNode<Mesh>()
                 .setShape(

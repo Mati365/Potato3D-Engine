@@ -12,25 +12,24 @@ namespace GL3Engine {
         
         for (GLint i = 0; i < (GLint) size; ++i) {
             sheet.push_back( {
-                    {
-                            i * .5f - start_pos, 0.f, -start_pos }, {
-                            0.f, 1.f, 0.f }, {
-                            0.f, 0.f }, -1 });
+                    { i * .5f - start_pos, 0.f, -start_pos },
+                    { 0.f, 1.f, 0.f },
+                    { 0.f, 0.f }, -1 });
             sheet.push_back( {
-                    {
-                            i * .5f - start_pos, 0.f, start_pos }, {
-                            0.f, 1.f, 0.f }, {
-                            0.f, 0.f }, -1 });
+                    { i * .5f - start_pos, 0.f, start_pos },
+                    { 0.f, 1.f, 0.f },
+                    { 0.f, 0.f },
+                    -1 });
             sheet.push_back( {
-                    {
-                            start_pos, 0.f, -start_pos + i * .5f }, {
-                            0.f, 1.f, 0.f }, {
-                            0.f, 0.f }, -1 });
+                    { start_pos, 0.f, -start_pos + i * .5f },
+                    { 0.f, 1.f, 0.f },
+                    { 0.f, 0.f },
+                    -1 });
             sheet.push_back( {
-                    {
-                            -start_pos, 0.f, -start_pos + i * .5f }, {
-                            0.f, 1.f, 0.f }, {
-                            0.f, 0.f }, -1 });
+                    { -start_pos, 0.f, -start_pos + i * .5f },
+                    { 0.f, 1.f, 0.f },
+                    { 0.f, 0.f },
+                    -1 });
         }
         Shape3D* shape = new Shape3D( {
                 &sheet[0], sheet.size() * sizeof(Vertex4f),

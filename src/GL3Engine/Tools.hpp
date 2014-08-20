@@ -123,7 +123,7 @@ namespace Tools {
                 return t;
             }
     };
-    template<typename T> class NonCopyable {
+    class NonCopyable {
         public:
             NonCopyable() {
             }

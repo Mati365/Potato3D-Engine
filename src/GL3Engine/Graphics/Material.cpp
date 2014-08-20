@@ -21,7 +21,9 @@ namespace GL3Engine {
         (tex[type].empty() ? 0.f : 1.f), 0.f, 0.f, 0.f
         
         return MaterialBufferData {
-                COL_DEFINE(AMBIENT), COL_DEFINE(DIFFUSE), COL_DEFINE(SPECULAR),
+                COL_DEFINE(AMBIENT),
+                COL_DEFINE(DIFFUSE),
+                COL_DEFINE(SPECULAR),
                 TEX_USAGE_DEFINE(AMBIENT),
                 TEX_USAGE_DEFINE(DIFFUSE),
                 TEX_USAGE_DEFINE(SPECULAR),

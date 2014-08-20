@@ -32,6 +32,7 @@ namespace GL3Engine {
                  public Drawable,
                  public WindowEventListener {
             friend class SceneManager;
+            template<typename U> friend class Batch;
 
         public:
             static constexpr GLfloat VIEW_DISTANCE = 6.f;
@@ -82,10 +83,6 @@ namespace GL3Engine {
                 return effect;
             }
             
-            Node& setParent(Node* parent) {
-                this->parent = parent;
-                return *this;
-            }
             Node* getParentNode() const {
                 return parent;
             }
@@ -115,7 +112,26 @@ namespace GL3Engine {
             }
 
         private:
+            Node& setParent(Node* parent) {
+                this->parent = parent;
+                return *this;
+            }
             void update();
+    };
+
+    template<typename T>
+    class Batch :
+                  public Node {
+        protected:
+            vector<T*> objects;
+
+        public:
+            Batch& regObject(T& object) {
+                if (is_base_of<Node, T>::value)
+                    dynamic_cast<Node*>(&object)->setParent(this);
+                objects.push_back(&object);
+                return *this;
+            }
     };
     class SceneManager :
                          public Drawable,

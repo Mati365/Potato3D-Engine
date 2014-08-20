@@ -101,38 +101,60 @@ namespace GL3Engine {
     }
     
     /** Obliczenia dla normal matrix */
-    void MatMatrix::transpose(const fMat& matrix, GLfloat* array) {
-        for (GLuint i = 0; i < matrix.cols; ++i)
-            for (GLuint j = 0; j < matrix.rows; ++j)
-                array[i * matrix.rows + j] = matrix.matrix[j * matrix.cols + i];
+    void MatMatrix::transpose(GLfloat* array, GLuint rows, GLuint cols) {
+        GLfloat* temp = new GLfloat[rows * cols];
+        for (GLuint i = 0; i < cols; ++i)
+            for (GLuint j = 0; j < rows; ++j)
+                temp[j * cols + i] = array[i * rows + j];
+        memcpy(array, temp, rows * cols * sizeof(GLfloat));
+        safeDelete(temp, true);
     }
     fMat MatMatrix::transpose(const fMat& matrix) {
-        fMat result(matrix.rows, matrix.cols);
-        transpose(matrix, result.matrix);
+        fMat result = matrix;
+        transpose(result.matrix, matrix.rows, matrix.cols);
         return result;
     }
     
     void MatMatrix::inverse(Mat3* matrix) {
+//        http://stackoverflow.com/questions/983999/simple-3x3-matrix-inverse-code-c
+//        double determinant =    +A(0,0)*(A(1,1)*A(2,2)-A(2,1)*A(1,2))
+//                                -A(0,1)*(A(1,0)*A(2,2)-A(1,2)*A(2,0))
+//                                +A(0,2)*(A(1,0)*A(2,1)-A(1,1)*A(2,0));
+//        0x0=0 1x0=1 2x0=2
+//        0x1=3 1x1=4 2x1=5
+//        0x2=6 1x2=7 2x2=8
         GLfloat* arr = matrix->matrix;
-        GLfloat det = (arr[4] * arr[8] - arr[5] * arr[7])
-                - 2 * (arr[3] * arr[8] - arr[5] * arr[6])
-                + 3 * (arr[3] * arr[7] - arr[4] * arr[6]);
-        if (det == 0)
-            return;
-        
-        // Rotacja
+
         static GLfloat mat[9];
-        transpose(*matrix, mat);
-        
-        arr[0] = mat[4] * mat[8] - mat[5] * mat[7];
-        arr[1] = -mat[3] * mat[8] + mat[5] * mat[6];
-        arr[2] = mat[3] * mat[7] - mat[4] * mat[6];
-        arr[3] = -mat[1] * mat[8] + mat[2] * mat[7];
-        arr[4] = mat[0] * mat[8] - mat[2] * mat[6];
-        arr[5] = -mat[0] * mat[7] + mat[1] * mat[6];
-        arr[6] = mat[1] * mat[5] - mat[2] * mat[4];
-        arr[7] = -mat[0] * mat[5] + mat[2] * mat[3];
-        arr[8] = mat[0] * mat[4] - mat[1] * mat[3];
+        memcpy(mat, matrix->matrix, 9 * sizeof(GLfloat));
+
+        GLfloat det =
+                arr[0] * (arr[4] * arr[8] - arr[5] * arr[7])
+                        - arr[3] * (arr[1] * arr[8] - arr[7] * arr[2])
+                        + arr[6] * (arr[1] * arr[5] - arr[4] * arr[2]);
+        GLfloat inv_det = 1.f / det;
+
+//        double invdet = 1/determinant;
+//        result(0,0) =  (A(1,1)*A(2,2)-A(2,1)*A(1,2))*invdet;
+//        result(1,0) = -(A(0,1)*A(2,2)-A(0,2)*A(2,1))*invdet;
+//        result(2,0) =  (A(0,1)*A(1,2)-A(0,2)*A(1,1))*invdet;
+//        result(0,1) = -(A(1,0)*A(2,2)-A(1,2)*A(2,0))*invdet;
+//        result(1,1) =  (A(0,0)*A(2,2)-A(0,2)*A(2,0))*invdet;
+//        result(2,1) = -(A(0,0)*A(1,2)-A(1,0)*A(0,2))*invdet;
+//        result(0,2) =  (A(1,0)*A(2,1)-A(2,0)*A(1,1))*invdet;
+//        result(1,2) = -(A(0,0)*A(2,1)-A(2,0)*A(0,1))*invdet;
+//        result(2,2) =  (A(0,0)*A(1,1)-A(1,0)*A(0,1))*invdet;
+        arr[0] = (mat[4] * mat[8] - mat[5] * mat[7]) * inv_det;
+        arr[1] = -(mat[3] * mat[8] - mat[6] * mat[5]) * inv_det;
+        arr[2] = (mat[3] * mat[7] - mat[6] * mat[4]) * inv_det;
+        arr[3] = -(mat[1] * mat[8] - mat[7] * mat[2]) * inv_det;
+        arr[4] = (mat[0] * mat[8] - mat[6] * mat[2]) * inv_det;
+        arr[5] = -(mat[0] * mat[7] - mat[1] * mat[6]) * inv_det;
+        arr[6] = (mat[1] * mat[5] - mat[2] * mat[4]) * inv_det;
+        arr[7] = -(mat[0] * mat[5] - mat[2] * mat[3]) * inv_det;
+        arr[8] = (mat[0] * mat[4] - mat[1] * mat[3]) * inv_det;
+
+        transpose(arr, 3, 3);
     }
     Mat3 MatMatrix::inverse(const Mat3& matrix) {
         Mat3 mat(matrix);

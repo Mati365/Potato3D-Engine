@@ -93,9 +93,8 @@ namespace GL3Engine {
         return *this;
     }
     template<typename T>
-    Matrix<T>& Matrix<T>::operator=(T* dynamic_array) {
-        safeDelete(this->matrix, true);
-        this->matrix = dynamic_array;
+    Matrix<T>& Matrix<T>::operator=(const T* array) {
+        memcpy(matrix, array, rows * cols * sizeof(GLfloat));
         return *this;
     }
     

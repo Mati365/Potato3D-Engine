@@ -32,7 +32,7 @@ namespace GL3Engine {
     }
 
     template<typename T>
-    Vec3 ASCIIMeshLoader<T>::getVec3D(LOADER_ITERATOR& iter) {
+    Vec3 ASCIIMeshLoader<T>::getVec3D(LoaderIterator& iter) {
         Vec3 v;
         sscanf(
                 (*iter + " " + *(iter + 1) + " " + *(iter + 2))
@@ -42,7 +42,7 @@ namespace GL3Engine {
         return v;
     }
     template<typename T>
-    Vec2 ASCIIMeshLoader<T>::getVec2D(LOADER_ITERATOR& iter) {
+    Vec2 ASCIIMeshLoader<T>::getVec2D(LoaderIterator& iter) {
         Vec2 v;
         sscanf(
                 (*iter + " " + *(iter + 1)).c_str(),

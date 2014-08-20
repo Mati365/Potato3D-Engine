@@ -16,6 +16,7 @@ namespace GL3Engine {
                                     Vec4 { x, y, z, 1.f }, \
                                     Vec4 { _x, _y, _z, 1.f })) \
                     }
+
     PointLightCam cube_cams[] = {
     DEF_FACE(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 1.f, 0.f, 0.f, 0.f, -1.f, 0.f),
     DEF_FACE(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, -1.f, 0.f, 0.f,0.f, -1.f, 0.f),
@@ -95,8 +96,8 @@ namespace GL3Engine {
                     pos + side.cam->getPos(),
                     pos + side.cam->getTarget()
             };
-            fbo.begin();
-            fbo.end();
+            //fbo.begin();
+            //fbo.end();
         }
     }
 }

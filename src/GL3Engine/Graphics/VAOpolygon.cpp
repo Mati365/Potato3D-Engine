@@ -39,6 +39,7 @@ namespace GL3Engine {
             VERTEX_ATTR_PTR(1, 3, 3, T); // Normals
             VERTEX_ATTR_PTR(2, 2, 6, T); // UVs
             VERTEX_ATTR_PTR(3, 1, 8, T); // MTL
+            VERTEX_ATTR_PTR(4, 3, 9, T); // Tangent
         } else {
             VERTEX_ATTR_PTR(0, 3, 0, T); // Vertex
             VERTEX_ATTR_PTR(1, 2, 3, T); // UV

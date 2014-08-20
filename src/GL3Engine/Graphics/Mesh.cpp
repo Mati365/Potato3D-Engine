@@ -36,8 +36,10 @@ namespace GL3Engine {
 
                 .setUniform("matrix.m", world->model)
 
+                .setUniform("matrix.v", world->view)
+
                 .setUniform("matrix.normal",
-                        MatMatrix::inverse(world->model.getCut(3, 3)))
+                        MatMatrix::inverse((world->view * world->model).getCut(3, 3)))
 
                 .setUniform("matrix.cam",
                         world->getActiveCamera()->getPos());

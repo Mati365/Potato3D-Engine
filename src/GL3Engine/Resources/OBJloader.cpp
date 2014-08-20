@@ -18,7 +18,7 @@ namespace GL3Engine {
                               { "map_Kd", DIFFUSE_TEX },
                               { "map_Ks", SPECULAR_TEX },
                               { "map_d", ALPHA_TEX },
-                              { "map_bump", BUMP_TEX },
+                              { "map_Bump", BUMP_TEX },
                               { "bump", BUMP_TEX },
                               { "Ns", SHINE },
                               { "d", TRANSPARENT },
@@ -26,7 +26,7 @@ namespace GL3Engine {
     }
     
     void MTLloader::onHeaderArgument(
-            c_str file_dir, GLint active_header, LOADER_ITERATOR& it) {
+            c_str file_dir, GLint active_header, LoaderIterator& it) {
         Material* material = this->mtl.empty() ? nullptr : this->mtl.back();
         if (active_header == NAME) {
             this->mtl.push_back(new Material);
@@ -86,8 +86,17 @@ namespace GL3Engine {
                 break;
         }
     }
+    void OBJloader::finalizePolygon() {
+        // Liczenie bi tangent
+        for (GLuint i = 0; i < vertex_array.size(); ++i) {
+
+        }
+        vertex_array.insert(vertex_array.end(), polygon.begin(),
+                polygon.end());
+        polygon.clear();
+    }
     void OBJloader::onHeaderArgument(
-            c_str file_dir, GLint active_header, LOADER_ITERATOR& it) {
+            c_str file_dir, GLint active_header, LoaderIterator& it) {
         switch (active_header) {
             // Plik MTL
             case LOAD_MATERIAL: {
@@ -132,6 +141,7 @@ namespace GL3Engine {
     
     Shape3D* OBJloader::createObject() {
         finalizePolygon();
+        calcTangents(vertex_array);
         return new Shape3D(
                 { &vertex_array[0], vertex_array.size() * sizeof(Vertex4f), GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW },
                 { nullptr, 0, GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW },
@@ -146,7 +156,7 @@ namespace GL3Engine {
         used_material = -1;
     }
 
-    Vertex4f OBJloader::getVertex(LOADER_ITERATOR& iter) {
+    Vertex4f OBJloader::getVertex(LoaderIterator& iter) {
         Vertex4f v = { { 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f }, { 0.f, 0.f }, -1 };
         string param = *iter;
         GLfloat args[3];

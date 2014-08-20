@@ -9,8 +9,6 @@
 #include "Scene.hpp"
 
 namespace GL3Engine {
-    using namespace std;
-    
     struct GL_BUFFER_DATA {
             const GLvoid* data;
             size_t len;
@@ -21,7 +19,8 @@ namespace GL3Engine {
     };
     GLint genGLBuffer(const GL_BUFFER_DATA&, bool bind = false);
     
-    template<typename T> class VAOpolygon {
+    template<typename T> class VAOpolygon :
+                                            public NonCopyable {
         private:
             GLuint vao = 0, vbo = 0, indices = 0, vertices_count = 0,
                     indices_count = 0;

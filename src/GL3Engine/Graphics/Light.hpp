@@ -120,20 +120,6 @@ namespace GL3Engine {
     // Light       lights[MAX_LIGHTS];
     // int         lights_count;
     // };
-    template<typename T>
-    class Batch :
-                  public Node {
-        protected:
-            vector<T*> objects;
-
-        public:
-            Batch& regObject(T& object) {
-                if (is_base_of<Node, T>::value)
-                    dynamic_cast<Node*>(&object)->setParent(this);
-                objects.push_back(&object);
-                return *this;
-            }
-    };
     class LightBatch :
                        public Batch<Light> {
         DECLARE_NODE_TYPE(LightBatch)
