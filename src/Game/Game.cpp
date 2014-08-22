@@ -7,7 +7,8 @@ namespace Game {
     GameScreen::GameScreen(Window* _wnd)
             :
               wnd(_wnd),
-              scene(_wnd->getBounds()) {
+              scene(_wnd->getBounds()),
+              mesh(nullptr) {
     }
     
     void GameScreen::init() {
@@ -69,19 +70,20 @@ namespace Game {
                 .getTransform()
                 .mul(MatMatrix::scale( { .3f, .3f, .3f }))
                 .mul(MatMatrix::translate( { 0.f, 0.f, 0.f }));
-        
+
         fbo =
                 dynamic_cast<RenderQuad*>(
                 &scene.createSceneNode<RenderQuad>()
-                        .setSize(scene.getRenderResolution())
-                        .setShaderParam("blur", { { blur }, GL_FLOAT }));
+                        .setSize(scene.getRenderResolution()));
     }
     void GameScreen::draw() {
         scene.draw();
-        if (blur > 0.f)
+        if (blur > 0.001f)
             blur *= .98f;
-        fbo->getShaderParam("blur")[0] = blur;
+        else
+            blur = 0.f;
 
+        fbo->getEffectMgr().setEffectParam("blur", GL_FLOAT)[0] = blur;
         mesh->getTransform().mul(MatMatrix::rotate(.0001f, { 0.f, 1.f, 0.f }));
     }
     

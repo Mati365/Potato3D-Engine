@@ -40,7 +40,7 @@ namespace GL3Engine {
             cout << buffer << std::endl;
             
             glDeleteShader(shader);
-            return 0;
+            assert(0);
         }
         return shader;
     }

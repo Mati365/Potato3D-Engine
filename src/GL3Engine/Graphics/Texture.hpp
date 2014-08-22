@@ -40,7 +40,8 @@ namespace GL3Engine {
             Texture(const Vec2i&,
                     GLenum type = GL_RGBA,
                     GLenum bytes = GL_UNSIGNED_BYTE,
-                    GLuint flags = DEFAULT_TEX_FLAGS);
+                    GLuint flags = DEFAULT_TEX_FLAGS,
+                    GLuint tex_type = GL_TEXTURE_2D);
 
             virtual void loadTexture(c_str);
             virtual void generate(const Vec2i&, GLenum, GLenum);

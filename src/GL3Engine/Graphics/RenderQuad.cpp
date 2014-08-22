@@ -9,11 +9,12 @@ namespace GL3Engine {
     }
     
     void RenderQuad::create() {
-        if (fbo_handle)
-            glDeleteFramebuffers(1, &fbo_handle);
+        if (handle)
+            glDeleteFramebuffers(1, &handle);
+
         // FBO
-        glGenFramebuffers(1, &fbo_handle);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
+        glGenFramebuffers(1, &handle);
+        glBindFramebuffer(GL_FRAMEBUFFER, handle);
         {
             // Depth buffer
             if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags)) {
@@ -44,7 +45,6 @@ namespace GL3Engine {
                                 * sizeof(Vertex2f), GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW },
                         { Tile::quad_indices, 6 * sizeof(GLfloat), GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW }));
     }
-    
     void RenderQuad::passToShader() {
         if (IS_SET_FLAG(USE_COLOR_BUFFER, flags))
             effect->setUniform(GL_TEXTURE_2D,
@@ -65,33 +65,39 @@ namespace GL3Engine {
             glBindVertexArray(0);
             glEnable(GL_CULL_FACE);
         }
-        scene->setRenderTarget(this);
+        if (scene)
+            scene->setRenderTarget(this);
     }
     
-    GLint last_fbo = 0;
     void RenderQuad::begin() {
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &last_fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo_handle);
-        glViewport(0, 0, size[0], size[1]);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, handle);
+        {
+            glViewport(0, 0, size[0], size[1]);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
     }
     void RenderQuad::begin(GLuint face, GLuint tex) {
         if (!tex)
             return;
+        {
+            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                    face, tex, 0);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        }
         begin();
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                face, tex, 0);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
     void RenderQuad::end() {
-        glBindFramebuffer(GL_FRAMEBUFFER, last_fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, size[0], size[1]);
     }
     
     RenderQuad& RenderQuad::setSize(const Vec2i& size) {
         this->size = size;
-        this->color_tex.reset(new Texture(size));
-        this->depth_tex.reset(new Texture(size, GL_DEPTH_COMPONENT, GL_FLOAT));
+        if (IS_SET_FLAG(USE_COLOR_BUFFER, flags))
+            this->color_tex.reset(new Texture(size));
+        if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags))
+            this->depth_tex.reset(
+                    new Texture(size, GL_DEPTH_COMPONENT, GL_FLOAT));
 
         if (!effect)
             setEffect(REQUIRE_RES(Shader, DEFAULT_FBO_SHADER));

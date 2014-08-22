@@ -4,10 +4,13 @@
 #include <map>
 
 #include "Texture.hpp"
+#include "AttribContainer.hpp"
 
 namespace GL3Engine {
     class Material;
-    class Shader {
+    class Shader :
+                   public NonCopyable,
+                   public ScopedContainer {
         private:
             GLint program = 0;
             map<GLuint, GLuint> ubo; // blockindex handle do bufora
@@ -15,10 +18,10 @@ namespace GL3Engine {
         public:
             Shader(c_str, c_str, c_str);
 
-            void begin() const {
+            void begin() const override {
                 glUseProgram(program);
             }
-            void end() const {
+            void end() const override {
                 glUseProgram(0);
             }
             

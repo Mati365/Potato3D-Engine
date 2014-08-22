@@ -1,23 +1,37 @@
 #include "Scene.hpp"
 
 namespace GL3Engine {
-    Node& Node::setShaderParam(
-            c_str variable, const ShaderParam& param) {
-        effect_params[variable] = param;
-        return *this;
+    GLfloat& EffectManager::EffectParam::operator[](GLuint index) {
+        if (data.size() <= index)
+            data.resize(index + 1);
+        return data[index];
     }
-    void Node::update() {
+    EffectManager::EffectParam& EffectManager::setEffectParam(c_str param,
+            GLuint type) {
+        EffectParam& p = effect_params[param];
+        p.type = type;
+        return p;
+    }
+
+    void EffectManager::begin() const {
+        if (!attrib)
+            return;
+        attrib->begin();
+        for (auto& el : effect_params)
+            attrib->setUniform(el.first, &el.second.data[0],
+                    el.second.data.size(), el.second.type);
+    }
+    void EffectManager::end() const {
+        if (attrib)
+            attrib->end();
+    }
+
+    void Node::render() {
         if (state == State::DISABLED)
             return;
-        if (effect) {
-            effect->begin();
-            for (auto& el : effect_params)
-                effect->setUniform(el.first, &el.second.data[0],
-                        el.second.data.size(), el.second.type);
-        }
+        effect.begin();
         draw();
-        if (effect)
-            effect->end();
+        effect.end();
     }
 }
 

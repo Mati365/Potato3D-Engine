@@ -10,9 +10,14 @@ namespace GL3Engine {
         this->flags = flags;
     }
     Texture::Texture(
-            const Vec2i& _size, GLenum _type, GLenum _bytes, GLuint _flags)
+            const Vec2i& _size,
+            GLenum _type,
+            GLenum _bytes,
+            GLuint _flags,
+            GLuint _tex_type)
             :
-              flags(_flags) {
+              flags(_flags),
+              tex_type(_tex_type) {
         generate(_size, _type, _bytes);
     }
 
@@ -126,14 +131,18 @@ namespace GL3Engine {
 
     // ---- CubeTex
     CubeTexture::CubeTexture(
-            const Vec2i& size, GLenum type, GLenum bytes, GLuint flags)
+            const Vec2i& size,
+            GLenum type,
+            GLenum bytes,
+            GLuint flags)
             :
-              Texture(size, type, bytes, flags) {
-        this->tex_type = GL_TEXTURE_CUBE_MAP;
+              Texture(size, type, bytes, flags, GL_TEXTURE_CUBE_MAP) {
     }
     void CubeTexture::generate(const Vec2i& size, GLenum type, GLenum bytes) {
         if (handle)
             glDeleteTextures(1, &handle);
+
+        cout << "DUPA" << endl;
 
         glGenTextures(1, &handle);
         glBindTexture(tex_type, handle);

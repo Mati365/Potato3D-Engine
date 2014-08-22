@@ -25,21 +25,23 @@ namespace GL3Engine {
         if (material_cache.empty())
             updateMaterialsCache(effect);
         
-        world->pushTransform();
+        world->pushAttrib();
         {
-            world->model *= transform.model;
+            world->attrib.model *= transform.model;
             effect->bindToSlot("LightBlock",
                     scene->getSceneFlags()[SceneManager::SceneFlag::LIGHT_SHADER_BINDING]);
             {
                 effect->setUniform("matrix.mvp",
-                        world->vp_matrix * world->model)
+                        world->attrib.vp_matrix * world->attrib.model)
 
-                .setUniform("matrix.m", world->model)
+                .setUniform("matrix.m", world->attrib.model)
 
-                .setUniform("matrix.v", world->view)
+                .setUniform("matrix.v", world->attrib.view)
 
                 .setUniform("matrix.normal",
-                        MatMatrix::inverse((world->view * world->model).getCut(3, 3)))
+                        MatMatrix::inverse(
+                                (world->attrib.view * world->attrib.model)
+                                        .getCut(3, 3)))
 
                 .setUniform("matrix.cam",
                         world->getActiveCamera()->getPos());
@@ -47,13 +49,15 @@ namespace GL3Engine {
             if (shape->getMaterials().empty())
                 effect->setUniform("col", shape->getColor());
             else {
-                effect->setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
+                effect->setUniform(GL_TEXTURE_2D_ARRAY,
+                        "texture_pack", 0,
                         shape->getMaterials()[0]->tex_array->getHandle());
-                effect->changeUBOData(ubo_handle, &material_cache[0],
+                effect->changeUBOData(ubo_handle,
+                        &material_cache[0],
                         material_cache.size() * sizeof(MaterialBufferData));
             }
         }
-        world->popTransform();
+        world->popAttrib();
     }
     void Mesh::draw() {
         assert(effect);

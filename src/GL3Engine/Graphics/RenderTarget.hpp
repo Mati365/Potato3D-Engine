@@ -39,9 +39,11 @@ namespace GL3Engine {
             };
 
         private:
-            GLuint fbo_handle = 0, depth_render_buf = 0;
+            GLuint handle = 0,
+                    depth_render_buf = 0;
 
-            unique_ptr<Texture> color_tex, depth_tex;
+            unique_ptr<Texture> color_tex,
+                    depth_tex;
             unique_ptr<Shape2D> quad;
 
             GLuint flags = USE_COLOR_BUFFER | USE_DEPTH_BUFFER;
@@ -65,8 +67,8 @@ namespace GL3Engine {
                 return size;
             }
             
-            GLuint getFBO() const {
-                return fbo_handle;
+            GLuint getHandle() const {
+                return handle;
             }
             Texture& getColorTexture() {
                 return *color_tex.get();
@@ -76,7 +78,7 @@ namespace GL3Engine {
             }
             
             ~RenderQuad() {
-                glDeleteFramebuffers(1, &fbo_handle);
+                glDeleteFramebuffers(1, &handle);
             }
             
         protected:

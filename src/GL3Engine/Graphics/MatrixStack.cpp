@@ -2,6 +2,21 @@
 #include "Camera.hpp"
 
 namespace GL3Engine {
+    MVPArray::MVPArray(const MVPArray& arr) {
+        *this = arr;
+    }
+    MVPArray& MVPArray::operator=(const MVPArray& arr) {
+#define MEMCPY_PUSH(variable) \
+        memcpy(variable.matrix, arr.variable.matrix, 16 * sizeof(GLfloat))
+        {
+            MEMCPY_PUSH(proj);
+            MEMCPY_PUSH(view);
+            MEMCPY_PUSH(model);
+            MEMCPY_PUSH(vp_matrix);
+        }
+        return *this;
+    }
+
     MatrixStack::MatrixStack(const Vec2i& _resolution)
             :
               resolution(_resolution) {
@@ -16,9 +31,9 @@ namespace GL3Engine {
                 glDepthFunc(GL_LESS);
                 glEnable(GL_DEPTH_TEST);
                 {
-                    projection = MatMatrix::perspective(45.f,
+                    attrib.proj = MatMatrix::perspective(45.f,
                             resolution[0] / resolution[1], .1f, 100.f);
-                    MatMatrix::identity(1, &model);
+                    MatMatrix::identity(1, &attrib.model);
                     updateCameraCoords();
                 }
             }
@@ -29,13 +44,13 @@ namespace GL3Engine {
                 glDepthMask(GL_FALSE);
                 glDisable(GL_DEPTH_TEST);
                 {
-                    projection = MatMatrix::orthof( {
+                    attrib.proj = MatMatrix::orthof( {
                             Vec2 { -resolution[0] / 2.f, resolution[0] / 2.f },
                             Vec2 { -resolution[1] / 2.f, resolution[1] / 2.f },
                             Vec2 { 0.f, 1.f },
                     });
-                    vp_matrix = projection;
-                    MatMatrix::identity(2, &view, &model);
+                    attrib.vp_matrix = attrib.proj;
+                    MatMatrix::identity(2, &attrib.view, &attrib.model);
                 }
             }
                 break;
@@ -44,9 +59,10 @@ namespace GL3Engine {
     void MatrixStack::updateCameraCoords() {
         if (!active_cam)
             return;
-        view = MatMatrix::lookAt(active_cam->getPos(), active_cam->getTarget(),
-                { 0, 1, 0 });
-        vp_matrix = projection * view;
+        attrib.view = MatMatrix::lookAt(active_cam->getPos(),
+                active_cam->getTarget(),
+                { 0.f, 1.f, 0.f });
+        attrib.vp_matrix = attrib.proj * attrib.view;
     }
     MatrixStack& MatrixStack::setCam(Camera* active_cam) {
         this->active_cam = active_cam;
@@ -55,30 +71,7 @@ namespace GL3Engine {
 
     }
 
-    void MatrixStack::pushTransform() {
-        M_STACK_ARRAY array;
-#define MEMCPY_PUSH(variable) \
-        memcpy(array.variable, variable.matrix, 16 * sizeof(GLfloat))
-        {
-            MEMCPY_PUSH(projection);
-            MEMCPY_PUSH(view);
-            MEMCPY_PUSH(model);
-        }
-        stack.push_back(array);
-    }
-    void MatrixStack::popTransform() {
-        if (stack.empty())
-            return;
-#define MEMCPY_POP(variable) \
-        memcpy(variable.matrix, stack.back().variable, 16 * sizeof(GLfloat))
-        {
-            MEMCPY_POP(projection);
-            MEMCPY_POP(view);
-            MEMCPY_POP(model);
-        }
-        stack.pop_back();
-    }
-    void MatrixStack::loadMatrix(const Mat4& mem) {
-        memcpy(model.matrix, mem.matrix, 16 * sizeof(GLfloat));
+    void MatrixStack::loadModel(const Mat4& mem) {
+        memcpy(attrib.model.matrix, mem.matrix, 16 * sizeof(GLfloat));
     }
 }

@@ -1,5 +1,7 @@
 #ifndef SCENE_HPP_
 #define SCENE_HPP_
+#include <stdexcept>
+
 #include "Effects.hpp"
 #include "MatrixStack.hpp"
 
@@ -28,6 +30,30 @@ namespace GL3Engine {
     class SceneManager;
     class RenderTarget;
     
+    class EffectManager :
+                          public AttribContainer<Shader*>,
+                          public ScopedContainer {
+        public:
+            struct EffectParam {
+                    vector<GLfloat> data;
+                    GLenum type;
+
+                    GLfloat& operator[](GLuint);
+            };
+
+        private:
+            map<string, EffectParam> effect_params;
+
+        public:
+            EffectManager()
+                    :
+                      AttribContainer(nullptr) {
+            }
+            EffectParam& setEffectParam(c_str, GLuint);
+
+            void begin() const override;
+            void end() const override;
+    };
     class Node :
                  public Drawable,
                  public WindowEventListener {
@@ -48,21 +74,16 @@ namespace GL3Engine {
             MatrixStack* world = nullptr;
 
             Transform transform;
-            Shader* effect = nullptr;
+            EffectManager effect;
             GLuint render_mode = GL_TRIANGLES;
             State state = State::NORMAL;
 
-            struct ShaderParam {
-                    vector<GLfloat> data;
-                    GLenum type;
-
-                    GLfloat& operator[](GLuint index) {
-                        return data[index];
-                    }
-            };
-            map<string, ShaderParam> effect_params;
-
         public:
+            virtual void update() {
+            }
+            virtual void draw() override {
+            }
+
             Node& setRenderMode(GLuint render_mode) {
                 this->render_mode = render_mode;
                 return *this;
@@ -70,26 +91,22 @@ namespace GL3Engine {
             Transform& getTransform() {
                 return transform;
             }
-            
-            ShaderParam& getShaderParam(c_str key) {
-                return effect_params[key];
-            }
-            Node& setShaderParam(c_str, const ShaderParam&);
+
             Node& setEffect(Shader* effect) {
-                this->effect = effect;
+                this->effect.setAttrib(effect);
                 return *this;
             }
-            Shader* getEffect() {
+            EffectManager& getEffectMgr() {
                 return effect;
             }
-            
+
             Node* getParentNode() const {
                 return parent;
             }
             SceneManager* getScene() const {
                 return scene;
             }
-            
+
             GLboolean isActive() const {
                 return state == State::NORMAL;
             }
@@ -100,7 +117,7 @@ namespace GL3Engine {
             State getState() const {
                 return state;
             }
-            
+
             virtual inline size_t getHash()=0;
 
 #define CLASS_HASH(T) \
@@ -112,11 +129,7 @@ namespace GL3Engine {
             }
 
         private:
-            Node& setParent(Node* parent) {
-                this->parent = parent;
-                return *this;
-            }
-            void update();
+            void render(); // tylko na scenie + efekty
     };
 
     template<typename T>
@@ -128,7 +141,7 @@ namespace GL3Engine {
         public:
             Batch& regObject(T& object) {
                 if (is_base_of<Node, T>::value)
-                    dynamic_cast<Node*>(&object)->setParent(this);
+                    dynamic_cast<Node*>(&object)->parent = this;
                 objects.push_back(&object);
                 return *this;
             }
@@ -145,6 +158,7 @@ namespace GL3Engine {
 
         private:
             NodeList nodes;
+
             MatrixStack world_matrix;
             RenderTarget* target = nullptr;
 
@@ -184,6 +198,9 @@ namespace GL3Engine {
             GLboolean getMouseEvent(const Vec2i&, GLuint) override;
             GLboolean getKeyEvent(GLchar) override;
 
+            RenderTarget* getRenderTarget() {
+                return target;
+            }
             SceneFlags& getSceneFlags() {
                 return flags;
             }

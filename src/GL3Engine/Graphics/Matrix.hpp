@@ -6,7 +6,6 @@
 #include <array>
 #include <utility>
 #include <GL/glew.h>
-#include <GL/glu.h>
 
 #include "../Tools.hpp"
 

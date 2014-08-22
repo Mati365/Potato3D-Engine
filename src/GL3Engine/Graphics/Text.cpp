@@ -75,9 +75,11 @@ namespace GL3Engine {
     void Text::passToShader() {
         assert(effect);
         {
-            effect->setUniform("col", col).setUniform(GL_TEXTURE_2D, "texture",
-                    0, font->getHandle()).setUniform("matrix.mvp",
-                    world->vp_matrix * world->model * transform.model);
+            effect->setUniform("col", col)
+                    .setUniform(GL_TEXTURE_2D, "texture", 0, font->getHandle())
+                    .setUniform("matrix.mvp",
+                    world->attrib.vp_matrix * world->attrib.model
+                            * transform.model);
         }
     }
     void Text::draw() {

@@ -3,17 +3,22 @@
 
 namespace GL3Engine {
     void SceneManager::draw() {
+        // Kalkulacja cieniowania itp
+        for (auto& node : nodes)
+            node.get()->update();
+
+        // Rendering
         if (target)
             target->begin();
         {
             world_matrix.switchMode(MatrixStack::Mode::_3D);
             for (auto& node : nodes)
                 if (node.get() != target)
-                    node.get()->update();
+                    node.get()->render();
         }
         if (target) {
             target->end();
-            target->update();
+            target->render();
         }
     }
     SceneManager& SceneManager::addSceneNode(Node* node) {

@@ -48,8 +48,7 @@ namespace GL3Engine {
             }
 
         public:
-            void draw() override;
-            virtual void drawShadows() = 0;
+            virtual void update() = 0;
 
 #define ARRAY_LIGHT_SETTER(ret_type, array_size, target_variable, name) \
             virtual ret_type& set##name(const array<GLfloat, array_size>& array) { \
@@ -95,7 +94,7 @@ namespace GL3Engine {
 
         public:
             PointLight();
-            void drawShadows() override;
+            void update() override;
     };
     // Pos przeznaczony jako kierunek padania
     class DirectLight :
@@ -106,7 +105,7 @@ namespace GL3Engine {
             DirectLight() {
                 setType(LightData::ENABLED | LightData::DIRECT);
             }
-            void drawShadows() override {
+            void update() override {
             }
 
             ARRAY_LIGHT_SETTER(DirectLight, 3, pos, Dir)
@@ -135,7 +134,7 @@ namespace GL3Engine {
             LightBatch() {
                 createBuffer();
             }
-            void draw() override;
+            void update() override;
 
         private:
             void createBuffer();

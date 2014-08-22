@@ -35,7 +35,7 @@ namespace GL3Engine {
                 GL_STREAM_DRAW }, false);
         glBindBufferBase(GL_UNIFORM_BUFFER, BINDING_POINT, buffer);
     }
-    void LightBatch::draw() {
+    void LightBatch::update() {
         if (objects.empty())
             return;
 
@@ -47,7 +47,7 @@ namespace GL3Engine {
             // Depth mapy
             glCullFace(GL_FRONT);
             {
-                light->drawShadows();
+                light->update();
             }
             glCullFace(GL_BACK);
             data.push_back(light->getData());
@@ -70,7 +70,7 @@ namespace GL3Engine {
     }
 
     // ---- Light
-    void Light::draw() {
+    void Light::update() {
         if (parent)
             dynamic_cast<LightBatch*>(parent)->regObject(*this);
     }
@@ -79,26 +79,35 @@ namespace GL3Engine {
     PointLight::PointLight()
             :
               cube( { 512, 256 }) {
-        fbo.setFlags(RenderQuad::USE_DEPTH_BUFFER);
-        fbo.setEffect(REQUIRE_RES(Shader, DEFAULT_SHADOW_SHADER));
+        fbo.setFlags(RenderQuad::USE_COLOR_BUFFER);
+        fbo.setSize(Vec2i { 512, 256 });
+
         setType(LightData::ENABLED | LightData::POINT);
     }
-    void PointLight::drawShadows() {
+    void PointLight::update() {
         Vec4 pos = {
                 data.pos[0],
                 data.pos[1],
                 data.pos[2],
                 1.f
         };
+        Camera* cam = world->getActiveCamera();
         for (auto& side : make_pair(cube_cams,
                 cube_cams + CubeTexture::CUBE_TEX_FACES)) {
             Camera cam = {
                     pos + side.cam->getPos(),
                     pos + side.cam->getTarget()
             };
-            //fbo.begin();
-            //fbo.end();
+            // Shadow mapping
+            {
+                world->setCam(&cam);
+                fbo.begin(side.face, cube.getHandle());
+                for (auto& node : *scene)
+                    node->draw();
+                fbo.end();
+            }
         }
+        world->setCam(cam);
     }
 }
 

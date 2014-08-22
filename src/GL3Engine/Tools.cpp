@@ -1,5 +1,6 @@
 #include <sstream>
 #include <stdio.h>
+#include <map>
 
 #include "Tools.hpp"
 
@@ -11,13 +12,25 @@ namespace GL3Engine {
     }
 }
 namespace Tools {
-    deque<Log> Log::logs;
-    
+    map<GLenum, string> gl_errors = {
+            { GL_INVALID_ENUM, "Invalid enum!" },
+            { GL_INVALID_VALUE, "Invalid value!" },
+            { GL_INVALID_OPERATION, "Invalid operation!" },
+            { GL_INVALID_FRAMEBUFFER_OPERATION, "Invalid fbo operation!" },
+            { GL_STACK_OVERFLOW, "Stack overflow!" },
+            { GL_OUT_OF_MEMORY, "Out of memory!" },
+            { GL_STACK_UNDERFLOW, "Stack underflow!" }
+    };
     void showGLErrors() {
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR)
-            cout << "OpenGL error: " << err << endl;
+            cout << "_GL: "
+                    << (IS_IN_MAP(gl_errors, err) ? gl_errors[err] :
+                                                    toString((GLint) err))
+                    << endl;
     }
+
+    deque<Log> Log::logs;
     void Log::putLog(Log::Flag flag, c_str str) {
         static const char* flag_caption[] = {
                 "> !CRITICAL!",
@@ -31,6 +44,7 @@ namespace Tools {
         if (flag == Log::CRITICAL)
             exit(1);
     }
+
     vector<string> tokenize(c_str line, char sep) {
         vector<string> buf;
         istringstream iss(line);
