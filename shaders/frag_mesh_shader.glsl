@@ -1,4 +1,5 @@
 #version 400
+layout(location = 0) out vec4 color;
 
 #define	AMBIENT		0
 #define	DIFFUSE		1
@@ -105,7 +106,7 @@ void calcLight(in Light light) {
 									aspect * 
 									light.specular_intensity;
 		if(dot(reflection, view_dir) > 0.f)
-			gl_FragColor +=	
+			color +=	
 						vec4(
 							(MATERIAL.col[SPECULAR] * 
 							specular * 
@@ -116,18 +117,18 @@ void calcLight(in Light light) {
 							
 	// Całość
 	if(MATERIAL.tex_flag[AMBIENT])	
-		gl_FragColor += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);
+		color += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);
 	if(MATERIAL.tex_flag[DIFFUSE]) {
 		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE];
 		diffuse_col.a = 1.f;
-		gl_FragColor += 
+		color += 
 					diffuse_col * 
 					light.diffuse_col * 
 					light.diffuse_intensity * 
 					diff;
-		gl_FragColor.a *= MATERIAL.transparent;
+		color.a *= MATERIAL.transparent;
 	} else
-		gl_FragColor =	col * diff;
+		color =	col * diff;
 }
 void main(void) {
 	for(int i = 0;i < light_count;++i)

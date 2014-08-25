@@ -96,10 +96,14 @@ namespace GL3Engine {
                 this->effect.setAttrib(effect);
                 return *this;
             }
+            Node& setState(State state) {
+                this->state = state;
+                return *this;
+            }
+
             EffectManager& getEffectMgr() {
                 return effect;
             }
-
             Node* getParentNode() const {
                 return parent;
             }
@@ -109,10 +113,6 @@ namespace GL3Engine {
 
             GLboolean isActive() const {
                 return state == State::NORMAL;
-            }
-            Node& setState(State state) {
-                this->state = state;
-                return *this;
             }
             State getState() const {
                 return state;
@@ -152,8 +152,9 @@ namespace GL3Engine {
         public:
             enum class SceneFlag {
                 LIGHT_SHADER_BINDING,
+                MATERIAL_BUFFER_BINDING
             };
-            using SceneFlags = map<SceneManager::SceneFlag, GLuint>;
+            using SceneFlags = map<SceneFlag, GLuint>;
             using NodeList = vector<unique_ptr<Node>>;
 
         private:
@@ -163,7 +164,8 @@ namespace GL3Engine {
             RenderTarget* target = nullptr;
 
             SceneFlags flags = {
-                    { SceneFlag::LIGHT_SHADER_BINDING, 0 }
+                    { SceneFlag::LIGHT_SHADER_BINDING, 0 },
+                    { SceneFlag::MATERIAL_BUFFER_BINDING, 1 }
             };
 
         public:
@@ -197,6 +199,11 @@ namespace GL3Engine {
             void draw() override;
             GLboolean getMouseEvent(const Vec2i&, GLuint) override;
             GLboolean getKeyEvent(GLchar) override;
+
+#define GET_SCENE_FLAG(scene, flag) \
+            scene->getSceneFlags()[SceneManager::SceneFlag::flag]
+#define SET_SCENE_FLAG(scene, flag, value) \
+            scene->getSceneFlags()[SceneManager::SceneFlag::flag] = value
 
             RenderTarget* getRenderTarget() {
                 return target;

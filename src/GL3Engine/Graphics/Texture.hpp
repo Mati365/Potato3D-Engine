@@ -9,6 +9,13 @@ namespace GL3Engine {
     using namespace std;
     
     extern void putGLTextureFlags(GLenum, GLuint);
+
+    struct TextureFlags {
+            GLenum type;
+            GLenum bytes;
+            GLuint flags;
+            GLenum tex_type;
+    };
     class Texture :
                     public NonCopyable {
         public:
@@ -23,31 +30,27 @@ namespace GL3Engine {
                 LINEAR = 1 << 6,
                 NEAREST = 1 << 7
             };
+            static const TextureFlags default_tex_flags;
 
         protected:
-#define DEFAULT_TEX_FLAGS CLAMP_TO_EDGE | NEAREST
-            GLuint handle = 0,
-                    flags = DEFAULT_TEX_FLAGS,
-                    tex_type = GL_TEXTURE_2D;
-
+            TextureFlags flags = default_tex_flags;
+            GLuint handle = 0;
             Vec2i size;
 
         public:
             Texture() {
             }
-            Texture(c_str);
-            Texture(c_str, GLuint);
+            Texture(c_str, const TextureFlags& _flags = default_tex_flags);
+
+            Texture(const TextureFlags&);
             Texture(const Vec2i&,
-                    GLenum type = GL_RGBA,
-                    GLenum bytes = GL_UNSIGNED_BYTE,
-                    GLuint flags = DEFAULT_TEX_FLAGS,
-                    GLuint tex_type = GL_TEXTURE_2D);
+                    const TextureFlags& _flags = default_tex_flags);
 
             virtual void loadTexture(c_str);
-            virtual void generate(const Vec2i&, GLenum, GLenum);
+            virtual void generate(const Vec2i&);
 
-            GLuint getTexType() const {
-                return tex_type;
+            const TextureFlags& getTexFlags() const {
+                return flags;
             }
             GLuint getHandle() const {
                 return handle;
@@ -63,16 +66,33 @@ namespace GL3Engine {
         protected:
             virtual void configure();
     };
+    class CubeTexture :
+                        public Texture {
+        public:
+            static constexpr GLuint CUBE_TEX_FACES = 6;
+
+        public:
+            CubeTexture(const Vec2i&, const TextureFlags& _flags =
+                    Texture::default_tex_flags);
+            void generate(const Vec2i&) override;
+
+        private:
+            // TODO: Wczytywanie paczki tekstur
+            void loadTexture(c_str) override {
+            }
+    };
     class TextureArray :
                          public NonCopyable {
         private:
             GLuint handle = 0;
             vector<string> textures;
+            TextureFlags flags = Texture::default_tex_flags;
 
         public:
             TextureArray() {
             }
-            TextureArray(const vector<string>&);
+            TextureArray(const vector<string>&,
+                    const TextureFlags& _flags = Texture::default_tex_flags);
 
             void create();
 
@@ -83,27 +103,12 @@ namespace GL3Engine {
             GLuint getHandle() const {
                 return handle;
             }
+            const TextureFlags& getTexFlags() const {
+                return flags;
+            }
             
             ~TextureArray() {
                 glDeleteTextures(1, &handle);
-            }
-    };
-    class CubeTexture :
-                        public Texture {
-        public:
-            static constexpr GLuint CUBE_TEX_FACES = 6;
-
-        public:
-            CubeTexture(const Vec2i&,
-                    GLenum type = GL_RGBA,
-                    GLenum bytes = GL_UNSIGNED_BYTE,
-                    GLuint flags = DEFAULT_TEX_FLAGS);
-
-            void generate(const Vec2i&, GLenum, GLenum) override;
-
-        private:
-            // TODO: Wczytywanie paczki tekstur
-            void loadTexture(c_str) override {
             }
     };
     

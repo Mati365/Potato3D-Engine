@@ -186,6 +186,8 @@ namespace GL3Engine {
     
     GLuint Shader::bindToSlot(c_str variable, GLuint binding_point) {
         GLuint block_index = glGetUniformBlockIndex(program, variable.c_str());
+        if(block_index == GL_INVALID_INDEX)
+            return -1;
         glUniformBlockBinding(program, block_index, binding_point);
 //         if (variable == "LightBlock") {
 //          GLint block_size;
@@ -217,7 +219,8 @@ namespace GL3Engine {
         
         GLuint handle = genGLBuffer( {
                 data, static_cast<size_t>(block_size),
-                GL_UNIFORM_BUFFER, 0, draw_type }, false);
+                GL_UNIFORM_BUFFER, 0, draw_type
+        }, false);
         glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, handle);
         ubo[block_index] = handle;
         

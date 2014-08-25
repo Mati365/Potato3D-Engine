@@ -64,9 +64,7 @@ namespace GL3Engine {
                     sizeof(GLfloat), &size);
         }
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
-        
-        scene->getSceneFlags()[SceneManager::SceneFlag::LIGHT_SHADER_BINDING] =
-                BINDING_POINT;
+        SET_SCENE_FLAG(scene, LIGHT_SHADER_BINDING, BINDING_POINT);
     }
 
     // ---- Light
@@ -78,8 +76,11 @@ namespace GL3Engine {
     // ---- PointLight
     PointLight::PointLight()
             :
-              cube( { 512, 256 }) {
-        fbo.setFlags(RenderQuad::USE_COLOR_BUFFER);
+              cube( { 512, 256 },
+                      TextureFlags { GL_R32F, GL_FLOAT,
+                              Texture::CLAMP_TO_EDGE | Texture::NEAREST,
+                              GL_TEXTURE_CUBE_MAP_POSITIVE_X }) {
+        fbo.setFlags(RenderQuad::USE_DEPTH_BUFFER); // COLOR_BUFFER to cube
         fbo.setSize(Vec2i { 512, 256 });
 
         setType(LightData::ENABLED | LightData::POINT);
@@ -92,6 +93,7 @@ namespace GL3Engine {
                 1.f
         };
         Camera* cam = world->getActiveCamera();
+        Shader* shadow_effect = REQUIRE_RES(Shader, DEFAULT_SHADOW_SHADER);
         for (auto& side : make_pair(cube_cams,
                 cube_cams + CubeTexture::CUBE_TEX_FACES)) {
             Camera cam = {
@@ -102,8 +104,14 @@ namespace GL3Engine {
             {
                 world->setCam(&cam);
                 fbo.begin(side.face, cube.getHandle());
-                for (auto& node : *scene)
-                    node->draw();
+                for (auto& node : *scene) {
+//                    node->getEffectMgr()
+//                            .pushAttrib()
+//                            .setAttrib(shadow_effect);
+//                    node->draw();
+//                    node->getEffectMgr().
+//                            popAttrib();
+                }
                 fbo.end();
             }
         }

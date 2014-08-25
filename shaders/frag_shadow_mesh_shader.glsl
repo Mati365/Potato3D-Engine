@@ -1,10 +1,10 @@
 #version 400
-layout(location = 0) out vec4 color;
+layout(location = 0) out float color;
+
 in FragInfo {
-	vec2		uv;
-} frag;		
-uniform	sampler2D			depth_texture;
+	vec3		pos;
+} frag;
 
 void main(void) {
-	color = texture2D(depth_texture, frag.uv);
+	color =  gl_FragCoord.z;
 }

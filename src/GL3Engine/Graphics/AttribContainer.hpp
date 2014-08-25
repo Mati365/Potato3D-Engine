@@ -24,15 +24,21 @@ namespace GL3Engine {
                       attrib(_attrib) {
             }
 
-            void setAttrib(const C& c) {
-                attrib = c;
-            }
-            virtual inline void pushAttrib() {
+            virtual inline AttribContainer<C>& pushAttrib() {
                 container.push_back(attrib);
+                return *this;
             }
-            virtual inline void popAttrib() {
+            virtual inline AttribContainer<C>& popAttrib() {
                 attrib = container.back();
                 container.pop_back();
+                return *this;
+            }
+
+            C& getAttrib() {
+                return attrib;
+            }
+            void setAttrib(const C& c) {
+                attrib = c;
             }
 
             C operator->() {

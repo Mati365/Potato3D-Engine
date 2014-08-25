@@ -1,24 +1,23 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    Texture::Texture(c_str path) {
+    const TextureFlags Texture::default_tex_flags =
+            { GL_RGBA, GL_UNSIGNED_BYTE, CLAMP_TO_EDGE | NEAREST, GL_TEXTURE_2D };
+
+    Texture::Texture(c_str path, const TextureFlags& _flags)
+            :
+              flags(_flags) {
         loadTexture(path);
     }
-    Texture::Texture(c_str path, GLuint flags)
+
+    Texture::Texture(const TextureFlags& _flags)
             :
-              Texture(path) {
-        this->flags = flags;
+              flags(_flags) {
     }
-    Texture::Texture(
-            const Vec2i& _size,
-            GLenum _type,
-            GLenum _bytes,
-            GLuint _flags,
-            GLuint _tex_type)
+    Texture::Texture(const Vec2i& _size, const TextureFlags& _flags)
             :
-              flags(_flags),
-              tex_type(_tex_type) {
-        generate(_size, _type, _bytes);
+              flags(_flags) {
+        generate(_size);
     }
 
     void putGLTextureFlags(GLenum type, GLuint flags) {
@@ -51,24 +50,26 @@ namespace GL3Engine {
             glTexParameteri(type, GL_TEXTURE_WRAP_T, wrap_filter);
         }
     }
-    void Texture::generate(const Vec2i& size, GLenum type, GLenum bytes) {
+    void Texture::generate(const Vec2i& size) {
         if (handle)
             glDeleteTextures(1, &handle);
 
         glGenTextures(1, &handle);
-        glBindTexture(tex_type, handle);
+        glBindTexture(flags.tex_type, handle);
         {
-            glTexImage2D(tex_type, 0,
-                    type, size.X(), size.Y(),
-                    0, type, bytes, nullptr);
+            glTexImage2D(flags.tex_type, 0,
+                    flags.type, size.X(), size.Y(),
+                    0, flags.type, flags.bytes, nullptr);
         }
         configure();
     }
     void Texture::configure() {
-        putGLTextureFlags(tex_type, flags);
+        putGLTextureFlags(flags.tex_type, flags.flags);
 
-        glGetTexLevelParameteriv(tex_type, 0, GL_TEXTURE_WIDTH, &size[0]);
-        glGetTexLevelParameteriv(tex_type, 0, GL_TEXTURE_HEIGHT, &size[1]);
+        glGetTexLevelParameteriv(flags.tex_type, 0, GL_TEXTURE_WIDTH,
+                &size[0]);
+        glGetTexLevelParameteriv(flags.tex_type, 0, GL_TEXTURE_HEIGHT,
+                &size[1]);
     }
 
     void Texture::loadTexture(c_str path) {
@@ -81,9 +82,11 @@ namespace GL3Engine {
     }
 
     // ---- TexArray
-    TextureArray::TextureArray(const vector<string>& _textures)
+    TextureArray::TextureArray(const vector<string>& _textures,
+            const TextureFlags& _flags)
             :
-              textures(_textures) {
+              textures(_textures),
+              flags(_flags) {
         create();
     }
     void TextureArray::create() {
@@ -112,8 +115,7 @@ namespace GL3Engine {
         glGenTextures(1, &handle);
         glBindTexture(GL_TEXTURE_2D_ARRAY, handle);
         {
-            putGLTextureFlags(GL_TEXTURE_2D_ARRAY,
-                    Texture::NEAREST | Texture::REPEAT);
+            putGLTextureFlags(GL_TEXTURE_2D_ARRAY, flags.flags);
         }
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8,
                 max_size[0], max_size[1],
@@ -130,26 +132,21 @@ namespace GL3Engine {
     }
 
     // ---- CubeTex
-    CubeTexture::CubeTexture(
-            const Vec2i& size,
-            GLenum type,
-            GLenum bytes,
-            GLuint flags)
+    CubeTexture::CubeTexture(const Vec2i& size, const TextureFlags& _flags)
             :
-              Texture(size, type, bytes, flags, GL_TEXTURE_CUBE_MAP) {
+              Texture(_flags) {
+        generate(size);
     }
-    void CubeTexture::generate(const Vec2i& size, GLenum type, GLenum bytes) {
+    void CubeTexture::generate(const Vec2i& size) {
         if (handle)
             glDeleteTextures(1, &handle);
 
-        cout << "DUPA" << endl;
-
         glGenTextures(1, &handle);
-        glBindTexture(tex_type, handle);
+        glBindTexture(flags.tex_type, handle);
         for (GLuint i = 0; i < 6; ++i)
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, type,
-                    size.X(), size.Y(), 0,
-                    type, bytes, nullptr);
+            glTexImage2D(flags.tex_type + i, 0,
+                    flags.type, size.X(), size.Y(), 0,
+                    flags.type, flags.bytes, nullptr);
         configure();
     }
 }

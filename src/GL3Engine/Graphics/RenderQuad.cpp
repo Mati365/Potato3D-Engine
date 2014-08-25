@@ -76,13 +76,14 @@ namespace GL3Engine {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
     }
-    void RenderQuad::begin(GLuint face, GLuint tex) {
+    void RenderQuad::begin(GLuint face, GLuint tex, GLuint buffer) {
         if (!tex)
             return;
+        glBindFramebuffer(GL_FRAMEBUFFER, handle);
         {
-            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                    face, tex, 0);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, buffer, face, tex, 0);
+            if (flags == USE_DEPTH_BUFFER)
+                glDrawBuffer(GL_NONE);
         }
         begin();
     }
@@ -93,11 +94,16 @@ namespace GL3Engine {
     
     RenderQuad& RenderQuad::setSize(const Vec2i& size) {
         this->size = size;
+
         if (IS_SET_FLAG(USE_COLOR_BUFFER, flags))
-            this->color_tex.reset(new Texture(size));
+            this->color_tex.reset(new Texture(size, tex_flags));
+
         if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags))
             this->depth_tex.reset(
-                    new Texture(size, GL_DEPTH_COMPONENT, GL_FLOAT));
+                    new Texture(size,
+                            { GL_DEPTH_COMPONENT, GL_FLOAT,
+                                    tex_flags.flags,
+                                    tex_flags.tex_type }));
 
         if (!effect)
             setEffect(REQUIRE_RES(Shader, DEFAULT_FBO_SHADER));

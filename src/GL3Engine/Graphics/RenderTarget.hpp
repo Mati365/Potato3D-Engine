@@ -39,14 +39,16 @@ namespace GL3Engine {
             };
 
         private:
-            GLuint handle = 0,
-                    depth_render_buf = 0;
-
-            unique_ptr<Texture> color_tex,
-                    depth_tex;
+            GLuint handle = 0, depth_render_buf = 0;
+            unique_ptr<Texture> color_tex, depth_tex;
             unique_ptr<Shape2D> quad;
 
             GLuint flags = USE_COLOR_BUFFER | USE_DEPTH_BUFFER;
+            /**
+             *  Depth mapa map GL_DEPTH_COMPONENT
+             *  i GL_FLOAT reszta taka sama
+             */
+            TextureFlags tex_flags = Texture::default_tex_flags;
 
         public:
             RenderQuad() {
@@ -55,7 +57,7 @@ namespace GL3Engine {
 
             void draw() override;
             void begin();
-            void begin(GLuint, GLuint);
+            void begin(GLuint, GLuint, GLenum);
             void end();
 
             RenderQuad& setFlags(GLuint flags) {
@@ -63,10 +65,14 @@ namespace GL3Engine {
                 return *this;
             }
             RenderQuad& setSize(const Vec2i&) override;
+            const RenderQuad& setTexFlags(const TextureFlags& _flags) {
+                tex_flags = _flags;
+                return *this;
+            }
+
             const Vec2i& getSize() const {
                 return size;
             }
-            
             GLuint getHandle() const {
                 return handle;
             }
