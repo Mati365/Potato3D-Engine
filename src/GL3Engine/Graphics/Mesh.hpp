@@ -90,9 +90,7 @@ namespace GL3Engine {
 
         private:
             Shape3D* shape = nullptr;
-
             vector<MaterialBufferData> material_cache;
-            GLuint ubo_handle = 0;
 
         public:
             Mesh(Shape3D* _shape = nullptr);

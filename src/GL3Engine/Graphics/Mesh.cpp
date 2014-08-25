@@ -17,12 +17,12 @@ namespace GL3Engine {
         
         for (Material* mat : shape->getMaterials())
             material_cache.push_back(mat->getMaterialBufferData());
-        ubo_handle =
-                effect->setUBO(
-                        "MaterialBlock",
-                        nullptr,
-                        GL_DYNAMIC_DRAW,
-                        GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING));
+        effect->regGlobalBuffer(
+                -1,
+                GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
+                GL_STREAM_DRAW,
+                &material_cache[0],
+                "MaterialBlock");
     }
     
     void Mesh::passToShader() {
@@ -33,9 +33,9 @@ namespace GL3Engine {
         {
             world->attrib.model *= transform.model;
             {
-                effect->bindToSlot("MaterialBlock",
+                effect->bindBlockToSlot("MaterialBlock",
                         GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING));
-                effect->bindToSlot("LightBlock",
+                effect->bindBlockToSlot("LightBlock",
                         GET_SCENE_FLAG(scene, LIGHT_SHADER_BINDING));
 
                 effect->setUniform("matrix.mvp",
@@ -59,7 +59,8 @@ namespace GL3Engine {
                 effect->setUniform(GL_TEXTURE_2D_ARRAY,
                         "texture_pack", 0,
                         shape->getMaterials()[0]->tex_array->getHandle());
-                effect->changeUBOData(ubo_handle,
+                UniformBufferManager::getInstance().changeBufferData(
+                        GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
                         &material_cache[0],
                         material_cache.size() * sizeof(MaterialBufferData));
             }

@@ -57,7 +57,7 @@ namespace GL3Engine {
 
             void draw() override;
             void begin();
-            void begin(GLuint, GLuint, GLenum);
+            void begin(GLenum, GLuint, GLenum);
             void end();
 
             RenderQuad& setFlags(GLuint flags) {

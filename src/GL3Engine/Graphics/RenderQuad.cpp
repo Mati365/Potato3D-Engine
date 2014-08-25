@@ -76,12 +76,13 @@ namespace GL3Engine {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
     }
-    void RenderQuad::begin(GLuint face, GLuint tex, GLuint buffer) {
+    void RenderQuad::begin(GLenum face, GLuint tex, GLuint target) {
         if (!tex)
             return;
         glBindFramebuffer(GL_FRAMEBUFFER, handle);
         {
-            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, buffer, face, tex, 0);
+            //cout << target << endl;
+            glFramebufferTexture2D(GL_FRAMEBUFFER, target, face, tex, 0);
             if (flags == USE_DEPTH_BUFFER)
                 glDrawBuffer(GL_NONE);
         }

@@ -107,6 +107,27 @@ namespace GL3Engine {
         return *this;
     }
     
+    Shader& Shader::regGlobalBuffer(size_t size, GLuint binding_point,
+            GLenum draw_type, void* data, c_str variable) {
+        if (size == -1)
+            size = UniformBufferManager::getBlockSize(this, variable);
+        if (size > 0)
+            UniformBufferManager::getInstance().regBuffer(
+                    data,
+                    draw_type,
+                    size,
+                    binding_point);
+        return *this;
+    }
+    Shader& Shader::bindBlockToSlot(c_str variable, GLuint binding_point) {
+        GLint block_index = UniformBufferManager::getBlockIndex(this,
+                variable);
+        if(block_index == GL_INVALID_INDEX)
+            return *this;
+        glUniformBlockBinding(program, block_index, binding_point);
+        return *this;
+    }
+
     Shader& Shader::setUniform(
             GLint texture_type, c_str tex, GLint flag, GLuint handle) {
         glActiveTexture(GL_TEXTURE0 + flag);
@@ -183,61 +204,9 @@ namespace GL3Engine {
         }
         return *this;
     }
-    
-    GLuint Shader::bindToSlot(c_str variable, GLuint binding_point) {
-        GLuint block_index = glGetUniformBlockIndex(program, variable.c_str());
-        if(block_index == GL_INVALID_INDEX)
-            return -1;
-        glUniformBlockBinding(program, block_index, binding_point);
-//         if (variable == "LightBlock") {
-//          GLint block_size;
-//            glGetActiveUniformBlockiv(program, block_index,
-//            GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
-//             const GLchar *uniformNames[1] =
-//                    {
-//                            "light_count"
-//                    };
-//            GLuint uniformIndices;
-//            glGetUniformIndices(program, 1, uniformNames, &uniformIndices);
-//            GLint uniformOffsets[1];
-//            glGetActiveUniformsiv(program, 1, &uniformIndices,
-//            GL_UNIFORM_OFFSET, uniformOffsets);
-//         }
-        return block_index;
-    }
-    GLuint Shader::setUBO(
-            c_str variable, void* data, GLuint draw_type,
-            GLuint binding_point) {
-        GLuint block_index = bindToSlot(variable, binding_point);
-        GLint block_size = 0;
-        
-        if (IS_IN_MAP(ubo, block_index))
-            return ubo[block_index];
-        
-        glGetActiveUniformBlockiv(program, block_index,
-        GL_UNIFORM_BLOCK_DATA_SIZE, &block_size);
-        
-        GLuint handle = genGLBuffer( {
-                data, static_cast<size_t>(block_size),
-                GL_UNIFORM_BUFFER, 0, draw_type
-        }, false);
-        glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, handle);
-        ubo[block_index] = handle;
-        
-        return handle;
-    }
-    void Shader::changeUBOData(GLuint ubo_buf, void* data, size_t size) {
-        glBindBuffer(GL_UNIFORM_BUFFER, ubo_buf);
-        {
-            glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
-        }
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    }
-    
+
     Shader::~Shader() {
         glDeleteProgram(program);
-        for (auto& handle : ubo)
-            glDeleteBuffers(1, &handle.second);
     }
 }
 

@@ -76,12 +76,12 @@ namespace GL3Engine {
     // ---- PointLight
     PointLight::PointLight()
             :
-              cube( { 512, 256 },
-                      TextureFlags { GL_R32F, GL_FLOAT,
+              cube( { 256, 256 },
+                      TextureFlags { GL_DEPTH_COMPONENT, GL_FLOAT,
                               Texture::CLAMP_TO_EDGE | Texture::NEAREST,
-                              GL_TEXTURE_CUBE_MAP_POSITIVE_X }) {
+                              GL_TEXTURE_CUBE_MAP }) {
         fbo.setFlags(RenderQuad::USE_DEPTH_BUFFER); // COLOR_BUFFER to cube
-        fbo.setSize(Vec2i { 512, 256 });
+        fbo.setSize(Vec2i { 256, 256 });
 
         setType(LightData::ENABLED | LightData::POINT);
     }
@@ -103,14 +103,14 @@ namespace GL3Engine {
             // Shadow mapping
             {
                 world->setCam(&cam);
-                fbo.begin(side.face, cube.getHandle());
+                fbo.begin(side.face, cube.getHandle(), GL_DEPTH_ATTACHMENT);
                 for (auto& node : *scene) {
-//                    node->getEffectMgr()
-//                            .pushAttrib()
-//                            .setAttrib(shadow_effect);
-//                    node->draw();
-//                    node->getEffectMgr().
-//                            popAttrib();
+                    node->getEffectMgr()
+                            .pushAttrib()
+                            .setAttrib(shadow_effect);
+                    //node->draw();
+                    node->getEffectMgr().
+                            popAttrib();
                 }
                 fbo.end();
             }

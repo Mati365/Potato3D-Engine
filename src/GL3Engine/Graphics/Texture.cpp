@@ -144,7 +144,7 @@ namespace GL3Engine {
         glGenTextures(1, &handle);
         glBindTexture(flags.tex_type, handle);
         for (GLuint i = 0; i < 6; ++i)
-            glTexImage2D(flags.tex_type + i, 0,
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
                     flags.type, size.X(), size.Y(), 0,
                     flags.type, flags.bytes, nullptr);
         configure();

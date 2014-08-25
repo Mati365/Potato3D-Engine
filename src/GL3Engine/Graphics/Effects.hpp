@@ -29,9 +29,9 @@ namespace GL3Engine {
             Shader& setUniform(GLint, c_str, GLint, GLuint);
             Shader& setUniform(c_str, const vector<Material*>&);
 
-            GLuint setUBO(c_str, void*, GLuint, GLuint);
-            GLuint bindToSlot(c_str, GLuint);
-            void changeUBOData(GLuint, void*, size_t);
+            Shader& regGlobalBuffer(size_t, GLuint, GLenum,
+                    void* data = nullptr, c_str variable = "");
+            Shader& bindBlockToSlot(c_str, GLuint);
 
             Shader& setUniform(c_str, GLfloat);
             Shader& setUniform(c_str, GLint);
@@ -78,6 +78,25 @@ namespace GL3Engine {
 
         public:
             static GLint compileShader(c_str, GLint);
+    };
+    class UniformBufferManager :
+                                 public NonCopyable,
+                                 public Singleton<UniformBufferManager> {
+        private:
+            map<GLuint, GLuint> ubo;
+
+        public:
+            static GLint getBlockIndex(Shader*, c_str);
+            static GLint getBlockSize(Shader*, c_str);
+
+            void delBuffer(GLint);
+            GLuint regBuffer(void*, GLuint, GLint, GLuint);
+            void changeBufferData(GLint, void*, size_t);
+
+            ~UniformBufferManager() {
+                for (auto& handle : ubo)
+                    glDeleteBuffers(1, &handle.second);
+            }
     };
 }
 
