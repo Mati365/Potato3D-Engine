@@ -56,7 +56,8 @@ namespace GL3Engine {
     };
     class Node :
                  public Drawable,
-                 public WindowEventListener {
+                 public WindowEventListener,
+                 public AttribContainer<GLint> {
             friend class SceneManager;
             template<typename U> friend class Batch;
 

@@ -36,7 +36,7 @@ namespace GL3Engine {
     }
     void UniformBufferManager::changeBufferData(GLint binding_slot, void* data,
             size_t size) {
-        if (!IS_IN_MAP(ubo, binding_slot))
+        if (!IS_IN_MAP(ubo, binding_slot) || !size || !data)
             return;
         glBindBuffer(GL_UNIFORM_BUFFER, ubo[binding_slot]);
         {

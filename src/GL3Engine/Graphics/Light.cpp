@@ -105,12 +105,17 @@ namespace GL3Engine {
                 world->setCam(&cam);
                 fbo.begin(side.face, cube.getHandle(), GL_DEPTH_ATTACHMENT);
                 for (auto& node : *scene) {
-                    node->getEffectMgr()
-                            .pushAttrib()
-                            .setAttrib(shadow_effect);
-                    //node->draw();
-                    node->getEffectMgr().
-                            popAttrib();
+                    node->pushAttrib();
+                    node->setAttrib(Mesh::NONE);
+                    {
+                        node->getEffectMgr()
+                                .pushAttrib()
+                                .setAttrib(shadow_effect);
+                        node->draw();
+                        node->getEffectMgr().
+                                popAttrib();
+                    }
+                    node->popAttrib();
                 }
                 fbo.end();
             }

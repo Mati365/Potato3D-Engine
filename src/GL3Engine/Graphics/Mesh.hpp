@@ -88,6 +88,13 @@ namespace GL3Engine {
                  public Node {
         DECLARE_NODE_TYPE(Mesh)
 
+        public:
+            enum Flags {
+                NONE = 0,
+                USE_MATERIALS = 1 << 1,
+                USE_LIGHTING = 1 << 2
+            };
+
         private:
             Shape3D* shape = nullptr;
             vector<MaterialBufferData> material_cache;

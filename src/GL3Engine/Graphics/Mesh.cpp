@@ -9,20 +9,28 @@ namespace GL3Engine {
             :
               shape(_shape) {
         setEffect(REQUIRE_RES(Shader, DEFAULT_MESH_SHADER));
+        setAttrib(USE_MATERIALS | USE_LIGHTING);
     }
     void Mesh::updateMaterialsCache(Shader* effect) {
         material_cache.clear();
-        if (!shape->hasMaterials())
+        if (!shape->hasMaterials()
+                || !UniformBufferManager::getBlockSize(effect, "MaterialBlock"))
             return;
         
         for (Material* mat : shape->getMaterials())
             material_cache.push_back(mat->getMaterialBufferData());
-        effect->regGlobalBuffer(
-                -1,
-                GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
-                GL_STREAM_DRAW,
-                &material_cache[0],
-                "MaterialBlock");
+
+        try {
+            effect->regGlobalBuffer(
+                    -1,
+                    GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
+                    GL_STREAM_DRAW,
+                    nullptr,
+                    &material_cache[0],
+                    "MaterialBlock");
+        } catch (const GLint&) {
+            material_cache.clear();
+        }
     }
     
     void Mesh::passToShader() {
@@ -55,14 +63,17 @@ namespace GL3Engine {
             }
             if (shape->getMaterials().empty())
                 effect->setUniform("col", shape->getColor());
-            else {
-                effect->setUniform(GL_TEXTURE_2D_ARRAY,
-                        "texture_pack", 0,
-                        shape->getMaterials()[0]->tex_array->getHandle());
-                UniformBufferManager::getInstance().changeBufferData(
-                        GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
-                        &material_cache[0],
-                        material_cache.size() * sizeof(MaterialBufferData));
+            else if (!material_cache.empty()) {
+                if (IS_SET_FLAG(attrib, USE_LIGHTING))
+                    effect->setUniform(GL_TEXTURE_2D_ARRAY,
+                            "texture_pack", 0,
+                            shape->getMaterials()[0]->tex_array->getHandle());
+
+                if (IS_SET_FLAG(attrib, USE_MATERIALS))
+                    UniformBufferManager::getInstance().changeBufferData(
+                            GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
+                            &material_cache[0],
+                            material_cache.size() * sizeof(MaterialBufferData));
             }
         }
         world->popAttrib();

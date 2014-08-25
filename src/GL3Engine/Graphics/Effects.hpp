@@ -29,8 +29,9 @@ namespace GL3Engine {
             Shader& setUniform(GLint, c_str, GLint, GLuint);
             Shader& setUniform(c_str, const vector<Material*>&);
 
-            Shader& regGlobalBuffer(size_t, GLuint, GLenum,
-                    void* data = nullptr, c_str variable = "");
+            Shader& regGlobalBuffer(GLint, GLuint, GLenum,
+                    GLint* handle, void* data = nullptr, c_str variable = "")
+                            throw (GLint);
             Shader& bindBlockToSlot(c_str, GLuint);
 
             Shader& setUniform(c_str, GLfloat);

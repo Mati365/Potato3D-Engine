@@ -107,22 +107,29 @@ namespace GL3Engine {
         return *this;
     }
     
-    Shader& Shader::regGlobalBuffer(size_t size, GLuint binding_point,
-            GLenum draw_type, void* data, c_str variable) {
+    Shader& Shader::regGlobalBuffer(GLint size, GLuint binding_point,
+            GLenum draw_type, GLint* handle, void* data, c_str variable)
+                    throw (GLint) {
         if (size == -1)
             size = UniformBufferManager::getBlockSize(this, variable);
+
+        GLint _handle = -1;
         if (size > 0)
-            UniformBufferManager::getInstance().regBuffer(
+            _handle = UniformBufferManager::getInstance().regBuffer(
                     data,
                     draw_type,
                     size,
                     binding_point);
+        if (_handle == GL_INVALID_INDEX)
+            throw -1;
+        if (handle)
+            *handle = _handle;
         return *this;
     }
     Shader& Shader::bindBlockToSlot(c_str variable, GLuint binding_point) {
         GLint block_index = UniformBufferManager::getBlockIndex(this,
                 variable);
-        if(block_index == GL_INVALID_INDEX)
+        if (block_index == GL_INVALID_INDEX)
             return *this;
         glUniformBlockBinding(program, block_index, binding_point);
         return *this;
