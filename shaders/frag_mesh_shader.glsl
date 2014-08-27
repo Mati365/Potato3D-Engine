@@ -40,6 +40,10 @@ layout(std140) uniform LightBlock {
 	Light		lights[MAX_LIGHTS];
 	float		light_count;
 };
+struct ShadowMap {
+	samplerCube	point;
+	sampler2D	direct;
+};
 
 // 3 bloki po 136B+8B extra i 4 block 136B
 struct Material { // 136B size
@@ -54,6 +58,7 @@ layout(std140) uniform MaterialBlock {
 };
 
 uniform	sampler2DArray		texture_pack;
+uniform	ShadowMap			shadow_maps[MAX_LIGHTS];
 uniform	vec4				col;
 
 #define	GET_MATERIAL_UV_TEX(uv, type)	texture(texture_pack, vec3(uv , frag.mtl * (BUMP+1) + type))
@@ -64,7 +69,7 @@ Material 	MATERIAL 	= 	material[int(frag.mtl)];
 vec2 pixelize(in float d) {
 	return vec2(d * floor(frag.uv.x / d), d * floor((1.f - frag.uv.y) / d));
 }
-void calcLight(in Light light) {
+void calcLight(in Light light, in int index) {
 	vec3 normal;
 	if(MATERIAL.tex_flag[BUMP])
 		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.f - 1.f);
@@ -76,14 +81,18 @@ void calcLight(in Light light) {
 						frag.surface2view[2][1]));
 		
 	// Diffuse
-	vec3	light_viewspace	=	(vec4(light.pos, 1.f) * frag.v).xyz;
-	vec3	light_normal;
-	float	dist_prop;
+	vec3	light_normal,
+			light_viewspace	=	(vec4(light.pos, 1.f) * frag.v).xyz;
+	float	dist_prop, 
+			shadow_factor	=	1.f;
 		
 	switch(light.type) {
 		case POINT_LIGHT:
 			light_normal 	= 	normalize(light_viewspace - frag.pos) * frag.surface2view;
 			dist_prop 		= 	1.f / (1.f + (.5f * pow(length(abs(frag.pos - light_viewspace)), 1.f)));
+			color = texture(shadow_maps[0].point, light_normal);
+			color.a = 1.f;
+			return;
 		break;
 		
 		case DIRECT_LIGHT:
@@ -97,8 +106,8 @@ void calcLight(in Light light) {
 	
 	// Specular
 	if(MATERIAL.tex_flag[SPECULAR]) {
-		vec3 	view_dir 		= 	normalize(frag.pos);
-		vec3	reflection 		= 	reflect(light_normal, normal);
+		vec3 	view_dir 		= 	normalize(frag.pos),
+				reflection 		= 	reflect(light_normal, normal);
 		float 	aspect 			=	pow(max(dot(reflection, view_dir), 0.f), 8.f);
 		
 		vec3 	spec_tex 	= 	GET_MATERIAL_TEX(SPECULAR).rgb;
@@ -106,8 +115,7 @@ void calcLight(in Light light) {
 									aspect * 
 									light.specular_intensity;
 		if(dot(reflection, view_dir) > 0.f)
-			color +=	
-						vec4(
+			color +=	vec4(
 							(MATERIAL.col[SPECULAR] * 
 							specular * 
 							dist_prop *
@@ -132,5 +140,5 @@ void calcLight(in Light light) {
 }
 void main(void) {
 	for(int i = 0;i < light_count;++i)
-		calcLight(lights[i]);
+		calcLight(lights[i], i);
 }

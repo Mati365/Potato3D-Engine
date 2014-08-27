@@ -48,7 +48,9 @@ namespace GL3Engine {
             }
 
         public:
-            virtual void update() = 0;
+            virtual void update() override {
+            }
+            virtual Texture* getShadowTex() = 0;
 
 #define ARRAY_LIGHT_SETTER(ret_type, array_size, target_variable, name) \
             virtual ret_type& set##name(const array<GLfloat, array_size>& array) { \
@@ -83,6 +85,7 @@ namespace GL3Engine {
                 return *this;
             }
     };
+
     // Najwooolniejsze światło
     class PointLight :
                        public Light {
@@ -94,8 +97,13 @@ namespace GL3Engine {
 
         public:
             PointLight();
+
             void update() override;
+            Texture* getShadowTex() override {
+                return &cube;
+            }
     };
+
     // Pos przeznaczony jako kierunek padania
     class DirectLight :
                         public Light {
@@ -105,7 +113,9 @@ namespace GL3Engine {
             DirectLight() {
                 setType(LightData::ENABLED | LightData::DIRECT);
             }
-            void update() override {
+
+            Texture* getShadowTex() override {
+                return nullptr;
             }
 
             ARRAY_LIGHT_SETTER(DirectLight, 3, pos, Dir)
@@ -115,6 +125,7 @@ namespace GL3Engine {
                 return *this;
             }
     };
+
     // layout(std140) uniform LightBlock {
     // Light       lights[MAX_LIGHTS];
     // int         lights_count;

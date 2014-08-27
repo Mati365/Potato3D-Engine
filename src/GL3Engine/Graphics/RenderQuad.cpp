@@ -16,17 +16,21 @@ namespace GL3Engine {
         glGenFramebuffers(1, &handle);
         glBindFramebuffer(GL_FRAMEBUFFER, handle);
         {
-            // Depth buffer
-            if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags)) {
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                GL_TEXTURE_2D, depth_tex->getHandle(), 0);
-            }
-            
             // Texture
             if (IS_SET_FLAG(USE_COLOR_BUFFER, flags)) {
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, color_tex->getHandle(), 0);
             }
+            // Depth buffer
+            if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags)) {
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                GL_TEXTURE_2D, depth_tex->getHandle(), 0);
+            }
+            if (flags == USE_DEPTH_BUFFER) {
+                glDrawBuffer(GL_NONE);
+                glReadBuffer(GL_NONE);
+            } else
+                glDrawBuffer(GL_COLOR_ATTACHMENT0);
             assert(
                     glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         }
@@ -34,8 +38,7 @@ namespace GL3Engine {
         
         // QUAD
         vector<Vertex2f> vertex_array = {
-                {
-                        -1.f, -1.f, 0.f, 0.f, 0.f }, {
+                { -1.f, -1.f, 0.f, 0.f, 0.f }, {
                         1.f, -1.f, 0.f, 1.f, 0.f }, {
                         1.f, 1.f, 0.f, 1.f, 1.f }, {
                         -1.f, 1.f, 0.f, 0.f, 1.f }, };
@@ -81,12 +84,9 @@ namespace GL3Engine {
             return;
         glBindFramebuffer(GL_FRAMEBUFFER, handle);
         {
-            //cout << target << endl;
             glFramebufferTexture2D(GL_FRAMEBUFFER, target, face, tex, 0);
-            if (flags == USE_DEPTH_BUFFER)
-                glDrawBuffer(GL_NONE);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
         }
-        begin();
     }
     void RenderQuad::end() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -98,7 +98,6 @@ namespace GL3Engine {
 
         if (IS_SET_FLAG(USE_COLOR_BUFFER, flags))
             this->color_tex.reset(new Texture(size, tex_flags));
-
         if (IS_SET_FLAG(USE_DEPTH_BUFFER, flags))
             this->depth_tex.reset(
                     new Texture(size,

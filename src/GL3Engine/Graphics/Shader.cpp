@@ -47,22 +47,16 @@ namespace GL3Engine {
     
     /** UNIFORMY */
     Shader& Shader::setUniform(c_str variable, const Vec4& p) {
-        glProgramUniform4f(
-                program,
-                getUniformLoc(variable),
-                p.X(),
-                p.Y(),
-                p.Z(),
-                p.W());
+        setUniform(variable, p.matrix, 4, GL_FLOAT_VEC4);
+        return *this;
+    }
+    Shader& Shader::setUniform(c_str variable, const Vec3& p) {
+        setUniform(variable, p.matrix, 3, GL_FLOAT_VEC3);
         return *this;
     }
 
     Shader& Shader::setUniform(c_str variable, GLfloat value) {
-        glProgramUniform1f(program, getUniformLoc(variable), value);
-        return *this;
-    }
-    Shader& Shader::setUniform(c_str variable, GLint value) {
-        glProgramUniform1i(program, getUniformLoc(variable), value);
+        setUniform(variable, &value, 1, GL_FLOAT);
         return *this;
     }
     Shader& Shader::setUniform(c_str variable, const Matrix<GLfloat>& value) {
@@ -137,9 +131,15 @@ namespace GL3Engine {
 
     Shader& Shader::setUniform(
             GLint texture_type, c_str tex, GLint flag, GLuint handle) {
+        GLint loc = getUniformLoc(tex);
+        if (loc == GL_INVALID_INDEX)
+            return *this;
+
         glActiveTexture(GL_TEXTURE0 + flag);
         glBindTexture(texture_type, handle);
-        glProgramUniform1i(program, getUniformLoc(tex), flag);
+        glProgramUniform1i(program, loc, flag);
+        glDisable(GL_TEXTURE_CUBE_MAP);
+
         return *this;
     }
     Shader& Shader::setUniform(c_str variable, const MATERIALS& material) {

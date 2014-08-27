@@ -35,8 +35,6 @@ namespace GL3Engine {
             Shader& bindBlockToSlot(c_str, GLuint);
 
             Shader& setUniform(c_str, GLfloat);
-            Shader& setUniform(c_str, GLint);
-
             template<GLuint len> Shader& setUniform(
                     c_str variable, const array<GLfloat, len>& array) {
                 GLint loc = getUniformLoc(variable);
@@ -60,6 +58,7 @@ namespace GL3Engine {
 
             Shader& setUniform(c_str, const Matrix<GLfloat>&);
             Shader& setUniform(c_str, const Vec4&);
+            Shader& setUniform(c_str, const Vec3&);
             Shader& setUniform(c_str variable, const Color& p) {
                 setUniform<4>(variable, p.toArray());
                 return *this;
@@ -68,7 +67,7 @@ namespace GL3Engine {
             GLint getProgram() const {
                 return program;
             }
-            inline GLuint getUniformLoc(c_str variable) const {
+            inline GLint getUniformLoc(c_str variable) const {
                 return glGetUniformLocation(program, variable.c_str());
             }
             
