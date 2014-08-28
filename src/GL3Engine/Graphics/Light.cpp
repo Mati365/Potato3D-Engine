@@ -46,7 +46,7 @@ namespace GL3Engine {
             Light* light = objects[i];
             if (!IS_SET_FLAG(light->getType(), LightData::ENABLED))
                 continue;
-            // Depth mapy
+            // Shadow mapy
             glCullFace(GL_FRONT);
             {
                 light->update();
@@ -78,13 +78,14 @@ namespace GL3Engine {
     }
 
 // ---- PointLight
-    PointLight::PointLight()
-            :
-              cube( { 256, 256 },
-                      TextureFlags { GL_RED, GL_FLOAT,
-                              Texture::CLAMP_TO_EDGE | Texture::NEAREST,
-                              GL_TEXTURE_CUBE_MAP }) {
-        fbo.setFlags(RenderQuad::USE_DEPTH_BUFFER); // COLOR_BUFFER to cube
+    PointLight::PointLight() {
+        cube = new CubeTexture( { 256, 256 },
+                TextureFlags { GL_RED, GL_FLOAT,
+                        Texture::CLAMP_TO_EDGE | Texture::LINEAR,
+                        GL_TEXTURE_CUBE_MAP });
+        fbo.attachTex(GL_COLOR_ATTACHMENT0,
+                cube,
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X);
         fbo.setSize(Vec2i { 256, 256 });
 
         setType(LightData::ENABLED | LightData::POINT);
@@ -98,6 +99,7 @@ namespace GL3Engine {
         };
         Camera* cam = world->getActiveCamera();
         Shader* shadow_effect = REQUIRE_RES(Shader, DEFAULT_SHADOW_SHADER);
+
         for (auto& side : make_pair(cube_cams,
                 cube_cams + CubeTexture::CUBE_TEX_FACES)) {
             Camera cam = {
@@ -106,7 +108,7 @@ namespace GL3Engine {
             };
             // Shadow mapping
             world->setCam(&cam);
-            fbo.begin(side.face, cube.getHandle(), GL_COLOR_ATTACHMENT0);
+            fbo.setRenderFace(GL_COLOR_ATTACHMENT0, side.face);
             for (auto& node : *scene) {
                 node->pushAttrib();
                 node->setAttrib(Mesh::NONE);
@@ -123,6 +125,7 @@ namespace GL3Engine {
             }
             fbo.end();
         }
+
         world->setCam(cam);
     }
 }

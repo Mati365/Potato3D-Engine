@@ -5,5 +5,5 @@ in vec3 pos;
 uniform	vec4	light_pos;
 
 void main(void) {
-	color =  length(light_pos.xyz - pos) / 5;
+	color =  length(light_pos.xyz - pos);
 }

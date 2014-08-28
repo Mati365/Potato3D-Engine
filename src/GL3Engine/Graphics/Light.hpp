@@ -92,7 +92,7 @@ namespace GL3Engine {
         DECLARE_NODE_TYPE(PointLight)
 
         private:
-            CubeTexture cube;
+            CubeTexture* cube = nullptr;
             RenderQuad fbo;
 
         public:
@@ -100,7 +100,7 @@ namespace GL3Engine {
 
             void update() override;
             Texture* getShadowTex() override {
-                return &cube;
+                return cube;
             }
     };
 
