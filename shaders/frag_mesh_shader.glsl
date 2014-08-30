@@ -90,14 +90,17 @@ void calcLight(in Light light, in int index) {
 		case POINT_LIGHT:
 			light_normal 	= 	normalize(light_viewspace - frag.pos) * frag.surface2view;
 			dist_prop 		= 	1.f / (1.f + (.5f * pow(length(abs(frag.pos - light_viewspace)), 1.f)));
-			color = texture(shadow_maps[0].point, light_normal);
+			color.r = texture(shadow_maps[0].point, light_normal).r;
 			color.a = 1.f;
 			return;
 		break;
 		
 		case DIRECT_LIGHT:
-			light_normal	=	frag.pos * frag.surface2view;
+			light_normal	=	normalize(light.pos) * frag.surface2view;
 			dist_prop		=	1.f;
+			//color = texture(shadow_maps[0].point, light_normal);
+			//color.a = 1.f;
+			return;
 		break;
 	};
 	

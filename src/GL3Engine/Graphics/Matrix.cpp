@@ -72,6 +72,21 @@ namespace GL3Engine {
     Matrix<T>& Matrix<T>::operator-=(const Matrix<T>& matrix) {
         return addMat(*this, matrix, -1.f);
     }
+
+    template<typename T> Matrix<T>& addMat(Matrix<T>& a, const T* array,
+            GLfloat m) {
+        for (GLuint i = 0; i < a.getLength(); ++i)
+            a.matrix[i] += array[i] * m;
+        return a;
+    }
+    template<typename T>
+    Matrix<T>& Matrix<T>::operator+=(const T* array) {
+        return addMat(*this, array, 1.f);
+    }
+    template<typename T>
+    Matrix<T>& Matrix<T>::operator-=(const T* array) {
+        return addMat(*this, array, -1.f);
+    }
     template<typename T>
     Matrix<T> Matrix<T>::operator-() const {
         Matrix<T> mat(cols, rows);

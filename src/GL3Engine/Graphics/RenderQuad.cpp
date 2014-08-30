@@ -11,11 +11,13 @@ namespace GL3Engine {
     RenderQuad& RenderQuad::attachTex(GLuint attachment, Texture* tex,
             GLint tex_target) {
         assert(tex);
+
         glBindFramebuffer(GL_FRAMEBUFFER, handle);
         glFramebufferTexture2D(GL_FRAMEBUFFER,
                 attachment,
                 tex_target > 0 ? tex_target : tex->getTexFlags().tex_type,
                 tex->getHandle(), 0);
+
         assert(
                 glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         textures[attachment].reset(tex);
@@ -25,9 +27,7 @@ namespace GL3Engine {
         if (handle)
             glDeleteFramebuffers(1, &handle);
         glGenFramebuffers(1, &handle);
-        glBindFramebuffer(GL_FRAMEBUFFER, handle);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
+
         // QUAD
         vector<Vertex2f> vertex_array = {
                 { -1.f, -1.f, 0.f, 0.f, 0.f }, {
@@ -49,10 +49,15 @@ namespace GL3Engine {
     RenderQuad& RenderQuad::setRenderFace(GLenum attachment, GLuint face) {
         if (!IS_IN_MAP(textures, attachment))
             return *this;
+
         glBindFramebuffer(GL_FRAMEBUFFER, handle);
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, face,
                 textures[attachment]->getHandle(), 0);
-        glDrawBuffer(attachment);
+        glViewport(0, 0, size[0], size[1]);
+
+        setDrawBuffer( { attachment });
+        assert(
+                glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         return *this;
     }
     void RenderQuad::passToShader() {

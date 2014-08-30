@@ -51,6 +51,11 @@ namespace GL3Engine {
             RenderQuad& setRenderFace(GLenum, GLuint);
             RenderQuad& setDrawBuffer(const vector<GLenum>&);
 
+            const Texture* getAttachment(GLenum attachment) {
+                return IS_IN_MAP(textures, attachment) ? textures[attachment]
+                                                                 .get() :
+                                                         nullptr;
+            }
             const Vec2i& getSize() const {
                 return size;
             }

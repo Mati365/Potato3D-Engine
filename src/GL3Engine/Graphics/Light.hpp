@@ -44,13 +44,15 @@ namespace GL3Engine {
 
         protected:
             LightData data;
+            RenderQuad shadow_fbo;
+
             Light() {
             }
 
         public:
             virtual void update() override {
             }
-            virtual Texture* getShadowTex() = 0;
+            virtual const Texture* getShadowTex() const = 0;
 
 #define ARRAY_LIGHT_SETTER(ret_type, array_size, target_variable, name) \
             virtual ret_type& set##name(const array<GLfloat, array_size>& array) { \
@@ -93,13 +95,12 @@ namespace GL3Engine {
 
         private:
             CubeTexture* cube = nullptr;
-            RenderQuad fbo;
 
         public:
             PointLight();
-
             void update() override;
-            Texture* getShadowTex() override {
+
+            const Texture* getShadowTex() const override {
                 return cube;
             }
     };
@@ -109,15 +110,16 @@ namespace GL3Engine {
                         public Light {
         DECLARE_NODE_TYPE(DirectLight)
 
+        private:
+            Texture* tex = nullptr;
+
         public:
-            DirectLight() {
-                setType(LightData::ENABLED | LightData::DIRECT);
-            }
+            DirectLight();
+            void update() override;
 
-            Texture* getShadowTex() override {
-                return nullptr;
+            const Texture* getShadowTex() const override {
+                return tex;
             }
-
             ARRAY_LIGHT_SETTER(DirectLight, 3, pos, Dir)
 
         private:

@@ -33,6 +33,9 @@ namespace GL3Engine {
             Matrix<T>& operator*=(T);
             Matrix<T>& operator*=(const Matrix<T>&);
 
+            Matrix<T>& operator+=(const T*);
+            Matrix<T>& operator-=(const T*);
+
             Matrix<T>& operator+=(const Matrix<T>&);
             Matrix<T>& operator-=(const Matrix<T>&);
 
@@ -80,8 +83,17 @@ namespace GL3Engine {
         temp oper##= r; \
         return temp; \
     }
-    DEF_EXTERN_MAT_OPER(-)
-    DEF_EXTERN_MAT_OPER(+)
+#define DEF_EXTERN_MAT_OPER_ARRAY(oper) \
+    DEF_EXTERN_MAT_OPER(oper) \
+    template<typename T> inline Matrix<T> operator oper(const Matrix<T>& l, \
+                                             const T* r) { \
+        Matrix<T> temp = l; \
+        temp oper##= r; \
+        return temp; \
+    }
+
+    DEF_EXTERN_MAT_OPER_ARRAY(-)
+    DEF_EXTERN_MAT_OPER_ARRAY(+)
     DEF_EXTERN_MAT_OPER(*)
     
     template<typename T> inline Matrix<T> operator *(const Matrix<T>& l,
