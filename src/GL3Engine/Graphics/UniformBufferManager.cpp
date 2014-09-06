@@ -2,18 +2,18 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    GLint UniformBufferManager::getBlockIndex(Shader* shader,
+    GLuint UniformBufferManager::getBlockIndex(Shader* shader,
             c_str variable) {
         return glGetUniformBlockIndex(shader->getProgram(),
                 variable.c_str());
     }
-    void UniformBufferManager::delBuffer(GLint binding_slot) {
+    void UniformBufferManager::delBuffer(GLuint binding_slot) {
         if (IS_IN_MAP(ubo, binding_slot))
             glDeleteBuffers(1, &ubo[binding_slot]);
         ubo.erase(ubo.find(binding_slot));
     }
 
-    GLint UniformBufferManager::getBlockSize(Shader* shader, c_str variable) {
+    GLuint UniformBufferManager::getBlockSize(Shader* shader, c_str variable) {
         GLint block_size;
         glGetActiveUniformBlockiv(shader->getProgram(),
                 getBlockIndex(shader, variable),
@@ -34,7 +34,7 @@ namespace GL3Engine {
         ubo[binding_point] = handle;
         return handle;
     }
-    void UniformBufferManager::changeBufferData(GLint binding_slot, void* data,
+    void UniformBufferManager::changeBufferData(GLuint binding_slot, void* data,
             size_t size) {
         if (!IS_IN_MAP(ubo, binding_slot) || !size || !data)
             return;

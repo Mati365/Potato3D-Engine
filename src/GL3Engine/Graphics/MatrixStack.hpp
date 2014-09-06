@@ -14,10 +14,11 @@ namespace GL3Engine {
             MVPArray(const MVPArray&);
             MVPArray& operator=(const MVPArray&);
     };
+
     class MatrixStack :
                         public AttribContainer<MVPArray> {
         public:
-            enum class Mode {
+            enum Mode {
                 _3D,
                 _2D
             };
@@ -29,7 +30,7 @@ namespace GL3Engine {
         public:
             MatrixStack(const Vec2i&);
 
-            void switchMode(Mode);
+            void switchMode(GLuint);
             void updateCameraCoords();
 
             MatrixStack& setCam(Camera*);

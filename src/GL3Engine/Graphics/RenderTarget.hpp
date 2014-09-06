@@ -28,6 +28,8 @@ namespace GL3Engine {
             virtual ~RenderTarget() {
             }
     };
+
+    using TextureMap = map<GLuint, unique_ptr<Texture>>;
     class RenderQuad :
                        public RenderTarget {
         DECLARE_NODE_TYPE(RenderQuad)
@@ -35,7 +37,7 @@ namespace GL3Engine {
         private:
             GLuint handle = 0, depth_render_buf = 0;
             unique_ptr<Shape2D> quad;
-            map<GLuint, unique_ptr<Texture>> textures;
+            TextureMap textures;
 
         public:
             RenderQuad() {

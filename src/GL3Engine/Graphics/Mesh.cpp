@@ -38,43 +38,41 @@ namespace GL3Engine {
             updateMaterialsCache(effect);
         
         world->pushAttrib();
+        world->attrib.model *= transform.model;
         {
-            world->attrib.model *= transform.model;
-            {
-                effect->bindBlockToSlot("MaterialBlock",
-                        GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING));
-                effect->bindBlockToSlot("LightBlock",
-                        GET_SCENE_FLAG(scene, LIGHT_SHADER_BINDING));
+            effect->bindBlockToSlot("MaterialBlock",
+                    GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING));
+            effect->bindBlockToSlot("LightBlock",
+                    GET_SCENE_FLAG(scene, LIGHT_SHADER_BINDING));
 
-                effect->setUniform("matrix.mvp",
-                        world->attrib.vp_matrix * world->attrib.model)
+            effect->setUniform("matrix.mvp",
+                    world->attrib.vp_matrix * world->attrib.model)
 
-                .setUniform("matrix.m", world->attrib.model)
+            .setUniform("matrix.m", world->attrib.model)
 
-                .setUniform("matrix.v", world->attrib.view)
+            .setUniform("matrix.v", world->attrib.view)
 
-                .setUniform("matrix.normal",
-                        MatMatrix::inverse(
-                                (world->attrib.view * world->attrib.model)
-                                        .getCut(3, 3)))
+            .setUniform("matrix.normal",
+                    MatMatrix::inverse(
+                            (world->attrib.view * world->attrib.model)
+                                    .getCut(3, 3)))
 
-                .setUniform("matrix.cam",
-                        world->getActiveCamera()->getPos());
-            }
-            if (shape->getMaterials().empty())
-                effect->setUniform("col", shape->getColor());
-            else if (!material_cache.empty()) {
-                if (IS_SET_FLAG(attrib, USE_LIGHTING))
-                    effect->setUniform(GL_TEXTURE_2D_ARRAY,
-                            "texture_pack", 0,
-                            shape->getMaterials()[0]->tex_array->getHandle());
+            .setUniform("matrix.cam",
+                    world->getActiveCamera()->getPos());
+        }
+        if (shape->getMaterials().empty())
+            effect->setUniform("col", shape->getColor());
+        else if (!material_cache.empty()) {
+            if (IS_SET_FLAG(attrib, USE_LIGHTING))
+                effect->setUniform(GL_TEXTURE_2D_ARRAY,
+                        "texture_pack", 0,
+                        shape->getMaterials()[0]->tex_array->getHandle());
 
-                if (IS_SET_FLAG(attrib, USE_MATERIALS))
-                    UniformBufferManager::getInstance().changeBufferData(
-                            GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
-                            &material_cache[0],
-                            material_cache.size() * sizeof(MaterialBufferData));
-            }
+            if (IS_SET_FLAG(attrib, USE_MATERIALS))
+                UniformBufferManager::getInstance().changeBufferData(
+                        GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
+                        &material_cache[0],
+                        material_cache.size() * sizeof(MaterialBufferData));
         }
         world->popAttrib();
     }

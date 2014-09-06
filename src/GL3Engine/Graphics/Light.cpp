@@ -6,8 +6,6 @@
 #include "Mesh.hpp"
 
 namespace GL3Engine {
-    GLuint m_fbo, m_shadowMap, m_depth;
-
     struct PointLightCam {
             GLenum face;
             unique_ptr<Camera> cam;
@@ -57,7 +55,7 @@ namespace GL3Engine {
                         mesh_shader->setUniform(GL_TEXTURE_CUBE_MAP,
                                 "shadow_maps[" + toString(i) + "].point",
                                 i + 1,
-                                m_shadowMap);
+                                light->getShadowTex()->getHandle());
                         break;
 
                     case CLASS_HASH(DirectLight):
@@ -144,57 +142,6 @@ namespace GL3Engine {
     }
 
     // ---- PointLight
-    void initP() {
-        // Create the FBO
-        glGenFramebuffers(1, &m_fbo);
-
-        // Create the depth buffer
-        glGenTextures(1, &m_depth);
-        glBindTexture(GL_TEXTURE_2D, m_depth);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, 64, 64, 0,
-                GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        // Create the cube map
-        glGenTextures(1, &m_shadowMap);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S,
-                GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T,
-                GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R,
-                GL_CLAMP_TO_EDGE);
-
-        for (uint i = 0; i < 6; i++) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_R32F, 64, 64,
-                    0, GL_RED, GL_FLOAT, NULL);
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                GL_TEXTURE_2D, m_depth, 0);
-
-        // Disable writes to the color buffer
-        glDrawBuffer(GL_NONE);
-
-        // Disable reads from the color buffer
-        glReadBuffer(GL_NONE);
-
-        GLenum Status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-        if (Status != GL_FRAMEBUFFER_COMPLETE) {
-            printf("FB error, status: 0x%x\n", Status);
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-
     PointLight::PointLight() {
         cube = new CubeTexture( { 32, 32 },
                 TextureFlags { GL_RED, GL_FLOAT,
@@ -206,7 +153,6 @@ namespace GL3Engine {
         shadow_fbo.setSize(cube->getSize());
 
         setType(LightData::ENABLED | LightData::POINT);
-        initP();
     }
     void PointLight::update() {
         Vec4 pos = {
@@ -224,28 +170,22 @@ namespace GL3Engine {
                     pos + side.cam->getPos(),
                     pos + side.cam->getTarget()
             };
-            // Shadow mapping
             world->setCam(&cam);
+            shadow_fbo.setRenderFace(GL_COLOR_ATTACHMENT0, side.face);
 
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo);
-            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, side.face, m_shadowMap, 0);
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-            //shadow_fbo.setRenderFace(GL_COLOR_ATTACHMENT0, side.face);
+            shadow_effect->begin();
+            shadow_effect->setUniform("light_pos", pos);
             for (auto& node : *scene) {
+                if (node->getHash() != CLASS_HASH(Mesh))
+                    continue;
                 node->pushAttrib();
-                node->setAttrib(Mesh::NONE);
                 {
-                    node->getEffectMgr()
-                            .pushAttrib()
-                            .setAttrib(shadow_effect);
-                    shadow_effect->setUniform("light_pos", pos);
+                    node->setAttrib(Mesh::NONE);
                     node->draw();
-                    node->getEffectMgr().
-                            popAttrib();
                 }
                 node->popAttrib();
             }
+            shadow_effect->end();
         }
         world->setCam(cam);
     }

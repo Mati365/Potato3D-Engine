@@ -2,23 +2,40 @@
 #include "RenderTarget.hpp"
 
 namespace GL3Engine {
+    SceneManager::SceneManager(const Vec2i& res, const GLuint& conf)
+            :
+              world_matrix(res) {
+        setAttrib(conf);
+    }
+    SceneManager::SceneManager(const Vec2i& res)
+            :
+              SceneManager(res, MatrixStack::_3D) {
+    }
+
     void SceneManager::draw() {
-        // Kalkulacja cieniowania itp
         for (auto& node : nodes)
             node.get()->update();
-
-        // Rendering
         if (target)
             target->begin();
         {
-            world_matrix.switchMode(MatrixStack::Mode::_3D);
-            for (auto& node : nodes)
-                if (node.get() != target)
-                    node.get()->render();
+            GLint last_used_shader = -1;
+            world_matrix.switchMode(attrib);
+            for (auto& node : nodes) {
+                Shader* shader = node->getEffectMgr().getAttrib();
+                if (node.get() == target
+                        || node->getState() == Node::State::DISABLED)
+                    continue;
+                if (shader && shader->getProgram() != last_used_shader) {
+                    last_used_shader = shader->getProgram();
+                    shader->begin();
+                }
+                node.get()->draw();
+            }
         }
         if (target) {
             target->end();
-            target->render();
+            target->getEffectMgr().begin();
+            target->draw();
         }
     }
     SceneManager& SceneManager::addSceneNode(Node* node) {

@@ -86,12 +86,12 @@ namespace GL3Engine {
             map<GLuint, GLuint> ubo;
 
         public:
-            static GLint getBlockIndex(Shader*, c_str);
-            static GLint getBlockSize(Shader*, c_str);
+            static GLuint getBlockIndex(Shader*, c_str);
+            static GLuint getBlockSize(Shader*, c_str);
 
-            void delBuffer(GLint);
+            void delBuffer(GLuint);
             GLuint regBuffer(void*, GLuint, GLint, GLuint);
-            void changeBufferData(GLint, void*, size_t);
+            void changeBufferData(GLuint, void*, size_t);
 
             ~UniformBufferManager() {
                 for (auto& handle : ubo)

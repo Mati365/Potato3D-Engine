@@ -92,7 +92,7 @@ void calcLight(in Light light, in int index) {
 			dist_prop 		= 	1.f / (1.f + (.5f * pow(length(abs(frag.pos - light_viewspace)), 1.f)));
 			color.r = texture(shadow_maps[0].point, light_normal).r;
 			color.a = 1.f;
-			return;
+			//return;
 		break;
 		
 		case DIRECT_LIGHT:
@@ -111,7 +111,7 @@ void calcLight(in Light light, in int index) {
 	if(MATERIAL.tex_flag[SPECULAR]) {
 		vec3 	view_dir 		= 	normalize(frag.pos),
 				reflection 		= 	reflect(light_normal, normal);
-		float 	aspect 			=	pow(max(dot(reflection, view_dir), 0.f), 8.f);
+		float 	aspect 			=	pow(max(dot(reflection, view_dir), 0.f), 4.f);
 		
 		vec3 	spec_tex 	= 	GET_MATERIAL_TEX(SPECULAR).rgb;
 		float	specular 	=	(spec_tex.r + spec_tex.g + spec_tex.b) * 

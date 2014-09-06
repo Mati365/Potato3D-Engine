@@ -5,5 +5,5 @@ in vec3 		pos;
 uniform	vec4	light_pos;
 
 void main(void) {
-	color = 0.1f;
+	color = 1.f;
 }

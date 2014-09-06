@@ -54,15 +54,15 @@ namespace GL3Engine {
             void begin() const override;
             void end() const override;
     };
+    /** AttribContainer przechowuje tylko flagi! */
     class Node :
                  public Drawable,
                  public WindowEventListener,
                  public AttribContainer<GLint> {
-            friend class SceneManager;
             template<typename U> friend class Batch;
+            friend class SceneManager;
 
         public:
-            static constexpr GLfloat VIEW_DISTANCE = 6.f;
             enum class State {
                 NORMAL,
                 DISABLED,
@@ -73,9 +73,9 @@ namespace GL3Engine {
             Node* parent = nullptr;
             SceneManager* scene = nullptr;
             MatrixStack* world = nullptr;
-
             Transform transform;
             EffectManager effect;
+
             GLuint render_mode = GL_TRIANGLES;
             State state = State::NORMAL;
 
@@ -119,7 +119,7 @@ namespace GL3Engine {
                 return state;
             }
 
-            virtual inline size_t getHash()=0;
+            virtual inline size_t getHash() = 0;
 
 #define CLASS_HASH(T) \
             constHash(#T)
@@ -128,14 +128,17 @@ namespace GL3Engine {
             inline size_t getHash() override { \
                 return CLASS_HASH(T); \
             }
-
-        private:
-            void render(); // tylko na scenie + efekty
     };
-
+    /**
+     * Batchowanie obiektów, np. do renderingu,
+     * nie przejmuje nad nimi kontroli, kasowaniem
+     * i zarządzaniem zajmuje się NodeManager
+     */
     template<typename T>
     class Batch :
                   public Node {
+        DECLARE_NODE_TYPE(Batch)
+
         protected:
             vector<T*> objects;
 
@@ -147,9 +150,11 @@ namespace GL3Engine {
                 return *this;
             }
     };
+    /** W przyszłości wiele innych flag */
     class SceneManager :
-                         public Drawable,
-                         public WindowEventListener {
+                         public AttribContainer<GLint>,
+                         public WindowEventListener,
+                         public Drawable {
         public:
             enum class SceneFlag {
                 LIGHT_SHADER_BINDING,
@@ -160,9 +165,8 @@ namespace GL3Engine {
 
         private:
             NodeList nodes;
-
-            MatrixStack world_matrix;
             RenderTarget* target = nullptr;
+            MatrixStack world_matrix;
 
             SceneFlags flags = {
                     { SceneFlag::LIGHT_SHADER_BINDING, 0 },
@@ -170,11 +174,9 @@ namespace GL3Engine {
             };
 
         public:
-            SceneManager(const Vec2i& res)
-                    :
-                      world_matrix(res) {
-            }
-            
+            SceneManager(const Vec2i&);
+            SceneManager(const Vec2i&, const GLuint&);
+
             inline NodeList::iterator begin() {
                 return nodes.begin();
             }

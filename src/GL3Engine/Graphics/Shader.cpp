@@ -107,7 +107,7 @@ namespace GL3Engine {
         if (size == -1)
             size = UniformBufferManager::getBlockSize(this, variable);
 
-        GLint _handle = -1;
+        GLuint _handle = -1;
         if (size > 0)
             _handle = UniformBufferManager::getInstance().regBuffer(
                     data,
@@ -121,7 +121,7 @@ namespace GL3Engine {
         return *this;
     }
     Shader& Shader::bindBlockToSlot(c_str variable, GLuint binding_point) {
-        GLint block_index = UniformBufferManager::getBlockIndex(this,
+        GLuint block_index = UniformBufferManager::getBlockIndex(this,
                 variable);
         if (block_index == GL_INVALID_INDEX)
             return *this;
@@ -131,7 +131,7 @@ namespace GL3Engine {
 
     Shader& Shader::setUniform(
             GLint texture_type, c_str tex, GLint flag, GLuint handle) {
-        GLint loc = getUniformLoc(tex);
+        GLuint loc = getUniformLoc(tex);
         if (loc == GL_INVALID_INDEX)
             return *this;
 

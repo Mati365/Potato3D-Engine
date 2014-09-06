@@ -63,7 +63,7 @@ namespace GL3Engine {
                 return matrix[i];
             }
 
-            GLint getLength() const {
+            GLuint getLength() const {
                 return rows * cols;
             }
             

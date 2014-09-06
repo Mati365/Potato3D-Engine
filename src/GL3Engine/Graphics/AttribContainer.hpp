@@ -10,7 +10,8 @@ namespace GL3Engine {
             virtual ~ScopedContainer() {
             }
     };
-    template<typename C> class AttribContainer {
+    template<typename C>
+    class AttribContainer {
         protected:
             deque<C> container;
 

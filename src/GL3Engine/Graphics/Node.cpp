@@ -25,12 +25,5 @@ namespace GL3Engine {
         if (attrib)
             attrib->end();
     }
-    void Node::render() {
-        if (state == State::DISABLED)
-            return;
-        effect.begin();
-        draw();
-        effect.end();
-    }
 }
 

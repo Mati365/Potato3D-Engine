@@ -60,8 +60,9 @@ namespace GL3Engine {
             glTexImage2D(flags.tex_type, 0,
                     flags.type, size.X(), size.Y(),
                     0, flags.type, flags.bytes, nullptr);
+            configure();
         }
-        configure();
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
     void Texture::configure() {
         putGLTextureFlags(flags.tex_type, flags.flags);
@@ -143,13 +144,16 @@ namespace GL3Engine {
 
         glGenTextures(1, &handle);
         glBindTexture(GL_TEXTURE_CUBE_MAP, handle);
-        for (GLuint i = 0; i < 6; ++i)
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
-                    flags.type, size.X(), size.Y(), 0,
-                    flags.type, flags.bytes, nullptr);
-        configure();
+        {
+            for (GLuint i = 0; i < 6; ++i)
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
+                        flags.type, size.X(), size.Y(), 0,
+                        flags.type, flags.bytes, nullptr);
+            configure();
+        }
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 }
 

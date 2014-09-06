@@ -23,10 +23,10 @@ namespace GL3Engine {
         switchMode(Mode::_3D);
     }
     
-    void MatrixStack::switchMode(Mode mode) {
+    void MatrixStack::switchMode(GLuint mode) {
         switch (mode) {
             case Mode::_3D: {
-                glClear(GL_DEPTH_BUFFER_BIT);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glDepthMask(GL_TRUE);
                 glDepthFunc(GL_LESS);
                 glEnable(GL_DEPTH_TEST);
@@ -40,7 +40,7 @@ namespace GL3Engine {
                 break;
                 
             case Mode::_2D: {
-                glClear(GL_DEPTH_BUFFER_BIT);
+                glClear(GL_COLOR_BUFFER_BIT);
                 glDepthMask(GL_FALSE);
                 glDisable(GL_DEPTH_TEST);
                 {

@@ -50,12 +50,16 @@ namespace GL3Engine {
         if (!IS_IN_MAP(textures, attachment))
             return *this;
 
+        glBindTexture(textures[attachment]->getTexFlags().tex_type, 0);
+
         glBindFramebuffer(GL_FRAMEBUFFER, handle);
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, face,
                 textures[attachment]->getHandle(), 0);
-        glViewport(0, 0, size[0], size[1]);
+        glDrawBuffer(attachment);
 
-        setDrawBuffer( { attachment });
+        glViewport(0, 0, size[0], size[1]);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         assert(
                 glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         return *this;
@@ -101,13 +105,15 @@ namespace GL3Engine {
     
     RenderQuad& RenderQuad::setSize(const Vec2i& size) {
         this->size = size;
+
         if (!effect)
             setEffect(REQUIRE_RES(Shader, DEFAULT_FBO_SHADER));
         create();
-
-        if (!IS_IN_MAP(textures, GL_COLOR_ATTACHMENT0))
+        if (!IS_IN_MAP(textures, GL_COLOR_ATTACHMENT0)) {
             attachTex(GL_COLOR_ATTACHMENT0,
                     new Texture(size, Texture::default_tex_flags));
+            glDrawBuffer( { GL_COLOR_ATTACHMENT0 });
+        }
         if (!IS_IN_MAP(textures, GL_DEPTH_ATTACHMENT)) {
             TextureFlags depth_flags =
                     { GL_DEPTH_COMPONENT, GL_FLOAT,
