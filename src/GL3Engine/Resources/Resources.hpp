@@ -3,47 +3,53 @@
 #include "../Graphics/Mesh.hpp"
 
 namespace GL3Engine {
-    template<typename C>
-    class Loader {
-        public:
-            virtual C* load(c_str&) = 0;
-            virtual ~Loader() {
-            }
-    };
-    
-    template<typename C>
-    class ResourceManager {
-        private:
-            map<string, unique_ptr<Loader<C> > > loaders;
-            map<string, unique_ptr<C>> resources;
+    namespace CoreInterface {
+        template<typename C>
+        class Loader {
+            public:
+                virtual C* load(c_str&) = 0;
+                virtual ~Loader() {
+                }
+        };
+    }
+    namespace Resources {
+        template<typename C>
+        class ResourceManager {
+            private:
+                std::map<std::string, std::unique_ptr<CoreInterface::Loader<C> > > loaders;
+                std::map<std::string, std::unique_ptr<C>> resources;
 
-        public:
-            inline void putLoader(Loader<C>* loader, const string& extension) {
-                loaders[extension] = unique_ptr<Loader<C>>(loader);
-            }
-            C* getResource(c_str);
+            public:
+                inline void putLoader(CoreInterface::Loader<C>* loader,
+                        c_str extension) {
+                    loaders[extension] =
+                            std::unique_ptr<CoreInterface::Loader<C>>(loader);
+                }
+                C* getResource(c_str);
 
-        private:
-            C* registerResource(c_str, C*);
-    };
-    class GlobalResourceManager :
-                                  public Singleton<GlobalResourceManager> {
-        private:
-            ResourceManager<Texture> textures;
-            ResourceManager<Shape3D> shapes;
-            ResourceManager<Shader> shaders;
+            private:
+                C* registerResource(c_str, C*);
+        };
+        class GlobalResourceManager :
+                                      public CoreInterface::Singleton<
+                                              GlobalResourceManager> {
+            private:
+                ResourceManager<CoreMaterial::Texture> textures;
+                ResourceManager<SceneObject::Shape3D> shapes;
+                ResourceManager<CoreEffect::Shader> shaders;
 
-        public:
-            GlobalResourceManager();
+            public:
+                GlobalResourceManager();
 
-            template<typename Type>
-            Type* getResource(c_str) {
-                return nullptr;
-            }
-            template<typename Type>
-            void registerExtension(Loader<Type>*, c_str) {
-            }
-    };
+                template<typename Type>
+                Type* getResource(c_str) {
+                    return nullptr;
+                }
+                template<typename Type> void regExtension(
+                        CoreInterface::Loader<Type>*, c_str) {
+                }
+        };
+    }
 
 /** Domyślne typy wczytywane pierwsze */
 #define FONT_TEXTURE            "sprites/font.png"
@@ -53,7 +59,7 @@ namespace GL3Engine {
 #define DEFAULT_SHADOW_SHADER   "shaders/shadow_mesh_shader.glsl"
 
 #define REQUIRE_RES(type, handle) \
-        GlobalResourceManager::getInstance().getResource<type>(handle)
+        Resources::GlobalResourceManager::getInstance().getResource<type>(handle)
 }
 
 #endif

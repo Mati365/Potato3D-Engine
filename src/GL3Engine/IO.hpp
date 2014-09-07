@@ -1,24 +1,26 @@
 #ifndef IO_HPP_
 #define IO_HPP_
+#include <vector>
+#include <string>
+
 #include "Tools.hpp"
 
 namespace IO {
-    using namespace Tools;
-    
     extern size_t getFileLength(c_str&);
     
-    extern void getFileContents(c_str&, vector<string>&);
-    extern string getFileContents(c_str&);
-    extern string getFileContents(ifstream&, GLchar);
+    extern void getFileContents(c_str&, std::vector<std::string>&);
+    extern std::string getFileContents(c_str&);
+    extern std::string getFileContents(std::ifstream&, GLchar);
     
-    extern string removeQuotes(c_str);
-    extern ifstream& readString(ifstream&, string&);
-    extern string readString(ifstream&);
+    extern std::string removeQuotes(c_str);
+    extern std::ifstream& readString(std::ifstream&, std::string&);
+    extern std::string readString(std::ifstream&);
 
-    template<typename T> inline T readNumber(ifstream& fp) {
-        return stringTo<T>(readString(fp));
+    template<typename T> inline T readNumber(std::ifstream& fp) {
+        return Tools::stringTo<T>(readString(fp));
     }
-    template<typename T> inline ifstream& readNumber(ifstream& fp, T& num) {
+    template<typename T> inline std::ifstream& readNumber(std::ifstream& fp,
+            T& num) {
         num = readNumber<T>(fp);
         return fp;
     }

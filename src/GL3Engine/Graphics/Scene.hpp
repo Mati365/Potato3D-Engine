@@ -6,224 +6,200 @@
 #include "MatrixStack.hpp"
 
 namespace GL3Engine {
-    class Drawable {
-        public:
-            virtual void draw()=0;
-            virtual void passToShader() {
-            }
-            
-            virtual ~Drawable() {
-            }
-    };
-    class WindowEventListener {
-        public:
-            virtual GLboolean getMouseEvent(const Vec2i&, GLuint) {
-                return false;
-            }
-            virtual GLboolean getKeyEvent(GLchar) {
-                return false;
-            }
-            virtual ~WindowEventListener() {
-            }
-    };
-    
-    class SceneManager;
-    class RenderTarget;
-    
-    class EffectManager :
-                          public AttribContainer<Shader*>,
-                          public ScopedContainer {
-        public:
-            struct EffectParam {
-                    vector<GLfloat> data;
-                    GLenum type;
+    namespace CoreInterface {
+        class Drawable {
+            public:
+                virtual void draw()=0;
+                virtual void passToShader() {
+                }
 
-                    GLfloat& operator[](GLuint);
-            };
+                virtual ~Drawable() {
+                }
+        };
+        class WindowEventListener {
+            public:
+                virtual GLboolean getMouseEvent(
+                        const CoreMatrix::Vec2i&,
+                        GLuint) {
+                    return false;
+                }
+                virtual GLboolean getKeyEvent(GLchar) {
+                    return false;
+                }
+                virtual ~WindowEventListener() {
+                }
+        };
+    }
+    namespace SceneObject {
+        class RenderTarget;
+    }
+    namespace CoreRenderer {
+        class SceneManager;
 
-        private:
-            map<string, EffectParam> effect_params;
+        class Node :
+                     public CoreInterface::Drawable,
+                     public CoreInterface::WindowEventListener,
+                     public CoreAttrib::AttribContainer<GLint> {
+                template<typename U> friend class Batch;
+                friend class SceneManager;
 
-        public:
-            EffectManager()
-                    :
-                      AttribContainer(nullptr) {
-            }
-            EffectParam& setEffectParam(c_str, GLuint);
+            public:
+                enum class State {
+                    NORMAL,
+                    DISABLED,
+                    DESTROYED
+                };
+                struct NodeConfig {
+                        GLuint gl_render_flag;
+                        State state;
+                };
 
-            void begin() const override;
-            void end() const override;
-    };
-    /** AttribContainer przechowuje tylko flagi! */
-    class Node :
-                 public Drawable,
-                 public WindowEventListener,
-                 public AttribContainer<GLint> {
-            template<typename U> friend class Batch;
-            friend class SceneManager;
+            protected:
+                Node* parent = nullptr;
+                SceneManager* scene = nullptr;
+                NodeConfig config = { GL_TRIANGLES, State::NORMAL };
 
-        public:
-            enum class State {
-                NORMAL,
-                DISABLED,
-                DESTROYED
-            };
+                CoreMatrix::MatrixStack* world = nullptr;
+                CoreMatrix::Transform transform;
+                CoreEffect::EffectManager effect;
 
-        protected:
-            Node* parent = nullptr;
-            SceneManager* scene = nullptr;
-            MatrixStack* world = nullptr;
-            Transform transform;
-            EffectManager effect;
+            public:
+                virtual void update() {
+                }
+                virtual void draw() override {
+                }
 
-            GLuint render_mode = GL_TRIANGLES;
-            State state = State::NORMAL;
+                Node& setConfig(const NodeConfig& config) {
+                    this->config = config;
+                    return *this;
+                }
+                Node& setEffect(CoreEffect::Shader* effect) {
+                    this->effect.setAttrib(effect);
+                    return *this;
+                }
 
-        public:
-            virtual void update() {
-            }
-            virtual void draw() override {
-            }
+                CoreMatrix::Transform& getTransform() {
+                    return transform;
+                }
+                CoreEffect::EffectManager& getEffectMgr() {
+                    return effect;
+                }
+                Node* getParentNode() const {
+                    return parent;
+                }
+                SceneManager* getScene() const {
+                    return scene;
+                }
 
-            Node& setRenderMode(GLuint render_mode) {
-                this->render_mode = render_mode;
-                return *this;
-            }
-            Transform& getTransform() {
-                return transform;
-            }
+                NodeConfig& getConfig() {
+                    return config;
+                }
+                inline GLboolean isActive() const {
+                    return config.state == State::NORMAL;
+                }
 
-            Node& setEffect(Shader* effect) {
-                this->effect.setAttrib(effect);
-                return *this;
-            }
-            Node& setState(State state) {
-                this->state = state;
-                return *this;
-            }
-
-            EffectManager& getEffectMgr() {
-                return effect;
-            }
-            Node* getParentNode() const {
-                return parent;
-            }
-            SceneManager* getScene() const {
-                return scene;
-            }
-
-            GLboolean isActive() const {
-                return state == State::NORMAL;
-            }
-            State getState() const {
-                return state;
-            }
-
-            virtual inline size_t getHash() = 0;
+                virtual inline size_t getHash() = 0;
 
 #define CLASS_HASH(T) \
-            constHash(#T)
+            Tools::constHash(#T)
 #define DECLARE_NODE_TYPE(T) \
             public: \
             inline size_t getHash() override { \
                 return CLASS_HASH(T); \
             }
-    };
-    /**
-     * Batchowanie obiektów, np. do renderingu,
-     * nie przejmuje nad nimi kontroli, kasowaniem
-     * i zarządzaniem zajmuje się NodeManager
-     */
-    template<typename T>
-    class Batch :
-                  public Node {
-        DECLARE_NODE_TYPE(Batch)
+        };
+        template<typename T> class Batch :
+                                           public Node {
+            DECLARE_NODE_TYPE(Batch)
 
-        protected:
-            vector<T*> objects;
+            protected:
+                std::vector<T*> objects;
 
-        public:
-            Batch& regObject(T& object) {
-                if (is_base_of<Node, T>::value)
-                    dynamic_cast<Node*>(&object)->parent = this;
-                objects.push_back(&object);
-                return *this;
-            }
-    };
-    /** W przyszłości wiele innych flag */
-    class SceneManager :
-                         public AttribContainer<GLint>,
-                         public WindowEventListener,
-                         public Drawable {
-        public:
-            enum class SceneFlag {
-                LIGHT_SHADER_BINDING,
-                MATERIAL_BUFFER_BINDING
-            };
-            using SceneFlags = map<SceneFlag, GLuint>;
-            using NodeList = vector<unique_ptr<Node>>;
-
-        private:
-            NodeList nodes;
-            RenderTarget* target = nullptr;
-            MatrixStack world_matrix;
-
-            SceneFlags flags = {
-                    { SceneFlag::LIGHT_SHADER_BINDING, 0 },
-                    { SceneFlag::MATERIAL_BUFFER_BINDING, 1 }
-            };
-
-        public:
-            SceneManager(const Vec2i&);
-            SceneManager(const Vec2i&, const GLuint&);
-
-            inline NodeList::iterator begin() {
-                return nodes.begin();
-            }
-            inline NodeList::iterator end() {
-                return nodes.end();
-            }
-
-            SceneManager& addSceneNode(Node*);
-            template<typename T>
-            T& createSceneNode() {
-                static_assert(is_base_of<Node, T>::value, "Bad node type!");
-                Node* node = new T;
-                {
-                    addSceneNode(node);
+            public:
+                Batch& regObject(T& object) {
+                    if (std::is_base_of<Node, T>::value)
+                        dynamic_cast<Node*>(&object)->parent = this;
+                    objects.push_back(&object);
+                    return *this;
                 }
-                return *dynamic_cast<T*>(node);
-            }
-            SceneManager& setRenderTarget(RenderTarget* target) {
-                this->target = target;
-                return *this;
-            }
-            
-            void draw() override;
-            GLboolean getMouseEvent(const Vec2i&, GLuint) override;
-            GLboolean getKeyEvent(GLchar) override;
+        };
+        class SceneManager :
+                             public CoreAttrib::AttribContainer<GLint>,
+                             public CoreInterface::WindowEventListener,
+                             public CoreInterface::Drawable {
+            public:
+                enum class SceneFlag {
+                    LIGHT_SHADER_BINDING,
+                    MATERIAL_BUFFER_BINDING
+                };
+                using SceneFlags = std::map<SceneFlag, GLuint>;
+                using NodeList = std::vector<std::unique_ptr<Node>>;
+
+            private:
+                CoreMatrix::MatrixStack world_matrix;
+
+                NodeList nodes;
+                SceneObject::RenderTarget* target = nullptr;
+                SceneFlags flags = {
+                        { SceneFlag::LIGHT_SHADER_BINDING, 0 },
+                        { SceneFlag::MATERIAL_BUFFER_BINDING, 1 }
+                };
+
+            public:
+                SceneManager(const CoreMatrix::Vec2i&);
+                SceneManager(const CoreMatrix::Vec2i&, const GLuint&);
+
+                inline NodeList::iterator begin() {
+                    return nodes.begin();
+                }
+                inline NodeList::iterator end() {
+                    return nodes.end();
+                }
+
+                SceneManager& addSceneNode(Node*);
+                template<typename T>
+                T& createSceneNode() {
+                    static_assert(std::is_base_of<Node, T>::value, "Bad node type!");
+                    Node* node = new T;
+                    {
+                        addSceneNode(node);
+                    }
+                    return *dynamic_cast<T*>(node);
+                }
+                SceneManager& setRenderTarget(
+                        SceneObject::RenderTarget* target) {
+                    this->target = target;
+                    return *this;
+                }
+
+                void draw() override;
+                GLboolean getMouseEvent(const CoreMatrix::Vec2i&, GLuint)
+                        override;
+                GLboolean getKeyEvent(GLchar) override;
 
 #define GET_SCENE_FLAG(scene, flag) \
-            scene->getSceneFlags()[SceneManager::SceneFlag::flag]
+            scene->getSceneFlags()[CoreRenderer::SceneManager::SceneFlag::flag]
 #define SET_SCENE_FLAG(scene, flag, value) \
-            scene->getSceneFlags()[SceneManager::SceneFlag::flag] = value
+            scene->getSceneFlags()[CoreRenderer::SceneManager::SceneFlag::flag] = value
 
-            RenderTarget* getRenderTarget() {
-                return target;
-            }
-            SceneFlags& getSceneFlags() {
-                return flags;
-            }
-            MatrixStack& getWorldMatrix() {
-                return world_matrix;
-            }
-            Camera* getActiveCam() const {
-                return world_matrix.getActiveCamera();
-            }
-            const Vec2i& getRenderResolution() const {
-                return world_matrix.getResolution();
-            }
-    };
+                SceneObject::RenderTarget* getRenderTarget() {
+                    return target;
+                }
+                SceneFlags& getSceneFlags() {
+                    return flags;
+                }
+
+                CoreMatrix::MatrixStack& getWorldMatrix() {
+                    return world_matrix;
+                }
+                SceneObject::Camera* getActiveCam() const {
+                    return world_matrix.getActiveCamera();
+                }
+                const CoreMatrix::Vec2i& getRenderResolution() const {
+                    return world_matrix.getResolution();
+                }
+        };
+    }
 }
 
 #endif

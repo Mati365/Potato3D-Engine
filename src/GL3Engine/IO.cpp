@@ -4,12 +4,16 @@
 #include "IO.hpp"
 
 namespace IO {
+    using std::string;
+    using std::ifstream;
+    using std::vector;
+
     size_t getFileLength(c_str& path) {
-        return ifstream(path, ios::binary | ios::ate).tellg();
+        return ifstream(path, std::ios::binary | std::ios::ate).tellg();
     }
     
     string getFileContents(c_str& path) {
-        ifstream f(path);
+        std::ifstream f(path);
         return getFileContents(f, '\n');
     }
     string getFileContents(ifstream& t, GLchar separate) {

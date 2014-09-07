@@ -8,8 +8,8 @@ src/GL3Engine/Window/Window.d: ../src/GL3Engine/Window/Window.cpp \
  ../src/GL3Engine/Window/../Graphics/Types.hpp \
  ../src/GL3Engine/Window/../Graphics/Matrix.hpp \
  ../src/GL3Engine/Window/../Graphics/../Tools.hpp \
- ../src/GL3Engine/Window/../Graphics/Dimensions.hpp \
- ../src/GL3Engine/Window/../Graphics/ECS.hpp \
+ ../src/GL3Engine/Window/../Graphics/../StockUtils.hpp \
+ ../src/GL3Engine/Window/../Graphics/AttribContainer.hpp \
  ../src/GL3Engine/Window/../Graphics/MatrixStack.hpp \
  ../src/GL3Engine/Window/../Resources/Resources.hpp \
  ../src/GL3Engine/Window/../Resources/../Graphics/Mesh.hpp \
@@ -38,9 +38,9 @@ src/GL3Engine/Window/Window.d: ../src/GL3Engine/Window/Window.cpp \
 
 ../src/GL3Engine/Window/../Graphics/../Tools.hpp:
 
-../src/GL3Engine/Window/../Graphics/Dimensions.hpp:
+../src/GL3Engine/Window/../Graphics/../StockUtils.hpp:
 
-../src/GL3Engine/Window/../Graphics/ECS.hpp:
+../src/GL3Engine/Window/../Graphics/AttribContainer.hpp:
 
 ../src/GL3Engine/Window/../Graphics/MatrixStack.hpp:
 

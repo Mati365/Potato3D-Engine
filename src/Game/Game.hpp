@@ -11,7 +11,7 @@ namespace Game {
     using namespace GL3Engine;
     
     class GameScreen :
-                       public Renderer {
+                       public CoreWindow::Renderer {
         public:
             enum Flags {
                 DRAW_AXIS = 1 << 1,
@@ -20,22 +20,22 @@ namespace Game {
             GLuint flags = 0;
 
         private:
-            Window* wnd;
+            CoreWindow::Window* wnd = nullptr;
+            CoreRenderer::SceneManager scene;
+            SceneObject::RenderQuad* fbo = nullptr;
+            SceneObject::Mesh* mesh = nullptr;
 
-            SceneManager scene;
-            RenderQuad* fbo = nullptr;
             GLfloat blur = 0.f;
-            Mesh* mesh;
 
         public:
-            GameScreen(Window*);
+            GameScreen(CoreWindow::Window*);
             void init() override;
             void draw() override;
 
-            GLboolean getMouseEvent(const Vec2i&, GLuint) override;
+            GLboolean getMouseEvent(const CoreMatrix::Vec2i&, GLuint) override;
             GLboolean getKeyEvent(GLchar) override;
 
-            inline Window* getWindow() const {
+            inline CoreWindow::Window* getWindow() const {
                 return wnd;
             }
     };

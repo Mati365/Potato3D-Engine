@@ -12,13 +12,15 @@ CPP_SRCS += \
 ../src/GL3Engine/Graphics/MatrixStack.cpp \
 ../src/GL3Engine/Graphics/Mesh.cpp \
 ../src/GL3Engine/Graphics/Node.cpp \
-../src/GL3Engine/Graphics/Point.cpp \
 ../src/GL3Engine/Graphics/Primitives.cpp \
 ../src/GL3Engine/Graphics/RenderQuad.cpp \
 ../src/GL3Engine/Graphics/SceneManager.cpp \
 ../src/GL3Engine/Graphics/Shader.cpp \
 ../src/GL3Engine/Graphics/Text.cpp \
 ../src/GL3Engine/Graphics/Texture.cpp \
+../src/GL3Engine/Graphics/Tile.cpp \
+../src/GL3Engine/Graphics/Types.cpp \
+../src/GL3Engine/Graphics/UniformBufferManager.cpp \
 ../src/GL3Engine/Graphics/VAOpolygon.cpp 
 
 OBJS += \
@@ -30,13 +32,15 @@ OBJS += \
 ./src/GL3Engine/Graphics/MatrixStack.o \
 ./src/GL3Engine/Graphics/Mesh.o \
 ./src/GL3Engine/Graphics/Node.o \
-./src/GL3Engine/Graphics/Point.o \
 ./src/GL3Engine/Graphics/Primitives.o \
 ./src/GL3Engine/Graphics/RenderQuad.o \
 ./src/GL3Engine/Graphics/SceneManager.o \
 ./src/GL3Engine/Graphics/Shader.o \
 ./src/GL3Engine/Graphics/Text.o \
 ./src/GL3Engine/Graphics/Texture.o \
+./src/GL3Engine/Graphics/Tile.o \
+./src/GL3Engine/Graphics/Types.o \
+./src/GL3Engine/Graphics/UniformBufferManager.o \
 ./src/GL3Engine/Graphics/VAOpolygon.o 
 
 CPP_DEPS += \
@@ -48,13 +52,15 @@ CPP_DEPS += \
 ./src/GL3Engine/Graphics/MatrixStack.d \
 ./src/GL3Engine/Graphics/Mesh.d \
 ./src/GL3Engine/Graphics/Node.d \
-./src/GL3Engine/Graphics/Point.d \
 ./src/GL3Engine/Graphics/Primitives.d \
 ./src/GL3Engine/Graphics/RenderQuad.d \
 ./src/GL3Engine/Graphics/SceneManager.d \
 ./src/GL3Engine/Graphics/Shader.d \
 ./src/GL3Engine/Graphics/Text.d \
 ./src/GL3Engine/Graphics/Texture.d \
+./src/GL3Engine/Graphics/Tile.d \
+./src/GL3Engine/Graphics/Types.d \
+./src/GL3Engine/Graphics/UniformBufferManager.d \
 ./src/GL3Engine/Graphics/VAOpolygon.d 
 
 
@@ -62,7 +68,7 @@ CPP_DEPS += \
 src/GL3Engine/Graphics/%.o: ../src/GL3Engine/Graphics/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -DGLEW_STATIC -I/usr/include -I/usr/local/include -O0 -g3 -Wall -c -fmessage-length=0 -std=c++0x -std=c++11 -std=c++1y -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -DGLEW_STATIC -DDEBUG -I/usr/include -I/usr/local/include -O0 -g3 -Wall -c -fmessage-length=0 -std=c++0x -std=c++11 -std=c++1y -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

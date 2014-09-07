@@ -9,8 +9,8 @@ src/GL3Engine/Resources/OBJloader.d: \
  ../src/GL3Engine/Resources/../Graphics/Types.hpp \
  ../src/GL3Engine/Resources/../Graphics/Matrix.hpp \
  ../src/GL3Engine/Resources/../Graphics/../Tools.hpp \
- ../src/GL3Engine/Resources/../Graphics/Dimensions.hpp \
- ../src/GL3Engine/Resources/../Graphics/ECS.hpp \
+ ../src/GL3Engine/Resources/../Graphics/../StockUtils.hpp \
+ ../src/GL3Engine/Resources/../Graphics/AttribContainer.hpp \
  ../src/GL3Engine/Resources/../Graphics/MatrixStack.hpp \
  ../src/GL3Engine/Resources/../IO.hpp \
  ../src/GL3Engine/Resources/../Tools.hpp
@@ -33,9 +33,9 @@ src/GL3Engine/Resources/OBJloader.d: \
 
 ../src/GL3Engine/Resources/../Graphics/../Tools.hpp:
 
-../src/GL3Engine/Resources/../Graphics/Dimensions.hpp:
+../src/GL3Engine/Resources/../Graphics/../StockUtils.hpp:
 
-../src/GL3Engine/Resources/../Graphics/ECS.hpp:
+../src/GL3Engine/Resources/../Graphics/AttribContainer.hpp:
 
 ../src/GL3Engine/Resources/../Graphics/MatrixStack.hpp:
 

@@ -4,45 +4,48 @@
 #include "AttribContainer.hpp"
 
 namespace GL3Engine {
-    class Camera;
-    class MVPArray {
-        public:
-            Mat4 proj, view, model, vp_matrix;
+    namespace SceneObject {
+        class Camera;
+    }
+    namespace CoreMatrix {
+        class MVPArray {
+            public:
+                Mat4 proj, view, model, vp_matrix;
 
-            MVPArray() {
-            }
-            MVPArray(const MVPArray&);
-            MVPArray& operator=(const MVPArray&);
-    };
+                MVPArray() {
+                }
+                MVPArray(const MVPArray&);
+                MVPArray& operator=(const MVPArray&);
+        };
+        class MatrixStack :
+                            public CoreAttrib::AttribContainer<MVPArray> {
+            public:
+                enum Mode {
+                    _3D,
+                    _2D
+                };
 
-    class MatrixStack :
-                        public AttribContainer<MVPArray> {
-        public:
-            enum Mode {
-                _3D,
-                _2D
-            };
+            private:
+                SceneObject::Camera* active_cam = nullptr;
+                Vec2i resolution;
 
-        private:
-            Camera* active_cam = nullptr;
-            Vec2i resolution;
+            public:
+                MatrixStack(const Vec2i&);
 
-        public:
-            MatrixStack(const Vec2i&);
+                void switchMode(GLuint);
+                void updateCameraCoords();
 
-            void switchMode(GLuint);
-            void updateCameraCoords();
+                MatrixStack& setCam(SceneObject::Camera*);
+                SceneObject::Camera* getActiveCamera() const {
+                    return active_cam;
+                }
+                const Vec2i& getResolution() const {
+                    return resolution;
+                }
 
-            MatrixStack& setCam(Camera*);
-            Camera* getActiveCamera() const {
-                return active_cam;
-            }
-            const Vec2i& getResolution() const {
-                return resolution;
-            }
-            
-            void loadModel(const Mat4&);
-    };
+                void loadModel(const Mat4&);
+        };
+    }
 }
 
 #endif

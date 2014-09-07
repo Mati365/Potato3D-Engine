@@ -4,16 +4,16 @@
 #include "../IO.hpp"
 
 namespace GL3Engine {
-    using namespace boost;
-    using namespace IO;
-    
+    using std::vector;
+    using std::string;
+
     /** Dostep: Header/ID i zwraca wartosc */
     void INIParser::load(c_str& path) {
         vector<string> lines;
         string header;
         data.clear();
         
-        getFileContents(path, lines);
+        IO::getFileContents(path, lines);
         for (string& str : lines)
             if (str[0] == '[')
                 header = str.substr(1, str.find(']') - 1);
@@ -25,7 +25,7 @@ namespace GL3Engine {
                     v = v.substr(v.find_first_of('"') + 1,
                             v.find_last_of('"') - 1);
                 else
-                    erase_all(v, " ");
+                    boost::erase_all(v, " ");
                 data[header + '/' + str.substr(0, s)] = v;
             }
     }

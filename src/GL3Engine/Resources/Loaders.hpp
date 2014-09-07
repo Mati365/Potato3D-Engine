@@ -4,50 +4,52 @@
 #include "../IO.hpp"
 
 namespace GL3Engine {
-    using namespace IO;
-    using LoaderIterator = vector<string>::iterator;
+    using LoaderIterator = std::vector<std::string>::iterator;
     
     /** SHADER */
-    class GLSLloader :
-                       public Loader<Shader> {
-        public:
-            static string putToFileName(string, c_str);
-            Shader* load(c_str);
-    };
-    class Textureloader :
-                          public Loader<Texture> {
-        public:
-            Texture* load(c_str str) {
-                return new Texture(str);
-            }
-    };
-    
+    namespace CoreLoader {
+        class GLSLloader :
+                           public CoreInterface::Loader<CoreEffect::Shader> {
+            public:
+                static std::string putToFileName(std::string, c_str);
+                CoreEffect::Shader* load(c_str);
+        };
+        class Textureloader :
+                              public CoreInterface::Loader<CoreMaterial::Texture> {
+            public:
+                CoreMaterial::Texture* load(c_str str) {
+                    return new CoreMaterial::Texture(str);
+                }
+        };
+    }
     /** MESHE */
     namespace OBJ {
-        using HeaderStack = vector<Vec3>;
+        using HeaderStack = std::vector<CoreMatrix::Vec3>;
         struct IndexStack {
                 HeaderStack normals, vertices;
-                vector<Vec2> uv;
+                std::vector<CoreMatrix::Vec2> uv;
         };
 
-        template<typename T> class ASCIIMeshLoader :
-                                                     public Loader<T>,
-                                                     public MemAlloc<T> {
+        using HeaderMap = std::map<std::string, GLint>;
+        template<typename T>
+        class ASCIIMeshLoader :
+                                public CoreInterface::Loader<T>,
+                                public CoreInterface::MemAlloc<T> {
             protected:
-                map<string, GLint> headers;
+                HeaderMap headers;
 
             public:
-                ASCIIMeshLoader(const map<string, GLint>& _headers)
+                ASCIIMeshLoader(const HeaderMap& _headers)
                         :
                           headers(_headers) {
                 }
 
-                virtual void onNewHeader(GLint, vector<string>&) = 0;
+                virtual void onNewHeader(GLint, std::vector<std::string>&) = 0;
                 virtual void onHeaderArgument(c_str, GLint,
                         LoaderIterator&) = 0;
 
-                static Vec3 getVec3D(LoaderIterator&);
-                static Vec2 getVec2D(LoaderIterator&);
+                static CoreMatrix::Vec3 getVec3D(LoaderIterator&);
+                static CoreMatrix::Vec2 getVec2D(LoaderIterator&);
 
                 T* load(c_str&);
                 virtual ~ASCIIMeshLoader() {
@@ -57,7 +59,7 @@ namespace GL3Engine {
                 T* selfCreateObject();
         };
         class MTLloader :
-                          public ASCIIMeshLoader<MATERIALS> {
+                          public ASCIIMeshLoader<CoreMaterial::Materials> {
             private:
                 enum HEADER
                                     : GLint {
@@ -76,23 +78,24 @@ namespace GL3Engine {
                     ALPHA_TEX,
                     BUMP_TEX
                 };
-                MATERIALS mtl;
+                CoreMaterial::Materials mtl;
 
             public:
                 MTLloader();
 
-                void onNewHeader(GLint, vector<string>&) {
+                void onNewHeader(GLint, std::vector<std::string>&) {
                 }
                 void onHeaderArgument(c_str, GLint, LoaderIterator&);
-                static TextureArray* packTextures(MATERIALS&);
+                static CoreMaterial::TextureArray* packTextures(
+                        CoreMaterial::Materials&);
 
                 /** Zwraca ostatni element!!! */
                 GLuint getSize() {
                     return mtl.size();
                 }
-                MATERIALS* createObject() {
+                CoreMaterial::Materials* createObject() {
                     MTLloader::packTextures(mtl);
-                    return new MATERIALS(mtl);
+                    return new CoreMaterial::Materials(mtl);
                 }
                 
                 void releaseMemory() {
@@ -100,7 +103,7 @@ namespace GL3Engine {
                 }
         };
         class OBJloader :
-                          public ASCIIMeshLoader<Shape3D> {
+                          public ASCIIMeshLoader<SceneObject::Shape3D> {
             private:
                 enum HEADER
                                     : GLint {
@@ -116,38 +119,38 @@ namespace GL3Engine {
 
                 // OBJ
                 IndexStack indices;
-                VertexArray polygon, vertex_array;
+                CoreType::VertexArray polygon, vertex_array;
 
                 // MTL
-                unique_ptr<MTLloader> mtl_loader;
-                MATERIALS materials;
+                std::unique_ptr<MTLloader> mtl_loader;
+                CoreMaterial::Materials materials;
                 GLint used_material = -1;
 
             public:
                 OBJloader();
 
-                void onNewHeader(GLint, vector<string>&);
+                void onNewHeader(GLint, std::vector<std::string>&);
                 void onHeaderArgument(c_str, GLint, LoaderIterator&);
 
-                Shape3D* createObject();
+                SceneObject::Shape3D* createObject();
                 void releaseMemory();
 
             private:
                 void finalizePolygon();
 
-                Vertex4f getVertex(LoaderIterator& iter);
+                CoreType::Vertex4f getVertex(LoaderIterator& iter);
         };
     }
     namespace MD5 {
         struct Joint {
-                string name;
+                std::string name;
                 GLint parent_index;
-                POS pos;
-                Vec4 orient;
+                CoreType::POS pos;
+                CoreMatrix::Vec4 orient;
         };
         struct Vertex {
                 GLuint index;
-                UV uv;
+                CoreType::UV uv;
                 GLuint start_weight;
                 GLuint weight_count;
         };
@@ -155,17 +158,17 @@ namespace GL3Engine {
                 GLuint index;
                 GLuint joint_index;
                 GLfloat bias;
-                POS pos;
+                CoreType::POS pos;
         };
         struct Pack {
-                string shader_path;
-                deque<Vertex> vertices;
-                deque<Vec3> tris;
-                deque<Weight> weights;
+                std::string shader_path;
+                std::deque<Vertex> vertices;
+                std::deque<CoreMatrix::Vec3> tris;
+                std::deque<Weight> weights;
         };
         struct MeshInfo {
-                deque<Joint> joints;
-                deque<Pack> meshes;
+                std::deque<Joint> joints;
+                std::deque<Pack> meshes;
 
                 inline Pack& lastMesh() {
                     return meshes.back();
@@ -173,16 +176,16 @@ namespace GL3Engine {
         };
 
         class MD5loader :
-                          public Loader<Shape3D> {
+                          public CoreInterface::Loader<SceneObject::Shape3D> {
             private:
-                vector<Vertex4f> vertices;
+                std::vector<CoreType::Vertex4f> vertices;
                 MeshInfo mesh;
 
             public:
-                Shape3D* load(c_str&);
+                SceneObject::Shape3D* load(c_str&);
 
             private:
-                void loadMeshInfo(ifstream&);
+                void loadMeshInfo(std::ifstream&);
         };
     }
 }

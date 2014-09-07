@@ -10,8 +10,9 @@
 #include <memory>
 #include <assert.h>
 #include <functional>
-
 #include <type_traits>
+
+#include "StockUtils.hpp"
 
 namespace std {
     template<typename T> inline T* begin(const pair<T*, T*>& p)
@@ -25,20 +26,42 @@ namespace std {
 }
 namespace GL3Engine {
     GLuint operator*(GLuint, std::function<void(void)>);
+
+    namespace CoreInterface {
+        template<typename T> class MemAlloc {
+            public:
+                virtual T* createObject() = 0;
+                virtual void releaseMemory() = 0;
+                virtual ~MemAlloc() {
+                }
+        };
+        template<typename T> class Singleton {
+            protected:
+                Singleton() {
+                }
+
+            public:
+                static inline T& getInstance() {
+                    static T t;
+                    return t;
+                }
+        };
+        class NonCopyable {
+            public:
+                NonCopyable() {
+                }
+                virtual ~NonCopyable() {
+                }
+            private:
+                NonCopyable& operator=(const NonCopyable&) {
+                    return *this;
+                }
+                NonCopyable(const NonCopyable&) {
+                }
+        };
+    }
 }
 namespace Tools {
-    using namespace std;
-    
-    using c_str = const string&;
-    using GLuchar = unsigned char;
-    
-#define FORCE_INLINE __attribute__((always_inline))
-#define REMOVE_FLAG(num, flag) ((num) & ~(flag))
-#define IS_SET_FLAG(num, flag) ((num) & (flag))
-    
-#define ARRAY_LENGTH(type, array) (sizeof(array) / sizeof(type))
-#define IS_IN_MAP(map, key) (map.find(key) != map.cend())
-    
     constexpr size_t constHash(const GLchar* input) {
         return *input ?
                         static_cast<size_t>(*input)
@@ -46,17 +69,17 @@ namespace Tools {
                         5381;
     }
     extern size_t hashString(c_str);
-    extern vector<string> tokenize(c_str, char);
+    extern std::vector<std::string> tokenize(c_str, char);
     
     /** Konwersje */
     template<typename T> T stringTo(c_str str) {
+        std::istringstream iss(str);
         T num;
-        istringstream iss(str);
         iss >> num;
         return num;
     }
-    template<typename T> string toString(const T& num) {
-        ostringstream ss;
+    template<typename T> std::string toString(const T& num) {
+        std::ostringstream ss;
         ss << num;
         return ss.str();
     }
@@ -65,8 +88,8 @@ namespace Tools {
         return v * 180.f / 3.145f;
     }
     template<typename T, GLint size> inline void copyToRaw(
-            const array<T, size>& source, T* destination) {
-        copy(source.begin(), source.end(), destination);
+            const std::array<T, size>& source, T* destination) {
+        std::copy(source.begin(), source.end(), destination);
     }
     
     template<typename T> void safeDelete(T*& ptr, GLboolean arr) {
@@ -86,56 +109,23 @@ namespace Tools {
                 buf++;
         return buf;
     }
-#define INSTANCE_OF(a, type) dynamic_cast<type*>(a)
     
     struct Log {
-            enum Flag {
+            enum class Flag {
                 CRITICAL,
                 WARNING,
                 ERROR
             };
 
             Flag flag;
-            string message;
+            std::string message;
 
-            static deque<Log> logs;
-            static void putLog(Flag, const string&);
+            static std::deque<Log> logs;
+            static void putLog(Flag, c_str);
     };
-#define LOG(type, str) Log::putLog(Log::type, str)
+#define LOG(type, str) Tools::Log::putLog(Tools::Log::Flag::type, str)
     
     extern void showGLErrors();
-    
-    template<typename T> class MemAlloc {
-        public:
-            virtual T* createObject() = 0;
-            virtual void releaseMemory() = 0;
-            virtual ~MemAlloc() {
-            }
-    };
-    template<typename T> class Singleton {
-        protected:
-            Singleton() {
-            }
-            
-        public:
-            static inline T& getInstance() {
-                static T t;
-                return t;
-            }
-    };
-    class NonCopyable {
-        public:
-            NonCopyable() {
-            }
-            virtual ~NonCopyable() {
-            }
-        private:
-            NonCopyable& operator=(const NonCopyable&) {
-                return *this;
-            }
-            NonCopyable(const NonCopyable&) {
-            }
-    };
 }
 
 #endif

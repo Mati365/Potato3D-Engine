@@ -8,8 +8,8 @@ src/3D\ engine.d: ../src/3D\ engine.cpp ../src/Game/Game.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/Types.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/Matrix.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/../Tools.hpp \
- ../src/Game/../GL3Engine/Window/../Graphics/Dimensions.hpp \
- ../src/Game/../GL3Engine/Window/../Graphics/ECS.hpp \
+ ../src/Game/../GL3Engine/Window/../Graphics/../StockUtils.hpp \
+ ../src/Game/../GL3Engine/Window/../Graphics/AttribContainer.hpp \
  ../src/Game/../GL3Engine/Window/../Graphics/MatrixStack.hpp \
  ../src/Game/../GL3Engine/Window/../Resources/Resources.hpp \
  ../src/Game/../GL3Engine/Window/../Resources/../Graphics/Mesh.hpp \
@@ -48,9 +48,9 @@ src/3D\ engine.d: ../src/3D\ engine.cpp ../src/Game/Game.hpp \
 
 ../src/Game/../GL3Engine/Window/../Graphics/../Tools.hpp:
 
-../src/Game/../GL3Engine/Window/../Graphics/Dimensions.hpp:
+../src/Game/../GL3Engine/Window/../Graphics/../StockUtils.hpp:
 
-../src/Game/../GL3Engine/Window/../Graphics/ECS.hpp:
+../src/Game/../GL3Engine/Window/../Graphics/AttribContainer.hpp:
 
 ../src/Game/../GL3Engine/Window/../Graphics/MatrixStack.hpp:
 

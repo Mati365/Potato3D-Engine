@@ -3,7 +3,7 @@
 #include "Resources.hpp"
 
 namespace GL3Engine {
-    using INIHeader = map<string, string>;
+    using INIHeader = std::map<std::string, std::string>;
     class INIParser {
         private:
             INIHeader data;
@@ -12,7 +12,7 @@ namespace GL3Engine {
             INIParser(c_str& path) {
                 load(path);
             }
-            string& getValue(c_str header, c_str key) {
+            std::string& getValue(c_str header, c_str key) {
                 return data[header + "/" + key];
             }
             INIHeader getKeys(c_str);

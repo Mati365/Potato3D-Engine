@@ -12,7 +12,12 @@ namespace GL3Engine {
     }
 }
 namespace Tools {
-    map<GLenum, string> gl_errors = {
+    using std::string;
+    using std::vector;
+    using std::cout;
+    using std::endl;
+
+    std::map<GLenum, string> gl_errors = {
             { GL_INVALID_ENUM, "Invalid enum!" },
             { GL_INVALID_VALUE, "Invalid value!" },
             { GL_INVALID_OPERATION, "Invalid operation!" },
@@ -30,7 +35,7 @@ namespace Tools {
                     << endl;
     }
 
-    deque<Log> Log::logs;
+    std::deque<Log> Log::logs;
     void Log::putLog(Log::Flag flag, c_str str) {
         static const char* flag_caption[] = {
                 "> !CRITICAL!",
@@ -39,22 +44,23 @@ namespace Tools {
         };
         logs.push_back( {
                 flag, str });
-        cout << string(flag_caption[static_cast<GLint>(flag)]) + " " + str
+        cout <<
+                string(flag_caption[static_cast<GLint>(flag)]) + " " + str
                 << endl;
-        if (flag == Log::CRITICAL)
+        if (flag == Log::Flag::CRITICAL)
             exit(1);
     }
 
-    vector<string> tokenize(c_str line, char sep) {
+    std::vector<string> tokenize(c_str line, char sep) {
         vector<string> buf;
-        istringstream iss(line);
         string tok;
+        std::istringstream iss(line);
         while (getline(iss, tok, sep))
             buf.push_back(tok);
         return buf;
     }
     size_t hashString(c_str str) {
-        static hash<string> _hash;
+        static std::hash<string> _hash;
         return _hash(str);
     }
 }
