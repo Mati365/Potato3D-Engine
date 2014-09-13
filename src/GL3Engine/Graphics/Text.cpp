@@ -5,14 +5,14 @@
 
 namespace GL3Engine {
     namespace CoreFont {
-        using CoreMatrix::Vec3;
-        using CoreMatrix::Vec2;
-        using CoreMatrix::MatMatrix;
-        using CoreType::Vertex2f;
-        using CoreMaterial::TileIterator;
+        TYPE_IMPORT(CoreMatrix, Vec3);
+        TYPE_IMPORT(CoreMatrix, Vec2);
+        TYPE_IMPORT(CoreMatrix, MatMatrix);
+        TYPE_IMPORT(CoreType, Vertex2f);
+        TYPE_IMPORT(CoreMaterial, TileIterator);
 
-        using std::vector;
-        using std::string;
+        TYPE_IMPORT(std, vector);
+        TYPE_IMPORT(std, string);
         
         Text::Text() {
             setEffect(REQUIRE_RES(CoreEffect::Shader, DEFAULT_TEXT_SHADER));

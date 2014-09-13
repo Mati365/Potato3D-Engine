@@ -4,9 +4,9 @@
 #include "IO.hpp"
 
 namespace IO {
-    using std::string;
-    using std::ifstream;
-    using std::vector;
+    TYPE_IMPORT(std, string);
+    TYPE_IMPORT(std, ifstream);
+    TYPE_IMPORT(std, vector);
 
     size_t getFileLength(c_str& path) {
         return ifstream(path, std::ios::binary | std::ios::ate).tellg();

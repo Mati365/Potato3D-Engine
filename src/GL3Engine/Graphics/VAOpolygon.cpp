@@ -5,7 +5,7 @@
 
 namespace GL3Engine {
     namespace SceneObject {
-        using CoreType::BufferData;
+        TYPE_IMPORT(CoreType, BufferData);
 
         template<typename T> VAOpolygon<T>::VAOpolygon(
                 const BufferData& vertices,

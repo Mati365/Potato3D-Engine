@@ -14,8 +14,8 @@ namespace GL3Engine {
             return buffer;
         }
 
-        using CoreMatrix::Vec3;
-        using CoreMatrix::Vec2;
+        TYPE_IMPORT(CoreMatrix, Vec3);
+        TYPE_IMPORT(CoreMatrix, Vec2);
 
         void calcTangents(VertexArray& vertices) {
             assert(!(vertices.size() % 3));

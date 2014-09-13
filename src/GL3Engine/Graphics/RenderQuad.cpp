@@ -3,10 +3,10 @@
 
 namespace GL3Engine {
     namespace SceneObject {
-        using CoreMatrix::Vec2i;
-        using CoreMaterial::Texture;
-        using CoreType::Vertex2f;
-        using std::vector;
+        TYPE_IMPORT(CoreMatrix, Vec2i);
+        TYPE_IMPORT(CoreMaterial, Texture);
+        TYPE_IMPORT(CoreType, Vertex2f);
+        TYPE_IMPORT(std, vector);
 
         RenderQuad::RenderQuad(const Vec2i& _size)
                 :

@@ -6,9 +6,9 @@
 
 namespace GL3Engine {
     namespace SceneObject {
-        using CoreEffect::Shader;
-        using CoreEffect::UniformBufferManager;
-        using CoreMatrix::MatMatrix;
+        TYPE_IMPORT(CoreEffect, Shader);
+        TYPE_IMPORT(CoreEffect, UniformBufferManager);
+        TYPE_IMPORT(CoreMatrix, MatMatrix);
 
         Mesh::Mesh(Shape3D* _shape)
                 :

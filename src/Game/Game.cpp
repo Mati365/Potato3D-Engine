@@ -4,11 +4,11 @@
 #include "../GL3Engine/Graphics/Light.hpp"
 
 namespace Game {
-    using CoreWindow::Window;
-    using CoreMatrix::Vec2i;
-    using CoreMatrix::MatMatrix;
-    using Resources::GlobalResourceManager;
-    using namespace SceneObject;
+    NAMESPACE_IMPORT(GL3Engine::SceneObject);
+    TYPE_IMPORT(GL3Engine::CoreWindow, Window);
+    TYPE_IMPORT(GL3Engine::CoreMatrix, Vec2i);
+    TYPE_IMPORT(GL3Engine::CoreMatrix, MatMatrix);
+    TYPE_IMPORT(GL3Engine::Resources, GlobalResourceManager);
 
     GameScreen::GameScreen(Window* _wnd)
             :
@@ -22,9 +22,9 @@ namespace Game {
                 .setPos( { 0.f, .5f, 0.f, 1.f })
                 .setTarget( { 0.f, .5f, .01f, 1.f });
         scene.createSceneNode<AxisMesh>();
-        scene.createSceneNode<CoreLighting::LightBatch>()
+        scene.createSceneNode<GL3Engine::CoreLighting::LightBatch>()
                 .regObject(
-                scene.createSceneNode<CoreLighting::PointLight>()
+                scene.createSceneNode<GL3Engine::CoreLighting::PointLight>()
                         .setPos( { 0.f, .5f, 0.f })
                         .setSpecular( { 1.f, 1.f, 1.f, 1.f }, 1.f)
                         .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 6.f));

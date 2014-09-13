@@ -2,7 +2,7 @@
 
 namespace GL3Engine {
     namespace CoreWindow {
-        using CoreMatrix::Vec2i;
+        TYPE_IMPORT(CoreMatrix, Vec2i);
 
         bool Window::initialize() noexcept {
             SDL_Init(SDL_INIT_VIDEO);

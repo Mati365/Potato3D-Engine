@@ -3,7 +3,7 @@
 
 namespace GL3Engine {
     namespace CoreRenderer {
-        using CoreMatrix::Vec2i;
+        TYPE_IMPORT(CoreMatrix, Vec2i);
 
         SceneManager::SceneManager(const Vec2i& res, const GLuint& conf)
                 :

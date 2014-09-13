@@ -5,15 +5,14 @@
 
 namespace GL3Engine {
     namespace MD5 {
-        using namespace IO;
+        NAMESPACE_IMPORT(IO);
+        TYPE_IMPORT (SceneObject, Shape3D);
+        TYPE_IMPORT(CoreMatrix, Vec3);
+        TYPE_IMPORT(CoreType, Vertex4f);
 
-        using SceneObject::Shape3D;
-        using CoreMatrix::Vec3;
-        using CoreType::Vertex4f;
-
-        using std::string;
-        using std::ifstream;
-        using std::vector;
+        TYPE_IMPORT(std, string);
+        TYPE_IMPORT(std, ifstream);
+        TYPE_IMPORT(std, vector);
 
         template<typename T> ifstream& readVec(ifstream& fp, T* destination,
                 GLuint count) {

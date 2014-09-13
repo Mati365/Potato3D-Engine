@@ -2,10 +2,10 @@
 
 namespace GL3Engine {
     namespace SceneObject {
-        using CoreMatrix::Vec2;
-        using CoreMatrix::Vec3;
-        using CoreMatrix::Vec2i;
-        using CoreMatrix::MatMatrix;
+        TYPE_IMPORT(CoreMatrix, Vec2);
+        TYPE_IMPORT(CoreMatrix, Vec2i);
+        TYPE_IMPORT(CoreMatrix, Vec3);
+        TYPE_IMPORT(CoreMatrix, MatMatrix);
 
         GLboolean FPSCamera::getKeyEvent(GLchar key) {
             switch (key) {

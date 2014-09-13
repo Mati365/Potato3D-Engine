@@ -98,13 +98,13 @@ namespace GL3Engine {
                     return config.state == State::NORMAL;
                 }
 
-                virtual inline size_t getHash() = 0;
+                virtual size_t getHash() const = 0;
 
 #define CLASS_HASH(T) \
             Tools::constHash(#T)
 #define DECLARE_NODE_TYPE(T) \
             public: \
-            inline size_t getHash() override { \
+            size_t getHash() const override { \
                 return CLASS_HASH(T); \
             }
         };

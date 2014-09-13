@@ -4,14 +4,15 @@
 
 namespace GL3Engine {
     namespace OBJ {
-        using CoreMaterial::Material;
-        using CoreMaterial::Materials;
-        using CoreMaterial::TextureArray;
-        using SceneObject::Shape3D;
-        using CoreType::Vertex4f;
+        TYPE_IMPORT(CoreMaterial, Material);
+        TYPE_IMPORT(CoreMaterial, Materials);
+        TYPE_IMPORT(CoreMaterial, TextureArray);
 
-        using std::vector;
-        using std::string;
+        TYPE_IMPORT(SceneObject, Shape3D);
+        TYPE_IMPORT(CoreType, Vertex4f);
+
+        TYPE_IMPORT(std, vector);
+        TYPE_IMPORT(std, string);
 
         MTLloader::MTLloader()
                 :

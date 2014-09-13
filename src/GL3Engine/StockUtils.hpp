@@ -13,5 +13,7 @@ using GLuchar = unsigned char;
 #define IS_IN_MAP(map, key) (map.find(key) != map.cend())
 
 #define INSTANCE_OF(a, type) dynamic_cast<type*>(a)
+#define TYPE_IMPORT(ns, type) using ns::type
+#define NAMESPACE_IMPORT(ns) using namespace ns
 
 #endif

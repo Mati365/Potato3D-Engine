@@ -4,8 +4,8 @@
 #include "../IO.hpp"
 
 namespace GL3Engine {
-    using std::vector;
-    using std::string;
+    TYPE_IMPORT(std, vector);
+    TYPE_IMPORT(std, string);
 
     /** Dostep: Header/ID i zwraca wartosc */
     void INIParser::load(c_str& path) {

@@ -4,8 +4,7 @@
 
 namespace GL3Engine {
     namespace CoreInterface {
-        template<typename C>
-        class Loader {
+        template<typename C> class Loader {
             public:
                 virtual C* load(c_str&) = 0;
                 virtual ~Loader() {
@@ -13,8 +12,7 @@ namespace GL3Engine {
         };
     }
     namespace Resources {
-        template<typename C>
-        class ResourceManager {
+        template<typename C> class ResourceManager {
             private:
                 std::map<std::string, std::unique_ptr<CoreInterface::Loader<C> > > loaders;
                 std::map<std::string, std::unique_ptr<C>> resources;
@@ -41,8 +39,7 @@ namespace GL3Engine {
             public:
                 GlobalResourceManager();
 
-                template<typename Type>
-                Type* getResource(c_str) {
+                template<typename Type> Type* getResource(c_str) {
                     return nullptr;
                 }
                 template<typename Type> void regExtension(

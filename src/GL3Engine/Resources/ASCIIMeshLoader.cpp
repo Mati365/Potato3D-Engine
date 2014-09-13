@@ -2,11 +2,10 @@
 
 namespace GL3Engine {
     namespace OBJ {
-        using std::string;
-        using std::vector;
+        TYPE_IMPORT(std, string);
+        TYPE_IMPORT(std, vector);
 
-        template<typename T>
-        T* ASCIIMeshLoader<T>::load(c_str& path) {
+        template<typename T> T* ASCIIMeshLoader<T>::load(c_str& path) {
             vector<string> lines;
             string dir = path.substr(0, path.find_last_of('/') + 1);
 
@@ -26,18 +25,17 @@ namespace GL3Engine {
             
             return selfCreateObject();
         }
-        template<typename T>
-        T* ASCIIMeshLoader<T>::selfCreateObject() {
+        template<typename T> T* ASCIIMeshLoader<T>::selfCreateObject() {
             T* obj = this->createObject();
             this->releaseMemory();
             return obj;
         }
 
-        using CoreMatrix::Vec2;
-        using CoreMatrix::Vec3;
+        TYPE_IMPORT(CoreMatrix, Vec2);
+        TYPE_IMPORT(CoreMatrix, Vec3);
 
-        template<typename T>
-        Vec3 ASCIIMeshLoader<T>::getVec3D(LoaderIterator& iter) {
+        template<typename T> Vec3 ASCIIMeshLoader<T>::getVec3D(
+                LoaderIterator& iter) {
             Vec3 v;
             sscanf(
                     (*iter + " " + *(iter + 1) + " " + *(iter + 2))
@@ -46,8 +44,8 @@ namespace GL3Engine {
             iter += 2;
             return v;
         }
-        template<typename T>
-        Vec2 ASCIIMeshLoader<T>::getVec2D(LoaderIterator& iter) {
+        template<typename T> Vec2 ASCIIMeshLoader<T>::getVec2D(
+                LoaderIterator& iter) {
             Vec2 v;
             sscanf(
                     (*iter + " " + *(iter + 1)).c_str(),

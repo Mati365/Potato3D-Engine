@@ -12,10 +12,10 @@ namespace GL3Engine {
     }
 }
 namespace Tools {
-    using std::string;
-    using std::vector;
-    using std::cout;
-    using std::endl;
+    TYPE_IMPORT(std, string);
+    TYPE_IMPORT(std, vector);
+    TYPE_IMPORT(std, cout);
+    TYPE_IMPORT(std, endl);
 
     std::map<GLenum, string> gl_errors = {
             { GL_INVALID_ENUM, "Invalid enum!" },

@@ -7,16 +7,14 @@
 
 namespace GL3Engine {
     namespace Resources {
-        using CoreInterface::Loader;
-        using std::string;
+        TYPE_IMPORT(CoreInterface, Loader);
+        TYPE_IMPORT(std, string);
 
 #define DECLARE_EXTENSION(stack, type) \
-        template<> \
-        void GlobalResourceManager::regExtension(Loader<type>* l, c_str e) { \
+        template<> void GlobalResourceManager::regExtension(Loader<type>* l, c_str e) { \
             stack.putLoader(l, e); \
         } \
-        template<> \
-        type* GlobalResourceManager::getResource(c_str handle) { \
+        template<> type* GlobalResourceManager::getResource(c_str handle) { \
             return stack.getResource(handle); \
         }
 

@@ -7,17 +7,17 @@
 
 namespace GL3Engine {
     namespace CoreLighting {
-        using SceneObject::Camera;
-        using CoreMatrix::Vec4;
-        using CoreEffect::Shader;
+        TYPE_IMPORT(SceneObject, Camera);
+        TYPE_IMPORT(CoreEffect, Shader);
+        TYPE_IMPORT(CoreMatrix, Vec4);
 
-        using CoreMaterial::CubeTexture;
-        using CoreMaterial::TextureFlags;
-        using CoreMaterial::Texture;
-        using CoreType::genGLBuffer;
+        TYPE_IMPORT(CoreMaterial, CubeTexture);
+        TYPE_IMPORT(CoreMaterial, TextureFlags);
+        TYPE_IMPORT(CoreMaterial, Texture);
+        TYPE_IMPORT(CoreType, genGLBuffer);
 
-        using std::unique_ptr;
-        using std::string;
+        TYPE_IMPORT(std, unique_ptr);
+        TYPE_IMPORT(std, string);
 
         struct PointLightCam {
                 GLenum face;
