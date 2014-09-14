@@ -7,6 +7,7 @@
 #include <fstream>
 
 #include "Scene.hpp"
+#include "GPUutils.hpp"
 
 namespace GL3Engine {
     namespace SceneObject {
@@ -23,8 +24,8 @@ namespace GL3Engine {
 
             public:
                 VAOpolygon(
-                        const CoreType::BufferData&,
-                        const CoreType::BufferData&,
+                        const GPU::BufferData&,
+                        const GPU::BufferData&,
                         const CoreType::Color& _col = { },
                         const CoreMaterial::Materials& _materials = { });
 
@@ -65,15 +66,15 @@ namespace GL3Engine {
                     return *this;
                 }
                 void changeData(
-                        const CoreType::BufferData&,
-                        const CoreType::BufferData&);
+                        const GPU::BufferData&,
+                        const GPU::BufferData&);
 
                 virtual ~VAOpolygon();
 
             private:
                 void create(
-                        const CoreType::BufferData&,
-                        const CoreType::BufferData&);
+                        const GPU::BufferData&,
+                        const GPU::BufferData&);
         };
         extern template class VAOpolygon<CoreType::Vertex4f> ;
         extern template class VAOpolygon<CoreType::Vertex2f> ;

@@ -92,18 +92,16 @@ void calcLight(in Light light, in int index) {
 		case POINT_LIGHT:
 			light_normal 	= 	normalize(light_viewspace - frag.pos) * frag.surface2view;
 			dist_prop 		= 	1.f / (1.f + (.5f * pow(length(abs(frag.pos - light_viewspace)), 1.f)));
-			color.r = texture(shadow_maps[0].point, light_normal).r;
 		break;
 		
 		case DIRECT_LIGHT:
 			light_normal	=	normalize(light.pos) * frag.surface2view;
 			dist_prop		=	1.f;
-			return;
 		break;
 	};
 	
 	float	diffuse			=	max(dot(light_normal, normal), 0.f) * dist_prop;
-	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.f);
+	vec3	diff			=	vec3(diffuse, diffuse, diffuse);
 	
 	// Specular
 	if(IS_MATERIAL_USED(SPECULAR)) {
@@ -116,28 +114,25 @@ void calcLight(in Light light, in int index) {
 									aspect * 
 									light.specular_intensity;
 		if(dot(reflection, view_dir) > 0.f)
-			color +=	vec4(
-							(MATERIAL.col[SPECULAR] * 
-							specular * 
-							dist_prop *
-							light.specular_col * 
-							light.specular_intensity).rgb, 0.f);
+			color.rgb +=	(MATERIAL.col[SPECULAR] * 
+								specular * 
+								dist_prop *
+								light.specular_col * 
+								light.specular_intensity).rgb;
 	}
 							
-	// Całość
-	if(IS_MATERIAL_USED(AMBIENT))	
-		color += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);
+	// Całość	
+	color += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);
 	if(IS_MATERIAL_USED(DIFFUSE)) {
-		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE];
-		diffuse_col.a = 1.f;
+		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * vec4(MATERIAL.col[DIFFUSE].rgb, 1.f);
 		color += 
 					diffuse_col * 
 					light.diffuse_col * 
 					light.diffuse_intensity * 
-					diff;
+					vec4(diff, 1.f);
 		color.a *= MATERIAL.transparent;
 	} else
-		color *= diff;
+		color.rgb *= diff;
 }
 void main(void) {
 	for(int i = 0;i < light_count;++i)

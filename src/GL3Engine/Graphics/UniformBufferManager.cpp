@@ -10,7 +10,8 @@ namespace GL3Engine {
         }
         void UniformBufferManager::delBuffer(GLuint binding_slot) {
             if (IS_IN_MAP(ubo, binding_slot))
-                glDeleteBuffers(1, &ubo[binding_slot]);
+                GPU::Allocator::getInstance().deallocBuffer(
+                        { ubo[binding_slot] });
             ubo.erase(ubo.find(binding_slot));
         }
 
@@ -28,10 +29,15 @@ namespace GL3Engine {
             if (IS_IN_MAP(ubo, binding_point))
                 return ubo[binding_point];
             assert(size > 0);
-            GLuint handle = CoreType::genGLBuffer( {
-                    data, static_cast<size_t>(size),
-                    GL_UNIFORM_BUFFER, 0, draw_type
-            }, false);
+            GLuint handle = GPU::Allocator::getInstance().allocBuffer(
+                    {
+                            data,
+                            static_cast<size_t>(size),
+                            GL_UNIFORM_BUFFER,
+                            0,
+                            draw_type
+                    },
+                    false);
             glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, handle);
             ubo[binding_point] = handle;
             return handle;

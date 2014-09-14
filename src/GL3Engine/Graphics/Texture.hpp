@@ -155,9 +155,8 @@ namespace GL3Engine {
         using MaterialBufferData = std::array<GLfloat, 16>;
         struct Material :
                           public CoreInterface::NonCopyable {
-                enum TEX_TYPE
-                    :GLint {
-                        AMBIENT,
+                enum TEX_TYPE {
+                    AMBIENT,
                     DIFFUSE,
                     SPECULAR,
                     ALPHA,
@@ -167,9 +166,9 @@ namespace GL3Engine {
                 std::string name = "";
                 GLfloat transparent = 1.f, shine = 1.f;
                 CoreType::Color col[SPECULAR + 1] = {
-                        { 1.f, 1.f, 1.f, 1.f },
-                        { 1.f, 1.f, 1.f, 1.f },
-                        { 1.f, 1.f, 1.f, 1.f }
+                        { 0.f, 0.f, 0.f, 1.f },
+                        { 0.f, 0.f, 0.f, 1.f },
+                        { 0.f, 0.f, 0.f, 1.f }
                 };
                 GLuint tex_flags = 0;
                 std::shared_ptr<TextureArray> tex_array = std::shared_ptr

@@ -5,7 +5,8 @@
 
 namespace GL3Engine {
     namespace SceneObject {
-        TYPE_IMPORT(CoreType, BufferData);
+        TYPE_IMPORT(GPU, BufferData);
+        TYPE_IMPORT(GPU, Allocator);
 
         template<typename T> VAOpolygon<T>::VAOpolygon(
                 const BufferData& vertices,
@@ -26,11 +27,11 @@ namespace GL3Engine {
             glBindVertexArray(vao);
 
             // Generowanie bufora indeksow
-            this->indices = genGLBuffer(indices, true);
+            this->indices = Allocator::getInstance().allocBuffer(indices, true);
             this->indices_count = indices.len / sizeof(GLuint);
 
             // Generowanie bufora wierzcholkow
-            this->vbo = genGLBuffer(vertices, true);
+            this->vbo = Allocator::getInstance().allocBuffer(vertices, true);
             this->vertices_count = vertices.len / sizeof(T);
 
             // Bardzo zły pomysł ale działa!
@@ -71,6 +72,7 @@ namespace GL3Engine {
                 Tools::safeDelete(materials.back(), false);
                 materials.pop_back();
             }
+            Allocator::getInstance().deallocBuffer( { vbo, indices });
         }
         
         template class VAOpolygon<CoreType::Vertex4f> ;

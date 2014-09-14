@@ -6,18 +6,6 @@
 
 namespace GL3Engine {
     namespace CoreType {
-        struct BufferData {
-                const GLvoid* data;
-                size_t len;
-                GLint type;
-
-                GLuint offset;
-                GLuint vbo_draw_type;
-        };
-        extern GLint genGLBuffer(
-                const CoreType::BufferData&,
-                GLboolean bind = false);
-
         using COL = GLfloat[4];
         using UV = GLfloat[2];
         using NORMAL = GLfloat[3];

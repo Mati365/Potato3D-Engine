@@ -59,6 +59,23 @@ namespace GL3Engine {
                 NonCopyable(const NonCopyable&) {
                 }
         };
+
+        template<typename T> class ContainerManager :
+                                                      public NonCopyable,
+                                                      public Singleton<
+                                                              ContainerManager<T>> {
+            private:
+                std::vector<T> objects;
+
+            public:
+                GLint regObject(T& obj) {
+                    objects.push_back(obj);
+                    return objects.size() - 1;
+                }
+                T& operator[](GLint key) {
+                    return objects[key];
+                }
+        };
     }
 }
 namespace Tools {

@@ -112,7 +112,6 @@ namespace GL3Engine {
                             &tex.mipmaps, SOIL_LOAD_RGBA);
                 }
                 data[i] = tex;
-
                 if (tex.size[0] * tex.size[0] >
                         max_size[0] * tex.size[0])
                     max_size = tex.size;

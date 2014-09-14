@@ -5,6 +5,7 @@
 
 #include "Texture.hpp"
 #include "AttribContainer.hpp"
+#include "GPUutils.hpp"
 
 namespace GL3Engine {
     namespace CoreEffect {
@@ -92,7 +93,8 @@ namespace GL3Engine {
 
                 ~UniformBufferManager() {
                     for (auto& handle : ubo)
-                        glDeleteBuffers(1, &handle.second);
+                        GPU::Allocator::getInstance().deallocBuffer(
+                                { handle.second });
                 }
         };
         class EffectManager :

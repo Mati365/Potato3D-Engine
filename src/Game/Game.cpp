@@ -49,7 +49,6 @@ namespace Game {
 
         scene.createSceneNode<Mesh>()
                 .setShape(new Billboard("sprites/billboard.png"))
-                .setAttrib(Mesh::USE_MATERIALS | Mesh::USE_LIGHTING | Mesh::DISABLE_CULL_FACING)
                 .getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { 0.f, 1.5f, 1.f }));

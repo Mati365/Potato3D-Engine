@@ -49,7 +49,7 @@ namespace GL3Engine {
             TYPE_IMPORT(CoreMaterial, Material);
             TYPE_IMPORT(CoreMaterial, TextureArray);
 
-            TextureArray* array = new TextureArray( { tex });
+            TextureArray* array = new TextureArray( { "", tex, "", "", "" });
             Material* material = new Material;
             material->tex_flags = 1 << Material::DIFFUSE;
             material->tex_array.reset(array);

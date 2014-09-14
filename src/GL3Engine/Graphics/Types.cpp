@@ -2,18 +2,6 @@
 
 namespace GL3Engine {
     namespace CoreType {
-        GLint genGLBuffer(const BufferData& data, GLboolean bind) {
-            GLuint buffer = 0;
-
-            glGenBuffers(1, &buffer);
-            glBindBuffer(data.type, buffer);
-            glBufferData(data.type, data.len, data.data, data.vbo_draw_type);
-            if (!bind)
-                glBindBuffer(data.type, 0);
-
-            return buffer;
-        }
-
         TYPE_IMPORT(CoreMatrix, Vec3);
         TYPE_IMPORT(CoreMatrix, Vec2);
 

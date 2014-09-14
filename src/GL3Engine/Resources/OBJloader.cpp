@@ -81,7 +81,7 @@ namespace GL3Engine {
                 }
             }
             // Możliwy mem leak
-            TextureArray* array = (new TextureArray(textures));
+            TextureArray* array = new TextureArray(textures);
             for (auto& mat : *materials)
                 mat->tex_array.reset(array);
             return materials;
@@ -163,6 +163,7 @@ namespace GL3Engine {
         Shape3D* OBJloader::createObject() {
             finalizePolygon();
             calcTangents(vertex_array);
+           // std::cout << material->tex_flags << std::endl;
             return new Shape3D(
                     { &vertex_array[0], vertex_array.size() * sizeof(Vertex4f), GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW },
                     { nullptr, 0, GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW },

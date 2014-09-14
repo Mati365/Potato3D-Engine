@@ -14,7 +14,7 @@ namespace GL3Engine {
         TYPE_IMPORT(CoreMaterial, CubeTexture);
         TYPE_IMPORT(CoreMaterial, TextureFlags);
         TYPE_IMPORT(CoreMaterial, Texture);
-        TYPE_IMPORT(CoreType, genGLBuffer);
+        TYPE_IMPORT(GPU, Allocator);
 
         TYPE_IMPORT(std, unique_ptr);
         TYPE_IMPORT(std, string);
@@ -43,10 +43,13 @@ namespace GL3Engine {
                 };
 
         void LightBatch::createBuffer() {
-            buffer = genGLBuffer( {
-                    nullptr, sizeof(Light) * MAX_LIGHTS,
-                    GL_UNIFORM_BUFFER, 0,
-                    GL_STREAM_DRAW }, false);
+            buffer = Allocator::getInstance().allocBuffer(
+                    {
+                            nullptr, sizeof(Light) * MAX_LIGHTS,
+                            GL_UNIFORM_BUFFER, 0,
+                            GL_STREAM_DRAW
+                    },
+                    false);
             glBindBufferBase(GL_UNIFORM_BUFFER, BINDING_POINT, buffer);
         }
         void LightBatch::update() {
