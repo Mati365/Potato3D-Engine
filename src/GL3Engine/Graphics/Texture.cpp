@@ -5,7 +5,9 @@ namespace GL3Engine {
         TYPE_IMPORT(CoreMatrix, Vec2i);
 
         const TextureFlags Texture::default_tex_flags =
-                { GL_RGBA, GL_UNSIGNED_BYTE, CLAMP_TO_EDGE | NEAREST, GL_TEXTURE_2D };
+                {
+                GL_RGBA, GL_UNSIGNED_BYTE,
+                        CLAMP_TO_EDGE | NEAREST, GL_TEXTURE_2D };
 
         Texture::Texture(c_str path, const TextureFlags& _flags)
                 :

@@ -152,10 +152,11 @@ namespace GL3Engine {
         /** Zwraca tablice bo Material nie
          * sklada sie tylko z danych dla glsl
          */
-        using MaterialBufferData = std::array<GLfloat, 36>;
-        struct Material {
+        using MaterialBufferData = std::array<GLfloat, 16>;
+        struct Material :
+                          public CoreInterface::NonCopyable {
                 enum TEX_TYPE
-                                    : GLint {
+                    :GLint {
                         AMBIENT,
                     DIFFUSE,
                     SPECULAR,
@@ -163,20 +164,16 @@ namespace GL3Engine {
                     BUMP
                 };
 
+                std::string name = "";
                 GLfloat transparent = 1.f, shine = 1.f;
-                GLbyte illum_model = 0;
-                CoreType::Color col[SPECULAR + 1];
-
-                std::string tex[BUMP + 1];
-                std::string name;
-                GLuint ubo = 0;
-
-                std::shared_ptr<TextureArray> tex_array;
-
-                Material() {
-                }
-                Material(const Material&);
-                Material(const CoreType::Color&);
+                CoreType::Color col[SPECULAR + 1] = {
+                        { 1.f, 1.f, 1.f, 1.f },
+                        { 1.f, 1.f, 1.f, 1.f },
+                        { 1.f, 1.f, 1.f, 1.f }
+                };
+                GLuint tex_flags = 0;
+                std::shared_ptr<TextureArray> tex_array = std::shared_ptr
+                        < TextureArray > (new TextureArray);
 
                 MaterialBufferData getMaterialBufferData() const;
         };

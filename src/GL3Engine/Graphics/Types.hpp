@@ -6,39 +6,6 @@
 
 namespace GL3Engine {
     namespace CoreType {
-        struct Color {
-                GLfloat col[4] = {
-                        0, 0, 0, 0 };
-
-                Color() {
-                }
-                Color(const std::initializer_list<GLfloat>& _col) {
-                    std::copy(_col.begin(), _col.end(), col);
-                }
-
-                std::array<GLfloat, 4> toArray() const {
-                    return {
-                        col[0],
-                        col[1],
-                        col[2],
-                        col[3]
-                    };
-                }
-                Color& operator=(const CoreMatrix::Vec4& p) {
-                    memcpy(col, p.matrix, 4 * sizeof(GLfloat));
-                    return *this;
-                }
-
-#define RETURN_COLOR(color, var) \
-    GLfloat color() const { \
-            return col[var]; \
-    }
-                RETURN_COLOR(r, 0)
-                RETURN_COLOR(g, 1)
-                RETURN_COLOR(b, 2)
-                RETURN_COLOR(a, 3)
-
-        };
         struct BufferData {
                 const GLvoid* data;
                 size_t len;
@@ -68,6 +35,7 @@ namespace GL3Engine {
                 POS tangent;
         };
 
+        using Color = CoreMatrix::Vec4;
         using Cube = Vertex4f[36];
         using VertexArray = std::vector<Vertex4f>;
 

@@ -11,7 +11,7 @@ namespace GL3Engine {
                 virtual ~ScopedContainer() {
                 }
         };
-        template<typename C> class AttribContainer {
+        template<typename C, typename T> class AttribContainer {
             protected:
                 std::deque<C> container;
 
@@ -25,11 +25,11 @@ namespace GL3Engine {
                           attrib(_attrib) {
                 }
 
-                virtual inline AttribContainer<C>& pushAttrib() {
+                virtual inline AttribContainer<C, T>& pushAttrib() {
                     container.push_back(attrib);
                     return *this;
                 }
-                virtual inline AttribContainer<C>& popAttrib() {
+                virtual inline AttribContainer<C, T>& popAttrib() {
                     attrib = container.back();
                     container.pop_back();
                     return *this;
@@ -38,8 +38,9 @@ namespace GL3Engine {
                 C& getAttrib() {
                     return attrib;
                 }
-                void setAttrib(const C& c) {
+                T& setAttrib(const C& c) {
                     attrib = c;
+                    return dynamic_cast<T&>(*this);
                 }
 
                 C operator->() {

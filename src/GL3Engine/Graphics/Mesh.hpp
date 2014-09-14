@@ -10,11 +10,13 @@
 
 namespace GL3Engine {
     namespace SceneObject {
-        template<typename T>
-        class VAOpolygon :
-                           public CoreInterface::NonCopyable {
+        template<typename T> class VAOpolygon :
+                                                public CoreInterface::NonCopyable {
             private:
-                GLuint vao = 0, vbo = 0, indices = 0, vertices_count = 0,
+                GLuint vao = 0,
+                        vbo = 0,
+                        indices = 0,
+                        vertices_count = 0,
                         indices_count = 0;
                 CoreType::Color col;
                 CoreMaterial::Materials materials;
@@ -57,6 +59,11 @@ namespace GL3Engine {
                     return indices_count > 0;
                 }
 
+                VAOpolygon<T>& setMaterials(
+                        const CoreMaterial::Materials& materials) {
+                    this->materials = materials;
+                    return *this;
+                }
                 void changeData(
                         const CoreType::BufferData&,
                         const CoreType::BufferData&);
@@ -82,7 +89,8 @@ namespace GL3Engine {
                 enum Flags {
                     NONE = 0,
                     USE_MATERIALS = 1 << 1,
-                    USE_LIGHTING = 1 << 2
+                    USE_LIGHTING = 1 << 2,
+                    DISABLE_CULL_FACING = 1 << 3
                 };
 
             private:
@@ -104,7 +112,7 @@ namespace GL3Engine {
 
             protected:
                 void updateMaterialsCache(CoreEffect::Shader*);
-                void passToShader();
+                void passToShader() override;
         };
     }
 }

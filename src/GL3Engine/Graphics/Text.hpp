@@ -23,7 +23,7 @@ namespace GL3Engine {
                      public CoreRenderer::Node {
             DECLARE_NODE_TYPE(Text)
 
-                static constexpr size_t BUFFER_SIZE = 128;
+                static constexpr size_t BUFFER_SIZE = 512;
 
             private:
                 CoreType::Color col = { 1.f, 1.f, 1.f, 1.f };

@@ -58,10 +58,9 @@ namespace GL3Engine {
                     }
                     // Index
                     for (GLuint i = 0; i < 6; ++i)
-                        index_buffer.push_back(
-                                CoreMaterial::Tile::quad_indices[i]
-                                        + vertex_buffer.size()
-                                        - 4);
+                        for (GLfloat obj : CoreMaterial::Tile::quad_indices)
+                            index_buffer.push_back(
+                                    obj + vertex_buffer.size() - 4);
                 }
                 cursor[0] += cell_size[0];
             }
@@ -75,13 +74,11 @@ namespace GL3Engine {
             return *this;
         }
         void Text::createBuffer() {
-            shape = new SceneObject::Shape2D( {
-                    nullptr, BUFFER_SIZE * sizeof(Vertex2f),
-                    GL_ARRAY_BUFFER, 0,
-                    GL_DYNAMIC_DRAW }, {
-                    nullptr, BUFFER_SIZE * sizeof(GLuint),
-                    GL_ELEMENT_ARRAY_BUFFER, 0,
-                    GL_DYNAMIC_DRAW }, col);
+            shape =
+                    new SceneObject::Shape2D(
+                            { nullptr, BUFFER_SIZE * sizeof(Vertex2f), GL_ARRAY_BUFFER, 0, GL_DYNAMIC_DRAW },
+                            { nullptr, BUFFER_SIZE * sizeof(GLuint), GL_ELEMENT_ARRAY_BUFFER, 0, GL_DYNAMIC_DRAW },
+                            col);
         }
         
         void Text::passToShader() {

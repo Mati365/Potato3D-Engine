@@ -142,33 +142,6 @@ namespace GL3Engine {
             
             return *this;
         }
-        Shader& Shader::setUniform(c_str variable,
-                const CoreMaterial::Materials& material) {
-            static char array_variable[50],
-                    col_buffer[15];
-            for (GLuint i = 0; i < material.size(); ++i) {
-                CoreMaterial::Material* mtl = material[i];
-                sprintf(array_variable, "%s[%u]", variable.c_str(), i);
-
-#define MATERIAL_PARAM(param) (array_variable + std::string(param))
-
-                setUniform(MATERIAL_PARAM(".transparent"), mtl->transparent);
-                setUniform(MATERIAL_PARAM(".shine"), mtl->shine);
-
-                for (GLuint j = 0; j < CoreMaterial::Material::BUMP + 1; ++j) {
-                    if (j < CoreMaterial::Material::SPECULAR + 1) {
-                        sprintf(col_buffer, ".%s[%u]", "col", j);
-                        setUniform(MATERIAL_PARAM(col_buffer), mtl->col[j]);
-                    }
-                    sprintf(col_buffer, ".%s[%u]", "tex_flag", j);
-                    setUniform(MATERIAL_PARAM(col_buffer),
-                            !mtl->tex[j].empty());
-                }
-            }
-            setUniform(GL_TEXTURE_2D_ARRAY, "texture_pack", 0,
-                    material[0]->tex_array->getHandle());
-            return *this;
-        }
         Shader& Shader::setUniform(
                 c_str variable, const GLfloat* data, GLuint count,
                 GLenum type) {

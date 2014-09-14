@@ -18,7 +18,8 @@ namespace GL3Engine {
                 MVPArray& operator=(const MVPArray&);
         };
         class MatrixStack :
-                            public CoreAttrib::AttribContainer<MVPArray> {
+                            public CoreAttrib::AttribContainer<MVPArray,
+                                    MatrixStack> {
             public:
                 enum Mode {
                     _3D,

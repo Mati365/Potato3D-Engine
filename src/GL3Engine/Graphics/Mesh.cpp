@@ -22,7 +22,6 @@ namespace GL3Engine {
                     || !UniformBufferManager::getBlockSize(effect,
                             "MaterialBlock"))
                 return;
-
             for (CoreMaterial::Material* mat : shape->getMaterials())
                 material_cache.push_back(mat->getMaterialBufferData());
 
@@ -66,25 +65,24 @@ namespace GL3Engine {
                 .setUniform("matrix.cam",
                         world->getActiveCamera()->getPos());
             }
-            if (shape->getMaterials().empty())
+            if (shape->getMaterials().empty() || material_cache.empty())
                 effect->setUniform("col", shape->getColor());
-            else if (!material_cache.empty()) {
-                if (IS_SET_FLAG(attrib, USE_LIGHTING))
-                    effect->setUniform(GL_TEXTURE_2D_ARRAY,
-                            "texture_pack", 0,
-                            shape->getMaterials()[0]->tex_array->getHandle());
-
-                if (IS_SET_FLAG(attrib, USE_MATERIALS))
-                    UniformBufferManager::getInstance().changeBufferData(
-                            GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
-                            &material_cache[0],
-                            material_cache.size()
-                                    * sizeof(CoreMaterial::MaterialBufferData));
+            else if (IS_SET_FLAG(attrib, USE_MATERIALS)) {
+                effect->setUniform(GL_TEXTURE_2D_ARRAY,
+                        "texture_pack", 0,
+                        shape->getMaterials()[0]->tex_array->getHandle());
+                UniformBufferManager::getInstance().changeBufferData(
+                        GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
+                        &material_cache[0],
+                        material_cache.size()
+                                * sizeof(CoreMaterial::MaterialBufferData));
             }
             world->popAttrib();
         }
         void Mesh::draw() {
             assert(effect);
+            if (IS_SET_FLAG(attrib, DISABLE_CULL_FACING))
+                glDisable(GL_CULL_FACE);
             {
                 passToShader();
                 glBindVertexArray(shape->getVAO());
@@ -97,6 +95,8 @@ namespace GL3Engine {
                             GL_UNSIGNED_SHORT, nullptr);
                 glBindVertexArray(0);
             }
+            if (IS_SET_FLAG(attrib, DISABLE_CULL_FACING))
+                glEnable(GL_CULL_FACE);
         }
     }
 }

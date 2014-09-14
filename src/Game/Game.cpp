@@ -2,6 +2,8 @@
 
 #include "../GL3Engine/Resources/Resources.hpp"
 #include "../GL3Engine/Graphics/Light.hpp"
+#include "../GL3Engine/Graphics/Billboard.hpp"
+#include "../GL3Engine/Graphics/Text.hpp"
 
 namespace Game {
     NAMESPACE_IMPORT(GL3Engine::SceneObject);
@@ -46,6 +48,13 @@ namespace Game {
                 .mul(MatMatrix::translate( { -2.f, .5f, 1.f }));
 
         scene.createSceneNode<Mesh>()
+                .setShape(new Billboard("sprites/billboard.png"))
+                .setAttrib(Mesh::USE_MATERIALS | Mesh::USE_LIGHTING | Mesh::DISABLE_CULL_FACING)
+                .getTransform()
+                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
+                .mul(MatMatrix::translate( { 0.f, 1.5f, 1.f }));
+
+        scene.createSceneNode<Mesh>()
                 .setShape(
                 GlobalResourceManager::getInstance().getResource<Shape3D>(
                         "mesh/wall/wall.obj"))
@@ -61,13 +70,13 @@ namespace Game {
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { -2.f, .5f, -3.f }));
 
-        scene.createSceneNode<Mesh>()
-                .setShape(
-                GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "mesh/bob/bob_lamp_update.md5mesh"))
-                .getTransform()
-                .mul(MatMatrix::scale( { .03f, .03f, .03f }))
-                .mul(MatMatrix::translate( { -1.f, 3.5f, 0.5f }));
+//        scene.createSceneNode<Mesh>()
+//                .setShape(
+//                GlobalResourceManager::getInstance().getResource<Shape3D>(
+//                        "mesh/bob/bob_lamp_update.md5mesh"))
+//                .getTransform()
+//                .mul(MatMatrix::scale( { .03f, .03f, .03f }))
+//                .mul(MatMatrix::translate( { -1.f, 3.5f, 0.5f }));
 
         scene.createSceneNode<Mesh>()
                 .setShape(
@@ -75,6 +84,12 @@ namespace Game {
                         "mesh/floor/floor.obj"))
                 .getTransform()
                 .mul(MatMatrix::scale( { .3f, .3f, .3f }))
+                .mul(MatMatrix::translate( { 0.f, 0.f, 0.f }));
+
+        scene.createSceneNode<GL3Engine::CoreFont::Text>()
+                .setText("Test czcionek ")
+                .getTransform()
+                .mul(MatMatrix::scale( { 2.7f, 2.7f, 1.f }))
                 .mul(MatMatrix::translate( { 0.f, 0.f, 0.f }));
 
         fbo =

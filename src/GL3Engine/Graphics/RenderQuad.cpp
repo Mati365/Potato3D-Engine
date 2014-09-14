@@ -36,10 +36,11 @@ namespace GL3Engine {
 
             // QUAD
             vector<Vertex2f> vertex_array = {
-                    { -1.f, -1.f, 0.f, 0.f, 0.f }, {
-                            1.f, -1.f, 0.f, 1.f, 0.f }, {
-                            1.f, 1.f, 0.f, 1.f, 1.f }, {
-                            -1.f, 1.f, 0.f, 0.f, 1.f }, };
+                    { -1.f, -1.f, 0.f, 0.f, 0.f },
+                    { 1.f, -1.f, 0.f, 1.f, 0.f },
+                    { 1.f, 1.f, 0.f, 1.f, 1.f },
+                    { -1.f, 1.f, 0.f, 0.f, 1.f },
+            };
             quad.reset(
                     new Shape2D(
                             { &vertex_array[0], vertex_array.size()

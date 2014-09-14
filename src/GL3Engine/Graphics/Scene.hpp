@@ -39,7 +39,7 @@ namespace GL3Engine {
         class Node :
                      public CoreInterface::Drawable,
                      public CoreInterface::WindowEventListener,
-                     public CoreAttrib::AttribContainer<GLint> {
+                     public CoreAttrib::AttribContainer<GLint, Node> {
                 template<typename U> friend class Batch;
                 friend class SceneManager;
 
@@ -124,7 +124,8 @@ namespace GL3Engine {
                 }
         };
         class SceneManager :
-                             public CoreAttrib::AttribContainer<GLint>,
+                             public CoreAttrib::AttribContainer<GLint,
+                                     SceneManager>,
                              public CoreInterface::WindowEventListener,
                              public CoreInterface::Drawable {
             public:

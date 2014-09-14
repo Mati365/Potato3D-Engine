@@ -7,12 +7,14 @@ namespace GL3Engine {
         TYPE_IMPORT(CoreMaterial, Material);
         TYPE_IMPORT(CoreMaterial, Materials);
         TYPE_IMPORT(CoreMaterial, TextureArray);
+        TYPE_IMPORT(CoreLoader, MaterialData);
 
         TYPE_IMPORT(SceneObject, Shape3D);
         TYPE_IMPORT(CoreType, Vertex4f);
 
         TYPE_IMPORT(std, vector);
         TYPE_IMPORT(std, string);
+        TYPE_IMPORT(std, shared_ptr);
 
         MTLloader::MTLloader()
                 :
@@ -35,19 +37,21 @@ namespace GL3Engine {
         
         void MTLloader::onHeaderArgument(
                 c_str file_dir, GLint active_header, LoaderIterator& it) {
-            Material* material = this->mtl.empty() ? nullptr : this->mtl.back();
+            MaterialData* mat_data =
+                    materials.empty() ? nullptr : &materials.back();
             if (active_header == NAME) {
-                this->mtl.push_back(new Material);
-                material = this->mtl.back();
-                material->name = *it;
+                materials.push_back(
+                        { new Material, CoreLoader::MaterialTextureData() });
+                mat_data = &materials.back();
+                mat_data->first->name = *it;
             }
 
 #define DEFINE_3DVEC(header_type, mtl_type) \
-               if(active_header==header_type) material->mtl_type = getVec3D(it);
+            if(active_header==header_type) mat_data->first->mtl_type = getVec3D(it);
 #define DEFINE_F_1DVEC(header_type, mtl_type) \
-               if(active_header==header_type) material->mtl_type = Tools::stringTo<GLfloat>(*it);
+            if(active_header==header_type) mat_data->first->mtl_type = Tools::stringTo<GLfloat>(*it);
 #define DEFINE_1DTEX(header_type, tex_type) \
-               if(active_header==header_type) material->tex[tex_type] = file_dir + *it;
+            if(active_header==header_type) mat_data->second[tex_type] = file_dir + *it;
 
             // Parametry
             DEFINE_F_1DVEC(SHINE, shine);
@@ -65,16 +69,22 @@ namespace GL3Engine {
             DEFINE_1DTEX(ALPHA_TEX, Material::ALPHA);
             DEFINE_1DTEX(BUMP_TEX, Material::BUMP);
         }
-        TextureArray* MTLloader::packTextures(Materials& mtl) {
+        Materials* MTLloader::packTextures(MaterialStack& mtl) {
             vector<string> textures;
-            for (Material* material : mtl)
-                for (string& str : material->tex)
-                    textures.push_back(str);
-
-            TextureArray* array = new TextureArray(textures);
-            for (Material* material : mtl)
-                material->tex_array.reset(array);
-            return array;
+            Materials* materials = new Materials;
+            for (auto& mat : mtl) {
+                materials->push_back(mat.first);
+                for (GLuint i = 0; i < mat.second.size(); ++i) {
+                    textures.push_back(mat.second[i]);
+                    if (!mat.second[i].empty())
+                        mat.first->tex_flags |= 1 << i;
+                }
+            }
+            // Możliwy mem leak
+            TextureArray* array = (new TextureArray(textures));
+            for (auto& mat : *materials)
+                mat->tex_array.reset(array);
+            return materials;
         }
         
         /* SIATKI */
@@ -172,13 +182,13 @@ namespace GL3Engine {
                     { 0.f, 0.f, 0.f },
                     { 0.f, 0.f, 0.f },
                     { 0.f, 0.f },
-                    -1 };
+                    -1
+            };
             string param = *iter;
             GLfloat args[3];
 
 #define SHORT_COPY(size, arg_index, variable, destination_variable) \
                     indices.variable[args[arg_index] - 1].copyTo(v.destination_variable, size)
-
             switch (count(param.begin(), param.end(), '/')) {
                 // v1
                 case 0:

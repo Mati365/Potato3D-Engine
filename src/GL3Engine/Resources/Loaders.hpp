@@ -8,6 +8,9 @@ namespace GL3Engine {
     
     /** SHADER */
     namespace CoreLoader {
+        using MaterialTextureData = std::array<std::string, CoreMaterial::Material::BUMP + 1>;
+        using MaterialData = std::pair<CoreMaterial::Material*, MaterialTextureData>;
+
         class GLSLloader :
                            public CoreInterface::Loader<CoreEffect::Shader> {
             public:
@@ -31,10 +34,13 @@ namespace GL3Engine {
         };
 
         using HeaderMap = std::map<std::string, GLint>;
-        template<typename T>
-        class ASCIIMeshLoader :
-                                public CoreInterface::Loader<T>,
-                                public CoreInterface::MemAlloc<T> {
+        using MaterialStack = std::vector<CoreLoader::MaterialData>;
+
+        template<typename T> class ASCIIMeshLoader :
+                                                     public CoreInterface::Loader<
+                                                             T>,
+                                                     public CoreInterface::MemAlloc<
+                                                             T> {
             protected:
                 HeaderMap headers;
 
@@ -78,7 +84,7 @@ namespace GL3Engine {
                     ALPHA_TEX,
                     BUMP_TEX
                 };
-                CoreMaterial::Materials mtl;
+                MaterialStack materials;
 
             public:
                 MTLloader();
@@ -86,28 +92,21 @@ namespace GL3Engine {
                 void onNewHeader(GLint, std::vector<std::string>&) {
                 }
                 void onHeaderArgument(c_str, GLint, LoaderIterator&);
-                static CoreMaterial::TextureArray* packTextures(
-                        CoreMaterial::Materials&);
 
-                /** Zwraca ostatni element!!! */
-                GLuint getSize() {
-                    return mtl.size();
+                /** Dynamiczna alokacja */
+                static CoreMaterial::Materials* packTextures(MaterialStack&);
+                CoreMaterial::Materials* createObject() override {
+                    return MTLloader::packTextures(materials);
                 }
-                CoreMaterial::Materials* createObject() {
-                    MTLloader::packTextures(mtl);
-                    return new CoreMaterial::Materials(mtl);
-                }
-                
-                void releaseMemory() {
-                    mtl.clear();
+                void releaseMemory() override {
+                    materials.clear();
                 }
         };
         class OBJloader :
                           public ASCIIMeshLoader<SceneObject::Shape3D> {
             private:
-                enum HEADER
-                                    : GLint {
-                        NONE,
+                enum HEADER {
+                    NONE,
                     VERTEX,
                     NORMAL,
                     TEXTURE,
@@ -132,8 +131,8 @@ namespace GL3Engine {
                 void onNewHeader(GLint, std::vector<std::string>&);
                 void onHeaderArgument(c_str, GLint, LoaderIterator&);
 
-                SceneObject::Shape3D* createObject();
-                void releaseMemory();
+                SceneObject::Shape3D* createObject() override;
+                void releaseMemory() override;
 
             private:
                 void finalizePolygon();

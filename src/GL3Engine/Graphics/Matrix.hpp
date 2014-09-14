@@ -100,9 +100,9 @@ namespace GL3Engine {
             temp *= val;
             return temp;
         }
-        template<typename T, GLuint COLS, GLuint ROWS>
-        class t_Matrix :
-                         public Matrix<T> {
+        template<typename T, GLuint COLS, GLuint ROWS> class t_Matrix :
+                                                                        public Matrix<
+                                                                                T> {
             public:
                 t_Matrix()
                         :
@@ -132,9 +132,16 @@ namespace GL3Engine {
             t_Matrix<T, COLS, ROWS>& set##name(T obj) { this->matrix[index] = obj; return *this; }
 
                 VEC_GETTER(X, 0)
+                VEC_GETTER(r, 0)
+
                 VEC_GETTER(Y, 1)
+                VEC_GETTER(g, 1)
+
                 VEC_GETTER(Z, 2)
+                VEC_GETTER(b, 2)
+
                 VEC_GETTER(W, 3)
+                VEC_GETTER(a, 4)
 
                 static constexpr GLuint index(GLuint x, GLuint y) {
                     return y * COLS + x;

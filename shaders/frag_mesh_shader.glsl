@@ -1,6 +1,9 @@
 #version 400
 layout(location = 0) out vec4 color;
 
+#define MAX_LIGHTS		10
+#define	MAX_MATERIALS	4
+
 #define	AMBIENT		0
 #define	DIFFUSE		1
 #define	SPECULAR	2
@@ -22,7 +25,6 @@ in FragInfo {
 // tablica wielkosc * sizeof vec4
 // chunk vec4
 // Flagi mają dodane 1 bo enabled jest 1 + flaga
-#define MAX_LIGHTS		10
 #define	POINT_LIGHT		5
 #define	DIRECT_LIGHT	9
 struct Light {
@@ -45,25 +47,25 @@ struct ShadowMap {
 	sampler2D	direct;
 };
 
-// 3 bloki po 136B+8B extra i 4 block 136B
+// 48B + 12B + 4B = 64B
 struct Material { // 136B size
 	vec4				col[3]; 			// 48B
-	bool				tex_flag[BUMP + 1]; // 80B
+	float				tex_flag;			// 4B
 	float				transparent; 		// 4B
 	float				shine; 				// 4B
-											// 8B extra
+											// 4B extra
 };
 layout(std140) uniform MaterialBlock {
-	Material	material[4];
+	Material	material[MAX_MATERIALS];
 };
 
 uniform	sampler2DArray		texture_pack;
 uniform	ShadowMap			shadow_maps[MAX_LIGHTS];
-uniform	vec4				col;
 
 #define	GET_MATERIAL_UV_TEX(uv, type)	texture(texture_pack, vec3(uv , frag.mtl * (BUMP+1) + type))
 #define	GET_MATERIAL_TEX(type)			GET_MATERIAL_UV_TEX(vec2(frag.uv.x, 1.f - frag.uv.y), type)
 
+#define	IS_MATERIAL_USED(material)		(int(MATERIAL.tex_flag) & (1 << material))
 Material 	MATERIAL 	= 	material[int(frag.mtl)];
 
 vec2 pixelize(in float d) {
@@ -71,7 +73,7 @@ vec2 pixelize(in float d) {
 }
 void calcLight(in Light light, in int index) {
 	vec3 normal;
-	if(MATERIAL.tex_flag[BUMP])
+	if(IS_MATERIAL_USED(BUMP))
 		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.f - 1.f);
 	else
 		normal = normalize(
@@ -91,15 +93,11 @@ void calcLight(in Light light, in int index) {
 			light_normal 	= 	normalize(light_viewspace - frag.pos) * frag.surface2view;
 			dist_prop 		= 	1.f / (1.f + (.5f * pow(length(abs(frag.pos - light_viewspace)), 1.f)));
 			color.r = texture(shadow_maps[0].point, light_normal).r;
-			color.a = 1.f;
-			//return;
 		break;
 		
 		case DIRECT_LIGHT:
 			light_normal	=	normalize(light.pos) * frag.surface2view;
 			dist_prop		=	1.f;
-			//color = texture(shadow_maps[0].point, light_normal);
-			//color.a = 1.f;
 			return;
 		break;
 	};
@@ -108,7 +106,7 @@ void calcLight(in Light light, in int index) {
 	vec4	diff			=	vec4(diffuse, diffuse, diffuse, 1.f);
 	
 	// Specular
-	if(MATERIAL.tex_flag[SPECULAR]) {
+	if(IS_MATERIAL_USED(SPECULAR)) {
 		vec3 	view_dir 		= 	normalize(frag.pos),
 				reflection 		= 	reflect(light_normal, normal);
 		float 	aspect 			=	pow(max(dot(reflection, view_dir), 0.f), 4.f);
@@ -127,9 +125,9 @@ void calcLight(in Light light, in int index) {
 	}
 							
 	// Całość
-	if(MATERIAL.tex_flag[AMBIENT])	
+	if(IS_MATERIAL_USED(AMBIENT))	
 		color += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);
-	if(MATERIAL.tex_flag[DIFFUSE]) {
+	if(IS_MATERIAL_USED(DIFFUSE)) {
 		vec4	diffuse_col	= GET_MATERIAL_TEX(DIFFUSE) * MATERIAL.col[DIFFUSE];
 		diffuse_col.a = 1.f;
 		color += 
@@ -139,7 +137,7 @@ void calcLight(in Light light, in int index) {
 					diff;
 		color.a *= MATERIAL.transparent;
 	} else
-		color =	col * diff;
+		color *= diff;
 }
 void main(void) {
 	for(int i = 0;i < light_count;++i)

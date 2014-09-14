@@ -7,9 +7,6 @@
 #include "AttribContainer.hpp"
 
 namespace GL3Engine {
-    namespace CoreMaterial {
-        class Material;
-    }
     namespace CoreEffect {
         class Shader :
                        public CoreInterface::NonCopyable,
@@ -30,9 +27,6 @@ namespace GL3Engine {
 
                 /** Uniformy */
                 Shader& setUniform(GLint, c_str, GLint, GLuint);
-                Shader& setUniform(c_str,
-                        const std::vector<CoreMaterial::Material*>&);
-
                 Shader& regGlobalBuffer(GLint, GLuint, GLenum,
                         GLint* handle, void* data = nullptr,
                         c_str variable = "")
@@ -64,11 +58,7 @@ namespace GL3Engine {
                 Shader& setUniform(c_str, const CoreMatrix::Matrix<GLfloat>&);
                 Shader& setUniform(c_str, const CoreMatrix::Vec4&);
                 Shader& setUniform(c_str, const CoreMatrix::Vec3&);
-                Shader& setUniform(c_str variable, const CoreType::Color& p) {
-                    setUniform<4>(variable, p.toArray());
-                    return *this;
-                }
-                
+
                 GLint getProgram() const {
                     return program;
                 }
@@ -106,7 +96,8 @@ namespace GL3Engine {
                 }
         };
         class EffectManager :
-                              public CoreAttrib::AttribContainer<Shader*>,
+                              public CoreAttrib::AttribContainer<Shader*,
+                                      EffectManager>,
                               public CoreAttrib::ScopedContainer {
             public:
                 struct EffectParam {
