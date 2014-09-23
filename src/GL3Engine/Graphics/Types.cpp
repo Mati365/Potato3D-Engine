@@ -31,10 +31,9 @@ namespace GL3Engine {
                     (d_pos[0] * d_uv[1].Y() - d_pos[1] * d_uv[0].Y()) * r;
             Vec3 bitangent =
                     (d_pos[1] * d_uv[0].X() - d_pos[0] * d_uv[1].X()) * r;
-            for (auto& v : tri) {
+            for (auto& v : tri)
                 tangent.copyTo(v->tangent, 3);
-                //            bitangent.copyTo(v->bitangent, 3);
-            }
+            //            bitangent.copyTo(v->bitangent, 3);
         }
     }
 }

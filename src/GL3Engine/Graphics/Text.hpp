@@ -8,9 +8,9 @@ namespace GL3Engine {
         class Font :
                      public CoreMaterial::Tile {
             public:
-                Font(CoreMaterial::Texture* _tex)
+                Font(CoreMaterial::Texture* tex)
                         :
-                          CoreMaterial::Tile(_tex, CoreMatrix::Vec2i { 32, 4 }) {
+                          CoreMaterial::Tile(tex, CoreMatrix::Vec2i { 32, 4 }) {
                 }
                 CoreMaterial::TileIterator getCharacter(GLchar c) const {
                     GLuint index = ((GLuint) c - 32);
@@ -23,34 +23,46 @@ namespace GL3Engine {
                      public CoreRenderer::Node {
             DECLARE_NODE_TYPE(Text)
 
-                static constexpr size_t BUFFER_SIZE = 512;
+                static constexpr size_t BUFFER_SIZE = 256 * 4
+                        * sizeof(CoreType::Vertex2f);
 
             private:
                 CoreType::Color col = { 1.f, 1.f, 1.f, 1.f };
-                std::unique_ptr<Font> font = std::unique_ptr<Font>(
-                        new Font(
-                                REQUIRE_RES(
-                                        CoreMaterial::Texture,
-                                        FONT_TEXTURE)));
-                SceneObject::Shape2D* shape = nullptr;
+                Font font = Font(
+                        REQUIRE_RES(CoreMaterial::Texture, FONT_TEXTURE));
+                std::unique_ptr<SceneObject::Shape2D> shape =
+                        std::unique_ptr<SceneObject::Shape2D>(
+                                new SceneObject::Shape2D(
+                                        {
+                                                nullptr,
+                                                BUFFER_SIZE
+                                                        * sizeof(CoreType::Vertex2f),
+                                                GL_ARRAY_BUFFER, 0,
+                                                GL_DYNAMIC_DRAW
+                                        },
+                                        {
+                                                nullptr,
+                                                BUFFER_SIZE * sizeof(GLuint),
+                                                GL_ELEMENT_ARRAY_BUFFER, 0,
+                                                GL_DYNAMIC_DRAW
+                                        },
+                                        col));
 
             public:
                 Text();
+                void draw() override;
 
                 Text& setPos(const CoreMatrix::Vec3&);
                 Text& setSize(GLfloat);
-                Text& setFont(Font* _font) {
-                    if (_font)
-                        font.reset(_font);
+                Text& setFont(const Font& font) {
+                    this->font = font;
                     return *this;
                 }
                 Text& setText(c_str);
 
-                void draw();
-
             protected:
                 void createBuffer();
-                void passToShader();
+                void passToShader() override;
         };
     }
 }

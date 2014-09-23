@@ -150,7 +150,7 @@ namespace GL3Engine {
                         continue;
                     node->pushAttrib();
                     {
-                        node->setAttrib(SceneObject::Mesh::NONE);
+                        node->setAttrib(SceneObject::Mesh::Flags::NORMAL);
                         node->draw();
                     }
                     node->popAttrib();

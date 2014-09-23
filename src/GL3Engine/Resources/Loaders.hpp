@@ -95,6 +95,9 @@ namespace GL3Engine {
 
                 /** Dynamiczna alokacja */
                 static CoreMaterial::Materials* packTextures(MaterialStack&);
+                static GLuint genTextureFlags(
+                        const CoreLoader::MaterialTextureData&);
+
                 CoreMaterial::Materials* createObject() override {
                     return MTLloader::packTextures(materials);
                 }

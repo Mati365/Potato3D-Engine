@@ -2,6 +2,7 @@
 #define RENDERTARGET_HPP_
 #include "Scene.hpp"
 #include "Mesh.hpp"
+#include "Billboard.hpp"
 
 namespace GL3Engine {
     namespace SceneObject {
@@ -34,7 +35,7 @@ namespace GL3Engine {
 
             private:
                 GLuint handle = 0, depth_render_buf = 0;
-                std::unique_ptr<Shape2D> quad;
+                Quad2D quad;
                 TextureMap textures;
 
             public:
@@ -71,7 +72,7 @@ namespace GL3Engine {
 
             protected:
                 void create();
-                void passToShader();
+                void passToShader() override;
         };
     }
 }

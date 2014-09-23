@@ -4,6 +4,7 @@
 #include "../GL3Engine/Graphics/Light.hpp"
 #include "../GL3Engine/Graphics/Billboard.hpp"
 #include "../GL3Engine/Graphics/Text.hpp"
+#include "../GL3Engine/Graphics/Texture.hpp"
 
 namespace Game {
     NAMESPACE_IMPORT(GL3Engine::SceneObject);
@@ -20,6 +21,10 @@ namespace Game {
     }
     
     void GameScreen::init() {
+        Shape3D* box =
+                GlobalResourceManager::getInstance().getResource<Shape3D>(
+                        "mesh/wall/wall.obj");
+
         scene.createSceneNode<FPSCamera>()
                 .setPos( { 0.f, .5f, 0.f, 1.f })
                 .setTarget( { 0.f, .5f, .01f, 1.f });
@@ -32,42 +37,51 @@ namespace Game {
                         .setDiffuse( { 1.f, 1.f, 1.f, 1.f, }, 6.f));
 
         mesh = &scene.createSceneNode<Mesh>()
-                .setShape(
-                GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "mesh/wall/wall.obj"));
+                .setShape(box);
         mesh->getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { 2.f, .5f, 1.f }));
 
         scene.createSceneNode<Mesh>()
-                .setShape(
-                GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "mesh/wall/wall.obj"))
+                .setShape(box)
                 .getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { -2.f, .5f, 1.f }));
 
         scene.createSceneNode<Mesh>()
-                .setShape(new Billboard("sprites/billboard.png"))
-                .getTransform()
-                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
-                .mul(MatMatrix::translate( { 0.f, 1.5f, 1.f }));
-
-        scene.createSceneNode<Mesh>()
-                .setShape(
-                GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "mesh/wall/wall.obj"))
+                .setShape(box)
                 .getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { 2.f, .5f, -3.f }));
 
         scene.createSceneNode<Mesh>()
-                .setShape(
-                GlobalResourceManager::getInstance().getResource<Shape3D>(
-                        "mesh/wall/wall.obj"))
+                .setShape(box)
                 .getTransform()
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { -2.f, .5f, -3.f }));
+
+
+//        scene.createSceneNode<Mesh>()
+//                .setShape(
+//                new Quad3D( { "", "sprites/billboard.png", "", "", "" }))
+//                .setAttrib(Mesh::Flags::NORMAL |
+//                Mesh::Flags::USE_MATERIALS |
+//                Mesh::Flags::DISABLE_CULL_FACING)
+//                .getTransform()
+//                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
+//                .mul(MatMatrix::translate( { 0.f, .5f, -2.f }));
+
+        scene.createSceneNode<Billboard>()
+                        .setTexture(REQUIRE_RES(GL3Engine::CoreMaterial::Texture, "sprites/billboard.png"))
+                        .getTransform()
+                        .mul(MatMatrix::scale( { .5f, .5f, 1.f }))
+                        .mul(MatMatrix::translate( { 0.f, 0.f, 2.f }));
+
+        scene.createSceneNode<GL3Engine::CoreFont::Text>()
+                .setText("DUPA JASIU")
+                .getTransform()
+                .mul(MatMatrix::scale( { 2.7f, 2.7f, 1.f }))
+                .mul(MatMatrix::translate( { 0.f, 0.f, 0.f }));
 
 //        scene.createSceneNode<Mesh>()
 //                .setShape(
@@ -84,13 +98,6 @@ namespace Game {
                 .getTransform()
                 .mul(MatMatrix::scale( { .3f, .3f, .3f }))
                 .mul(MatMatrix::translate( { 0.f, 0.f, 0.f }));
-
-        scene.createSceneNode<GL3Engine::CoreFont::Text>()
-                .setText("Test czcionek ")
-                .getTransform()
-                .mul(MatMatrix::scale( { 2.7f, 2.7f, 1.f }))
-                .mul(MatMatrix::translate( { 0.f, 0.f, 0.f }));
-
         fbo =
                 dynamic_cast<RenderQuad*>(
                 &scene.createSceneNode<RenderQuad>()

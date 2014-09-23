@@ -103,7 +103,6 @@ namespace GL3Engine {
             };
             _TEX* data = new _TEX[textures.size()];
             Vec2i max_size = { 0, 0 };
-
             for (GLuint i = 0; i < textures.size(); ++i) {
                 _TEX tex;
                 {

@@ -14,7 +14,6 @@ namespace GL3Engine {
 
         TYPE_IMPORT(std, vector);
         TYPE_IMPORT(std, string);
-        TYPE_IMPORT(std, shared_ptr);
 
         MTLloader::MTLloader()
                 :
@@ -34,7 +33,6 @@ namespace GL3Engine {
                                   { "d", TRANSPARENT },
                                   { "Tr", TRANSPARENT } }) {
         }
-        
         void MTLloader::onHeaderArgument(
                 c_str file_dir, GLint active_header, LoaderIterator& it) {
             MaterialData* mat_data =
@@ -69,22 +67,28 @@ namespace GL3Engine {
             DEFINE_1DTEX(ALPHA_TEX, Material::ALPHA);
             DEFINE_1DTEX(BUMP_TEX, Material::BUMP);
         }
+
         Materials* MTLloader::packTextures(MaterialStack& mtl) {
             vector<string> textures;
             Materials* materials = new Materials;
             for (auto& mat : mtl) {
                 materials->push_back(mat.first);
-                for (GLuint i = 0; i < mat.second.size(); ++i) {
-                    textures.push_back(mat.second[i]);
-                    if (!mat.second[i].empty())
-                        mat.first->tex_flags |= 1 << i;
-                }
+                mat.first->tex_flags = genTextureFlags(mat.second);
+                textures.insert(textures.end(), mat.second.begin(),
+                        mat.second.end());
             }
             // Możliwy mem leak
             TextureArray* array = new TextureArray(textures);
             for (auto& mat : *materials)
                 mat->tex_array.reset(array);
             return materials;
+        }
+        GLuint MTLloader::genTextureFlags(
+                const CoreLoader::MaterialTextureData& textures) {
+            GLuint flag = 0;
+            for (GLuint i = 0; i < textures.size(); ++i)
+                flag |= (!textures[i].empty() ? 1 << i : 0);
+            return flag;
         }
         
         /* SIATKI */
@@ -163,7 +167,6 @@ namespace GL3Engine {
         Shape3D* OBJloader::createObject() {
             finalizePolygon();
             calcTangents(vertex_array);
-           // std::cout << material->tex_flags << std::endl;
             return new Shape3D(
                     { &vertex_array[0], vertex_array.size() * sizeof(Vertex4f), GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW },
                     { nullptr, 0, GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW },

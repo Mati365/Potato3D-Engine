@@ -141,8 +141,6 @@ namespace Tools {
             static void putLog(Flag, c_str);
     };
 #define LOG(type, str) Tools::Log::putLog(Tools::Log::Flag::type, str)
-    
-    extern void showGLErrors();
 }
 
 #endif

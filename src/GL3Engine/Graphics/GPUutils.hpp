@@ -27,6 +27,10 @@ namespace GL3Engine {
 
                 ~Allocator();
         };
+        class GPUutils {
+            public:
+                static void showErrors();
+        };
     }
 }
 

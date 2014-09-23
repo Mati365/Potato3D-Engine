@@ -86,14 +86,6 @@ namespace GL3Engine {
                      public CoreRenderer::Node {
             DECLARE_NODE_TYPE(Mesh)
 
-            public:
-                enum Flags {
-                    NONE = 0,
-                    USE_MATERIALS = 1 << 1,
-                    USE_LIGHTING = 1 << 2,
-                    DISABLE_CULL_FACING = 1 << 3
-                };
-
             private:
                 Shape3D* shape = nullptr;
                 std::vector<CoreMaterial::MaterialBufferData> material_cache;

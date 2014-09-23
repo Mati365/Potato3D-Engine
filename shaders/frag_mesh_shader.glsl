@@ -72,16 +72,10 @@ vec2 pixelize(in float d) {
 	return vec2(d * floor(frag.uv.x / d), d * floor((1.f - frag.uv.y) / d));
 }
 void calcLight(in Light light, in int index) {
-	vec3 normal;
-	if(IS_MATERIAL_USED(BUMP))
-		normal = normalize(GET_MATERIAL_TEX(BUMP).rgb * 2.f - 1.f);
-	else
-		normal = normalize(
-					vec3(
-						frag.surface2view[0][1], 
-						frag.surface2view[1][1], 
-						frag.surface2view[2][1]));
-		
+	vec3 normal = normalize(
+		(IS_MATERIAL_USED(BUMP) ? GET_MATERIAL_TEX(BUMP).rgb : vec3(.494f, .513f, .984f)) 
+		* 2.f - 1.f
+	);
 	// Diffuse
 	vec3	light_normal,
 			light_viewspace	=	(vec4(light.pos, 1.f) * frag.v).xyz;
@@ -95,7 +89,7 @@ void calcLight(in Light light, in int index) {
 		break;
 		
 		case DIRECT_LIGHT:
-			light_normal	=	normalize(light.pos) * frag.surface2view;
+			light_normal	=	normalize(light.pos * frag.surface2view);
 			dist_prop		=	1.f;
 		break;
 	};

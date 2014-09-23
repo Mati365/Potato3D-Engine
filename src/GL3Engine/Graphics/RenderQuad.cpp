@@ -33,20 +33,6 @@ namespace GL3Engine {
             if (handle)
                 glDeleteFramebuffers(1, &handle);
             glGenFramebuffers(1, &handle);
-
-            // QUAD
-            vector<Vertex2f> vertex_array = {
-                    { -1.f, -1.f, 0.f, 0.f, 0.f },
-                    { 1.f, -1.f, 0.f, 1.f, 0.f },
-                    { 1.f, 1.f, 0.f, 1.f, 1.f },
-                    { -1.f, 1.f, 0.f, 0.f, 1.f },
-            };
-            quad.reset(
-                    new Shape2D(
-                            { &vertex_array[0], vertex_array.size()
-                                    * sizeof(Vertex2f), GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW },
-                            { CoreMaterial::Tile::quad_indices, 6
-                                    * sizeof(GLfloat), GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW }));
         }
 
         RenderQuad& RenderQuad::setDrawBuffer(const vector<GLenum>& buf) {
@@ -96,7 +82,7 @@ namespace GL3Engine {
             {
                 passToShader();
                 glDisable(GL_CULL_FACE);
-                glBindVertexArray(quad->getVAO());
+                glBindVertexArray(quad.getVAO());
                 {
                     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
                 }

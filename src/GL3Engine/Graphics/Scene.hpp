@@ -44,20 +44,30 @@ namespace GL3Engine {
                 friend class SceneManager;
 
             public:
-                enum class State {
-                    NORMAL,
-                    DISABLED,
-                    DESTROYED
+                enum Flags {
+                    // Flagi stanu
+                    NORMAL = 1 << 0,
+                    DISABLED = 1 << 1,
+                    DESTROYED = 1 << 2,
+                    // Flagi renderingu
+                    USE_MATERIALS = 1 << 3,
+                    USE_LIGHTING = 1 << 4,
+                    FRONT_CULLING = 1 << 5,
+                    DISABLE_CULL_FACING = 1 << 6
                 };
                 struct NodeConfig {
                         GLuint gl_render_flag;
-                        State state;
+                        GLint state;
                 };
 
             protected:
                 Node* parent = nullptr;
                 SceneManager* scene = nullptr;
-                NodeConfig config = { GL_TRIANGLES, State::NORMAL };
+                NodeConfig config = { GL_TRIANGLES,
+                        Flags::NORMAL |
+                                Flags::USE_MATERIALS |
+                                Flags::USE_LIGHTING
+                };
 
                 CoreMatrix::MatrixStack* world = nullptr;
                 CoreMatrix::Transform transform;
@@ -95,7 +105,7 @@ namespace GL3Engine {
                     return config;
                 }
                 inline GLboolean isActive() const {
-                    return config.state == State::NORMAL;
+                    return !IS_SET_FLAG(config.state, Flags::DISABLED);
                 }
 
                 virtual size_t getHash() const = 0;

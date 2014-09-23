@@ -27,9 +27,11 @@ namespace GL3Engine {
             glBindVertexArray(vao);
 
             // Generowanie bufora indeksow
-            this->indices = Allocator::getInstance().allocBuffer(indices, true);
-            this->indices_count = indices.len / sizeof(GLuint);
-
+            if (indices.len > 0) {
+                this->indices = Allocator::getInstance().allocBuffer(indices,
+                        true);
+                this->indices_count = indices.len / sizeof(GLuint);
+            }
             // Generowanie bufora wierzcholkow
             this->vbo = Allocator::getInstance().allocBuffer(vertices, true);
             this->vertices_count = vertices.len / sizeof(T);
@@ -53,10 +55,11 @@ namespace GL3Engine {
                 const BufferData& _indices) {
             glBindVertexArray(vao);
             {
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
-                glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, _indices.offset,
-                        _indices.len, _indices.data);
-
+                if (_indices.len > 0) {
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+                    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, _indices.offset,
+                            _indices.len, _indices.data);
+                }
                 glBindBuffer(GL_ARRAY_BUFFER, vbo);
                 glBufferSubData(GL_ARRAY_BUFFER, _vertices.offset,
                         _vertices.len,

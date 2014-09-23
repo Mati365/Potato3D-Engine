@@ -2,59 +2,35 @@
 
 namespace GL3Engine {
     namespace SceneObject {
-        TYPE_IMPORT(CoreType, Vertex4f);
-        TYPE_IMPORT(std, vector);
+        Billboard::Billboard() {
+            setEffect(REQUIRE_RES(CoreEffect::Shader, DEFAULT_TEXT_SHADER));
+        }
 
-        vector<Vertex4f> vertex_array = {
+        void Billboard::passToShader() {
+            assert(effect && tex);
+            {
+                effect->setUniform("col", color)
+
+                .setUniform(GL_TEXTURE_2D, "texture", 0, tex->getHandle())
+
+                .setUniform("matrix.mvp",
+                        world->attrib.vp_matrix *
+                                world->attrib.model *
+                                transform.model);
+            }
+        }
+        void Billboard::draw() {
+            assert(effect);
+            {
+                passToShader();
+                glDisable(GL_CULL_FACE);
                 {
-                        /** Vert */-.5f, -.5f, 0.f,
-                        /** N */0.f, 0.f, -1.f,
-                        /** Tex */0.f, 0.f,
-                        /** MTL */0
-                },
-                {
-                        /** Vert */.5f, -.5f, 0.f,
-                        /** N */0.f, 0.f, -1.f,
-                        /** Tex */1.f, 0.f,
-                        /** MTL */0
-                },
-                {
-                        /** Vert */.5f, .5f, 0.f,
-                        /** N */0.f, 0.f, -1.f,
-                        /** Tex */1.f, 1.f,
-                        /** MTL */0
-                },
-                {
-                        /** Vert */-.5f, .5f, 0.f,
-                        /** N */0.f, 0.f, -1.f,
-                        /** Tex */0.f, 1.f,
-                        /** MTL */0
+                    glBindVertexArray(quad.getVAO());
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+                    glBindVertexArray(0);
                 }
-        };
-        Billboard::Billboard(c_str tex)
-                :
-                  Shape3D(
-                          {
-                                  &vertex_array[0],
-                                  vertex_array.size() * sizeof(Vertex4f),
-                                  GL_ARRAY_BUFFER, 0,
-                                  GL_STATIC_DRAW
-                          },
-                          {
-                                  CoreMaterial::Tile::quad_indices,
-                                  6 * sizeof(GLfloat),
-                                  GL_ELEMENT_ARRAY_BUFFER, 0,
-                                  GL_STATIC_DRAW
-                          }) {
-            TYPE_IMPORT(CoreMaterial, Material);
-            TYPE_IMPORT(CoreMaterial, TextureArray);
-
-            TextureArray* array = new TextureArray( { "", tex, "", "", "" });
-            Material* material = new Material;
-            material->tex_flags = 1 << Material::DIFFUSE;
-            material->tex_array.reset(array);
-
-            setMaterials( { material });
+                glEnable(GL_CULL_FACE);
+            }
         }
     }
 }

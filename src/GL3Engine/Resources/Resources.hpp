@@ -56,7 +56,7 @@ namespace GL3Engine {
 #define DEFAULT_SHADOW_SHADER   "shaders/shadow_mesh_shader.glsl"
 
 #define REQUIRE_RES(type, handle) \
-        Resources::GlobalResourceManager::getInstance().getResource<type>(handle)
+        GL3Engine::Resources::GlobalResourceManager::getInstance().getResource<type>(handle)
 }
 
 #endif

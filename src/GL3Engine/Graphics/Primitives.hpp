@@ -11,7 +11,7 @@ namespace GL3Engine {
                 AxisMesh(GLfloat size = 17.f)
                         :
                           Mesh(genAxis(size)) {
-                    setConfig( { GL_LINES, Node::State::NORMAL });
+                    setConfig( { GL_LINES, Node::NORMAL });
                 }
 
             private:
