@@ -7,7 +7,7 @@ uniform	sampler2D			color_texture;
 uniform	sampler2D			depth_texture;
 uniform	float				blur;
 
-#define	PIXELIZED
+//#define	PIXELIZED
 const float	blur_array[9] = float[9](
 		0.0204001988,
 		0.0577929595,

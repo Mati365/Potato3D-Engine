@@ -38,7 +38,8 @@ namespace GL3Engine {
                 },
                 {
                         /** POS */1.f, -1.f, 0.f,
-                        /** Tex */1.f, 0.f },
+                        /** Tex */1.f, 0.f
+                },
                 {
                         /** POS */1.f, 1.f, 0.f,
                         /** Tex */1.f, 1.f
@@ -48,7 +49,7 @@ namespace GL3Engine {
                         /** Tex */0.f, 1.f
                 },
         };
-        Quad3D::Quad3D(const CoreLoader::MaterialTextureData& tex)
+        MaterialQuad::MaterialQuad(const CoreLoader::MaterialTextureData& tex)
                 :
                   Shape3D(
                           {
@@ -59,7 +60,7 @@ namespace GL3Engine {
                           },
                           {
                                   CoreMaterial::Tile::quad_indices,
-                                  6 * sizeof(GLfloat),
+                                  6 * sizeof(GLushort),
                                   GL_ELEMENT_ARRAY_BUFFER, 0,
                                   GL_STATIC_DRAW
                           }) {
@@ -67,7 +68,8 @@ namespace GL3Engine {
             TYPE_IMPORT(CoreMaterial, TextureArray);
 
             Material* material = new Material;
-            material->tex_flags = OBJ::MTLloader::genTextureFlags(tex);
+            material->tex_flags = OBJ::MTLloader::genTextureFlags(tex)
+                    | 1 << Material::BILLBOARD;
             material->tex_array.reset(
                     new TextureArray(
                             { tex[0], tex[1], tex[2], tex[3], tex[4] }));
@@ -75,7 +77,7 @@ namespace GL3Engine {
 
             setMaterials( { material });
         }
-        Quad2D::Quad2D()
+        Quad::Quad()
                 :
                   Shape2D(
                           {
@@ -86,7 +88,7 @@ namespace GL3Engine {
                           },
                           {
                                   CoreMaterial::Tile::quad_indices,
-                                  6 * sizeof(GLfloat),
+                                  6 * sizeof(GLushort),
                                   GL_ELEMENT_ARRAY_BUFFER, 0,
                                   GL_STATIC_DRAW
                           }) {

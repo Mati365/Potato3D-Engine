@@ -26,8 +26,8 @@ namespace Game {
                         "mesh/wall/wall.obj");
 
         scene.createSceneNode<FPSCamera>()
-                .setPos( { 0.f, .5f, 0.f, 1.f })
-                .setTarget( { 0.f, .5f, .01f, 1.f });
+                .setPos( { 0.f, .5f, 1.f, 1.f })
+                .setTarget( { 0.f, .5f, .99f, 1.f });
         scene.createSceneNode<AxisMesh>();
         scene.createSceneNode<GL3Engine::CoreLighting::LightBatch>()
                 .regObject(
@@ -60,7 +60,6 @@ namespace Game {
                 .mul(MatMatrix::scale( { .7f, .7f, .7f }))
                 .mul(MatMatrix::translate( { -2.f, .5f, -3.f }));
 
-
 //        scene.createSceneNode<Mesh>()
 //                .setShape(
 //                new Quad3D( { "", "sprites/billboard.png", "", "", "" }))
@@ -69,16 +68,18 @@ namespace Game {
 //                Mesh::Flags::DISABLE_CULL_FACING)
 //                .getTransform()
 //                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
-//                .mul(MatMatrix::translate( { 0.f, .5f, -2.f }));
+//                .mul(MatMatrix::translate( { 0.f, .5f, 2.f }));
 
         scene.createSceneNode<Billboard>()
-                        .setTexture(REQUIRE_RES(GL3Engine::CoreMaterial::Texture, "sprites/billboard.png"))
-                        .getTransform()
-                        .mul(MatMatrix::scale( { .5f, .5f, 1.f }))
-                        .mul(MatMatrix::translate( { 0.f, 0.f, 2.f }));
+                .setTexture(
+                REQUIRE_RES(GL3Engine::CoreMaterial::Texture,
+                        "sprites/billboard.png"))
+                .getTransform()
+                .mul(MatMatrix::scale( { .5f, .5f, .5f }))
+                .mul(MatMatrix::translate( { 0.f, 2.f, -2.f }));
 
         scene.createSceneNode<GL3Engine::CoreFont::Text>()
-                .setText("DUPA JASIU")
+                .setText("bla bla bla czcionki testuje")
                 .getTransform()
                 .mul(MatMatrix::scale( { 2.7f, 2.7f, 1.f }))
                 .mul(MatMatrix::translate( { 0.f, 0.f, 0.f }));

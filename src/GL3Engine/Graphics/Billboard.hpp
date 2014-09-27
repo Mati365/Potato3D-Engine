@@ -6,16 +6,15 @@
 namespace GL3Engine {
     namespace SceneObject {
         /** Podlega światłu, może być kilka materiałów! */
-        class Quad3D :
-                       public Shape3D {
+        class MaterialQuad :
+                             public Shape3D {
             public:
-                Quad3D(const CoreLoader::MaterialTextureData&);
+                MaterialQuad(const CoreLoader::MaterialTextureData&);
         };
-        /** Brak tesktury */
-        class Quad2D :
-                       public Shape2D {
+        class Quad :
+                     public Shape2D {
             public:
-                Quad2D();
+                Quad();
         };
 
         /**
@@ -29,7 +28,7 @@ namespace GL3Engine {
             private:
                 CoreMaterial::Texture* tex = nullptr;
                 CoreType::Color color = { 1.f, 1.f, 1.f, 1.f };
-                Quad2D quad;
+                Quad quad;
 
             public:
                 Billboard();
@@ -47,6 +46,15 @@ namespace GL3Engine {
             private:
                 void passToShader() override;
         };
+    //        scene.createSceneNode<Mesh>()
+    //                .setShape(
+    //                new Quad3D( { "", "sprites/billboard.png", "", "", "" }))
+    //                .setAttrib(Mesh::Flags::NORMAL |
+    //                Mesh::Flags::USE_MATERIALS |
+    //                Mesh::Flags::DISABLE_CULL_FACING)
+    //                .getTransform()
+    //                .mul(MatMatrix::scale( { .7f, .7f, .7f }))
+    //                .mul(MatMatrix::translate( { 0.f, .5f, 2.f }));
     }
 }
 

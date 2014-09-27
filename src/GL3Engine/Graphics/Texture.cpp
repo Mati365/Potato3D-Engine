@@ -5,9 +5,7 @@ namespace GL3Engine {
         TYPE_IMPORT(CoreMatrix, Vec2i);
 
         const TextureFlags Texture::default_tex_flags =
-                {
-                GL_RGBA, GL_UNSIGNED_BYTE,
-                        CLAMP_TO_EDGE | NEAREST, GL_TEXTURE_2D };
+                { GL_RGBA, GL_UNSIGNED_BYTE, CLAMP_TO_EDGE | NEAREST, GL_TEXTURE_2D };
 
         Texture::Texture(c_str path, const TextureFlags& _flags)
                 :
@@ -83,7 +81,12 @@ namespace GL3Engine {
                 glDeleteTextures(1, &handle);
 
             handle = SOIL_load_OGL_texture(path.c_str(), SOIL_LOAD_AUTO,
-                    SOIL_CREATE_NEW_ID, SOIL_FLAG_POWER_OF_TWO);
+                    SOIL_CREATE_NEW_ID,
+                    SOIL_FLAG_MIPMAPS
+                            | SOIL_FLAG_INVERT_Y
+                            | SOIL_FLAG_NTSC_SAFE_RGB
+                            | SOIL_FLAG_COMPRESS_TO_DXT
+                            | SOIL_FLAG_POWER_OF_TWO);
             configure();
         }
 

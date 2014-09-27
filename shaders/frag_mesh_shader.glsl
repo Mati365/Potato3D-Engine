@@ -10,7 +10,8 @@ layout(location = 0) out vec4 color;
 // ---------- TYLKO DLA TEXTUR -------------
 #define	ALPHA		3
 #define	BUMP		4
-// -----------------------------------------
+// ----------- DLA BILLBOARDÓW -------------
+#define BILLBOARD	5
 
 in FragInfo {
 	vec2		uv;
@@ -93,6 +94,8 @@ void calcLight(in Light light, in int index) {
 			dist_prop		=	1.f;
 		break;
 	};
+	if(IS_MATERIAL_USED(BILLBOARD))
+		light_normal = abs(light_normal);
 	
 	float	diffuse			=	max(dot(light_normal, normal), 0.f) * dist_prop;
 	vec3	diff			=	vec3(diffuse, diffuse, diffuse);

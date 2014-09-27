@@ -35,15 +35,14 @@ namespace GL3Engine {
             Vec2 cell_size = font.getCellSize();
 
             for (GLchar c : text) {
-                if (c == '\n') {
+                if (c == '$') {
                     cursor[0] = 0.f;
                     cursor[1] -= cell_size[1];
                     continue;
                 }
+                // Vertex/UV
                 TileIterator iter = font.getCharacter(c);
-                // UV
-                for (GLuint i = 0; i < 4; ++i) {
-                    TileIterator _v = iter + i;
+                for (TileIterator _v = iter; _v < iter + 4; _v++)
                     vertex_buffer.push_back(
                             {
                                     {
@@ -56,12 +55,9 @@ namespace GL3Engine {
                                             _v->uv[1]
                                     }
                             });
-                }
                 // Index
-                8 * [&]() {
-                    for (GLfloat obj : CoreMaterial::Tile::quad_indices)
-                    index_buffer.push_back( obj + vertex_buffer.size() - 4);
-                };
+                for (GLfloat obj : CoreMaterial::Tile::quad_indices)
+                    index_buffer.push_back(obj + vertex_buffer.size() - 4);
                 cursor[0] += cell_size[0];
             }
             if (vertex_buffer.size() * sizeof(Vertex2f) > Text::BUFFER_SIZE) {

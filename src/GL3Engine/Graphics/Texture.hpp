@@ -160,7 +160,8 @@ namespace GL3Engine {
                     DIFFUSE,
                     SPECULAR,
                     ALPHA,
-                    BUMP
+                    BUMP,
+                    BILLBOARD
                 };
 
                 std::string name = "";

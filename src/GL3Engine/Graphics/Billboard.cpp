@@ -9,6 +9,10 @@ namespace GL3Engine {
         void Billboard::passToShader() {
             assert(effect && tex);
             {
+                Camera* cam = scene->getActiveCam();
+                if(!cam)
+                    return;
+
                 effect->setUniform("col", color)
 
                 .setUniform(GL_TEXTURE_2D, "texture", 0, tex->getHandle())
@@ -26,7 +30,7 @@ namespace GL3Engine {
                 glDisable(GL_CULL_FACE);
                 {
                     glBindVertexArray(quad.getVAO());
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
                     glBindVertexArray(0);
                 }
                 glEnable(GL_CULL_FACE);

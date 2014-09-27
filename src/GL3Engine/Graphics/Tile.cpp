@@ -17,16 +17,16 @@ namespace GL3Engine {
                 for (GLfloat j = 0; j < 1.0; j += cell_size[0]) {
                     uv.push_back( {
                             { 0.f, cell_size[1], 0.f },
-                            { j, i } });
+                            { j, i + cell_size[1] } });
                     uv.push_back( {
                             { cell_size[0], cell_size[1], 0.f },
-                            { j + cell_size[0], i } });
-                    uv.push_back( {
-                            { cell_size[0], 0.f, 0.f },
                             { j + cell_size[0], i + cell_size[1] } });
                     uv.push_back( {
+                            { cell_size[0], 0.f, 0.f },
+                            { j + cell_size[0], i } });
+                    uv.push_back( {
                             { 0.f, 0.f, 0.f },
-                            { j, i + cell_size[1] } });
+                            { j, i } });
                 }
         }
     }

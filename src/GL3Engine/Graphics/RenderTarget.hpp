@@ -35,7 +35,7 @@ namespace GL3Engine {
 
             private:
                 GLuint handle = 0, depth_render_buf = 0;
-                Quad2D quad;
+                Quad quad;
                 TextureMap textures;
 
             public:
