@@ -53,6 +53,10 @@ namespace GL3Engine {
             setUniform(variable, p.matrix, 3, GL_FLOAT_VEC3);
             return *this;
         }
+        Shader& Shader::setUniform(c_str variable, const CoreMatrix::Vec2& p) {
+            setUniform(variable, p.matrix, 2, GL_FLOAT_VEC2);
+            return *this;
+        }
         
         Shader& Shader::setUniform(c_str variable, GLfloat value) {
             setUniform(variable, &value, 1, GL_FLOAT);

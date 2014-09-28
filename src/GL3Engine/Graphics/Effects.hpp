@@ -59,6 +59,7 @@ namespace GL3Engine {
                 Shader& setUniform(c_str, const CoreMatrix::Matrix<GLfloat>&);
                 Shader& setUniform(c_str, const CoreMatrix::Vec4&);
                 Shader& setUniform(c_str, const CoreMatrix::Vec3&);
+                Shader& setUniform(c_str, const CoreMatrix::Vec2&);
 
                 GLint getProgram() const {
                     return program;

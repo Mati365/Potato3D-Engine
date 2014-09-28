@@ -75,8 +75,8 @@ namespace Game {
                 REQUIRE_RES(GL3Engine::CoreMaterial::Texture,
                         "sprites/billboard.png"))
                 .getTransform()
-                .mul(MatMatrix::scale( { .5f, .5f, .5f }))
-                .mul(MatMatrix::translate( { 0.f, 2.f, -2.f }));
+                .mul(MatMatrix::translate( { .5f, .5f, .5f }))
+                .mul(MatMatrix::scale( { .25f, .25f, .25f }));
 
         scene.createSceneNode<GL3Engine::CoreFont::Text>()
                 .setText("bla bla bla czcionki testuje")

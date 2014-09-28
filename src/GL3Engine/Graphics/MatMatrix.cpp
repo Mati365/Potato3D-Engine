@@ -211,7 +211,8 @@ namespace GL3Engine {
             return {
                 a.Y() * b.Z() - a.Z() * b.Y(),
                 a.Z() * b.X() - a.X() * b.Z(),
-                a.X() * b.Y() - a.Y() * b.X()
+                a.X() * b.Y() - a.Y() * b.X(),
+                1.f
             };
         }
         GLfloat MatMatrix::dot(
