@@ -35,7 +35,6 @@ namespace GL3Engine {
 
             private:
                 GLuint handle = 0, depth_render_buf = 0;
-                Quad quad;
                 TextureMap textures;
 
             public:
@@ -47,10 +46,14 @@ namespace GL3Engine {
                 void begin() override;
                 void end() override;
 
-                RenderQuad& setSize(const CoreMatrix::Vec2i&) override;
+                RenderQuad& attachDepthTex();
+                RenderQuad& attachColorTex();
                 RenderQuad& attachTex(GLuint, CoreMaterial::Texture*,
-                        GLint tex_target = -1);
-                RenderQuad& setRenderFace(GLenum, GLuint);
+                        GLint face = -1);
+                RenderQuad& setRenderFace(GLenum, CoreMaterial::Texture*,
+                        GLuint);
+
+                RenderQuad& setSize(const CoreMatrix::Vec2i&) override;
                 RenderQuad& setDrawBuffer(const std::vector<GLenum>&);
 
                 const CoreMaterial::Texture* getAttachment(GLenum attachment) {

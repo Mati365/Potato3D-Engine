@@ -44,10 +44,8 @@ layout(std140) uniform LightBlock {
 	float		light_count;
 };
 struct ShadowMap {
-	samplerCube	point;
-	sampler2D	direct;
+	samplerCubeShadow	point;
 };
-
 // 48B + 12B + 4B = 64B
 struct Material { // 136B size
 	vec4				col[3]; 			// 48B
@@ -61,7 +59,7 @@ layout(std140) uniform MaterialBlock {
 };
 
 uniform	sampler2DArray		texture_pack;
-uniform	ShadowMap			shadow_maps[MAX_LIGHTS];
+uniform	ShadowMap			shadow_map[MAX_LIGHTS];
 
 #define	GET_MATERIAL_UV_TEX(uv, type)	texture(texture_pack, vec3(uv , frag.mtl * (BUMP+1) + type))
 #define	GET_MATERIAL_TEX(type)			GET_MATERIAL_UV_TEX(vec2(frag.uv.x, 1.f - frag.uv.y), type)
@@ -81,12 +79,13 @@ void calcLight(in Light light, in int index) {
 	vec3	light_normal,
 			light_viewspace	=	(vec4(light.pos, 1.f) * frag.v).xyz;
 	float	dist_prop, 
-			shadow_factor	=	1.f;
+			shadow_factor	=	1.f,
+			light_dist		=	length(abs(frag.pos - light_viewspace));
 		
 	switch(light.type) {
 		case POINT_LIGHT:
 			light_normal 	= 	normalize(light_viewspace - frag.pos) * frag.surface2view;
-			dist_prop 		= 	1.f / (1.f + (.5f * pow(length(abs(frag.pos - light_viewspace)), 1.f)));
+			dist_prop 		= 	1.f / (1.f + (.5f * pow(light_dist, 1.f)));
 		break;
 		
 		case DIRECT_LIGHT:

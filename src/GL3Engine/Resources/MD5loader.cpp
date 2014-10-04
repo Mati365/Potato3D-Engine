@@ -59,7 +59,7 @@ namespace GL3Engine {
                 switch (headers[token]) {
                     case MD5Version:
                         fp >> token;
-                        if (Tools::stringTo<GLuint>(token) != 10) {
+                        if (std::stoi(token) != 10) {
                             LOG(ERROR, "Unsupported md5 version!");
                             return;
                         }

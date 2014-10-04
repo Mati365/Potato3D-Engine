@@ -17,7 +17,7 @@ namespace IO {
     extern std::string readString(std::ifstream&);
 
     template<typename T> inline T readNumber(std::ifstream& fp) {
-        return Tools::stringTo<T>(readString(fp));
+        return std::stof(readString(fp));
     }
     template<typename T> inline std::ifstream& readNumber(std::ifstream& fp,
             T& num) {

@@ -11,12 +11,6 @@ namespace GL3Engine {
             public:
                 MaterialQuad(const CoreLoader::MaterialTextureData&);
         };
-        class Quad :
-                     public Shape2D {
-            public:
-                Quad();
-        };
-
         /**
          * Billboard, nie obowiązuje go oświetlenie,
          * szybszy niż FlatShape
@@ -28,7 +22,6 @@ namespace GL3Engine {
             private:
                 CoreMaterial::Texture* tex = nullptr;
                 CoreType::Color color = { 1.f, 1.f, 1.f, 1.f };
-                Quad quad;
 
             public:
                 Billboard();

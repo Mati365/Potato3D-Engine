@@ -142,8 +142,6 @@ namespace GL3Engine {
             glActiveTexture(GL_TEXTURE0 + flag);
             glBindTexture(texture_type, handle);
             glProgramUniform1i(program, loc, flag);
-            glDisable(GL_TEXTURE_CUBE_MAP);
-            
             return *this;
         }
         Shader& Shader::setUniform(

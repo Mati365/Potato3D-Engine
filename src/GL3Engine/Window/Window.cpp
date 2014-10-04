@@ -9,7 +9,8 @@ namespace GL3Engine {
             window = SDL_CreateWindow(
                     "Debug 3D",
                     SDL_WINDOWPOS_UNDEFINED,
-                    SDL_WINDOWPOS_UNDEFINED, bounds.X(), bounds.Y(),
+                    SDL_WINDOWPOS_UNDEFINED,
+                    bounds.X(), bounds.Y(),
                     SDL_WINDOW_OPENGL);
             SDL_SetRelativeMouseMode(SDL_TRUE);
             return window != nullptr;

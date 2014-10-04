@@ -87,20 +87,7 @@ namespace Tools {
     }
     extern size_t hashString(c_str);
     extern std::vector<std::string> tokenize(c_str, char);
-    
-    /** Konwersje */
-    template<typename T> T stringTo(c_str str) {
-        std::istringstream iss(str);
-        T num;
-        iss >> num;
-        return num;
-    }
-    template<typename T> std::string toString(const T& num) {
-        std::ostringstream ss;
-        ss << num;
-        return ss.str();
-    }
-    
+
     template<typename T> T toRad(const T& v) {
         return v * 180.f / 3.145f;
     }

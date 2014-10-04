@@ -31,24 +31,6 @@ namespace GL3Engine {
                         /** MTL */0
                 }
         };
-        std::vector<Vertex2f> quad2d_vert_array = {
-                {
-                        /** POS */-1.f, -1.f, 0.f,
-                        /** Tex */0.f, 0.f
-                },
-                {
-                        /** POS */1.f, -1.f, 0.f,
-                        /** Tex */1.f, 0.f
-                },
-                {
-                        /** POS */1.f, 1.f, 0.f,
-                        /** Tex */1.f, 1.f
-                },
-                {
-                        /** POS */-1.f, 1.f, 0.f,
-                        /** Tex */0.f, 1.f
-                },
-        };
         MaterialQuad::MaterialQuad(const CoreLoader::MaterialTextureData& tex)
                 :
                   Shape3D(
@@ -76,22 +58,6 @@ namespace GL3Engine {
             material->col[Material::DIFFUSE] = {.5f, .5f, .5f, 1.f};
 
             setMaterials( { material });
-        }
-        Quad::Quad()
-                :
-                  Shape2D(
-                          {
-                                  &quad2d_vert_array[0],
-                                  quad2d_vert_array.size() * sizeof(Vertex2f),
-                                  GL_ARRAY_BUFFER, 0,
-                                  GL_STATIC_DRAW
-                          },
-                          {
-                                  CoreMaterial::Tile::quad_indices,
-                                  6 * sizeof(GLushort),
-                                  GL_ELEMENT_ARRAY_BUFFER, 0,
-                                  GL_STATIC_DRAW
-                          }) {
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Game {
     TYPE_IMPORT(GL3Engine::CoreMatrix, Vec2i);
     TYPE_IMPORT(GL3Engine::CoreMatrix, MatMatrix);
     TYPE_IMPORT(GL3Engine::Resources, GlobalResourceManager);
+    TYPE_IMPORT(GL3Engine::CoreMaterial, Texture);
 
     GameScreen::GameScreen(Window* _wnd)
             :
@@ -75,8 +76,15 @@ namespace Game {
                 REQUIRE_RES(GL3Engine::CoreMaterial::Texture,
                         "sprites/billboard.png"))
                 .getTransform()
-                .mul(MatMatrix::translate( { .5f, .5f, .5f }))
+                .mul(MatMatrix::translate( { .5f, .5f, 2.5f }))
                 .mul(MatMatrix::scale( { .25f, .25f, .25f }));
+        scene.createSceneNode<Billboard>()
+                .setTexture(
+                REQUIRE_RES(GL3Engine::CoreMaterial::Texture,
+                        "sprites/tree.png"))
+                .getTransform()
+                .mul(MatMatrix::translate( { .5f, .45f, .5f }))
+                .mul(MatMatrix::scale( { .5f, .5f, .25f }));
 
         scene.createSceneNode<GL3Engine::CoreFont::Text>()
                 .setText("bla bla bla czcionki testuje")
@@ -103,6 +111,8 @@ namespace Game {
                 dynamic_cast<RenderQuad*>(
                 &scene.createSceneNode<RenderQuad>()
                         .setSize(scene.getRenderResolution()));
+        fbo->attachColorTex()
+                .attachDepthTex();
     }
     void GameScreen::draw() {
         scene.draw();
@@ -112,7 +122,10 @@ namespace Game {
             blur = 0.f;
 
         fbo->getEffectMgr().setEffectParam("blur", GL_FLOAT)[0] = blur;
-        mesh->getTransform().mul(MatMatrix::rotate(.0001f, { 0.f, 1.f, 0.f }));
+        mesh->getTransform().mul(MatMatrix::rotate(.01f, { 0.f, 1.f, 0.f }));
+#ifdef DEBUG
+        GL3Engine::GPU::GPUutils::showErrors();
+#endif
     }
     
     GLboolean GameScreen::getKeyEvent(GLchar key) {

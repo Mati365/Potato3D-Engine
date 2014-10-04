@@ -159,6 +159,12 @@ namespace GL3Engine {
             }
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_DEPTH_TEXTURE_MODE,
+            GL_LUMINANCE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE,
+            GL_COMPARE_R_TO_TEXTURE);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC,
+            GL_LEQUAL);
             glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         }
     }

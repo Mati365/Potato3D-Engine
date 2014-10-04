@@ -20,7 +20,7 @@ namespace GL3Engine {
             while ((err = glGetError()) != GL_NO_ERROR)
                 cout << "_GL: "
                         << (IS_IN_MAP(gl_errors, err) ? gl_errors[err] :
-                                                        Tools::toString(
+                                                        std::to_string(
                                                                 (GLint) err))
                         << endl;
         }

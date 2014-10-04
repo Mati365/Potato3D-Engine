@@ -47,7 +47,7 @@ namespace GL3Engine {
 #define DEFINE_3DVEC(header_type, mtl_type) \
             if(active_header==header_type) mat_data->first->mtl_type = getVec3D(it);
 #define DEFINE_F_1DVEC(header_type, mtl_type) \
-            if(active_header==header_type) mat_data->first->mtl_type = Tools::stringTo<GLfloat>(*it);
+            if(active_header==header_type) mat_data->first->mtl_type = std::stof(*it);
 #define DEFINE_1DTEX(header_type, tex_type) \
             if(active_header==header_type) mat_data->second[tex_type] = file_dir + *it;
 

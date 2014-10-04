@@ -14,18 +14,35 @@ namespace GL3Engine {
             setSize(_size);
         }
 
+        RenderQuad& RenderQuad::attachColorTex() {
+            attachTex(GL_COLOR_ATTACHMENT0,
+                    new Texture(size, Texture::default_tex_flags));
+            glDrawBuffer( { GL_COLOR_ATTACHMENT0 });
+            return *this;
+        }
+        RenderQuad& RenderQuad::attachDepthTex() {
+            attachTex(GL_DEPTH_ATTACHMENT,
+                    new Texture(size,
+                            { GL_DEPTH_COMPONENT, GL_FLOAT,
+                                    Texture::default_tex_flags.flags,
+                                    GL_TEXTURE_2D
+                            }));
+            return *this;
+        }
         RenderQuad& RenderQuad::attachTex(GLuint attachment, Texture* tex,
-                GLint tex_target) {
+                GLint face) {
             assert(tex);
+            if (!textures.size())
+                create();
 
             glBindFramebuffer(GL_FRAMEBUFFER, handle);
             glFramebufferTexture2D(GL_FRAMEBUFFER,
                     attachment,
-                    tex_target > 0 ? tex_target : tex->getTexFlags().tex_type,
+                    face > 0 ? face : tex->getTexFlags().tex_type,
                     tex->getHandle(), 0);
-
             assert(
-                    glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+                    glCheckFramebufferStatus(GL_FRAMEBUFFER)
+                    == GL_FRAMEBUFFER_COMPLETE);
             textures[attachment].reset(tex);
             return *this;
         }
@@ -33,6 +50,8 @@ namespace GL3Engine {
             if (handle)
                 glDeleteFramebuffers(1, &handle);
             glGenFramebuffers(1, &handle);
+            if (!effect)
+                setEffect(REQUIRE_RES(CoreEffect::Shader, DEFAULT_FBO_SHADER));
         }
 
         RenderQuad& RenderQuad::setDrawBuffer(const vector<GLenum>& buf) {
@@ -40,22 +59,25 @@ namespace GL3Engine {
             glBindFramebuffer(GL_FRAMEBUFFER, handle);
             return *this;
         }
-        RenderQuad& RenderQuad::setRenderFace(GLenum attachment, GLuint face) {
-            if (!IS_IN_MAP(textures, attachment))
+        RenderQuad& RenderQuad::setRenderFace(GLenum attachment, Texture* tex,
+                GLuint face) {
+            if (!IS_IN_MAP(textures, attachment) || !tex)
                 return *this;
 
-            glBindTexture(textures[attachment]->getTexFlags().tex_type, 0);
-
             glBindFramebuffer(GL_FRAMEBUFFER, handle);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, face,
-                    textures[attachment]->getHandle(), 0);
-            glDrawBuffer(attachment);
+            glFramebufferTexture2D(GL_FRAMEBUFFER,
+                    attachment,
+                    face,
+                    tex->getHandle(), 0);
+            if (attachment != GL_DEPTH_ATTACHMENT)
+                glDrawBuffer( { attachment });
 
             glViewport(0, 0, size[0], size[1]);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             assert(
-                    glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+                    glCheckFramebufferStatus(GL_FRAMEBUFFER)
+                    == GL_FRAMEBUFFER_COMPLETE);
             return *this;
         }
         void RenderQuad::passToShader() {
@@ -81,13 +103,7 @@ namespace GL3Engine {
             assert(effect);
             {
                 passToShader();
-                glDisable(GL_CULL_FACE);
-                glBindVertexArray(quad.getVAO());
-                {
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-                }
-                glBindVertexArray(0);
-                glEnable(GL_CULL_FACE);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             }
             if (scene)
                 scene->setRenderTarget(this);
@@ -99,22 +115,6 @@ namespace GL3Engine {
 
         RenderQuad& RenderQuad::setSize(const Vec2i& size) {
             this->size = size;
-
-            if (!effect)
-                setEffect(REQUIRE_RES(CoreEffect::Shader, DEFAULT_FBO_SHADER));
-            create();
-            if (!IS_IN_MAP(textures, GL_COLOR_ATTACHMENT0)) {
-                attachTex(GL_COLOR_ATTACHMENT0,
-                        new Texture(size, Texture::default_tex_flags));
-                glDrawBuffer( { GL_COLOR_ATTACHMENT0 });
-            }
-            if (!IS_IN_MAP(textures, GL_DEPTH_ATTACHMENT)) {
-                CoreMaterial::TextureFlags depth_flags =
-                        { GL_DEPTH_COMPONENT, GL_FLOAT,
-                                Texture::default_tex_flags.flags,
-                                GL_TEXTURE_2D };
-                attachTex(GL_DEPTH_ATTACHMENT, new Texture(size, depth_flags));
-            }
             return *this;
         }
     }

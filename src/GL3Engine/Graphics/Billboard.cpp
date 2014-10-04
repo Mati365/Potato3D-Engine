@@ -30,13 +30,7 @@ namespace GL3Engine {
             assert(effect);
             {
                 passToShader();
-                glDisable(GL_CULL_FACE);
-                {
-                    glBindVertexArray(quad.getVAO());
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-                    glBindVertexArray(0);
-                }
-                glEnable(GL_CULL_FACE);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             }
         }
     }

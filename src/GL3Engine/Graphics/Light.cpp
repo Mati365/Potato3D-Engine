@@ -57,13 +57,15 @@ namespace GL3Engine {
                 return;
 
             // Wysyłanie bloku informacji o pozycji dir itp
-            Shader* mesh_shader = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER);
             std::vector<LightData> data(objects.size() - 1);
+            Shader *mesh_shader = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER),
+                    *shadow_shader = REQUIRE_RES(Shader, DEFAULT_SHADOW_SHADER);
+
+            shadow_shader->begin();
             for (GLuint i = 0; i < objects.size(); ++i) {
                 Light* light = objects[i];
                 if (!IS_SET_FLAG(light->getType(), LightData::ENABLED))
                     continue;
-                // Shadow mapy
                 glCullFace(GL_FRONT);
                 {
                     light->update();
@@ -72,18 +74,18 @@ namespace GL3Engine {
                                                                          "direct";
                     mesh_shader->setUniform(
                             light->getShadowTex()->getTexFlags().tex_type,
-                            "shadow_maps[" + Tools::toString(i)
-                                    + "]." + variable,
+                            "shadow_map[" + std::to_string(i) + "]." + variable,
                             i + 1,
                             light->getShadowTex()->getHandle());
                 }
                 glCullFace(GL_BACK);
                 data.push_back(light->getData());
             }
-            //objects.clear();
+            shadow_shader->end();
 
-            GLfloat size = data.size(), data_len = data.size()
-                    * sizeof(LightData);
+            // Wysyłanie pozycji świateł
+            GLfloat size = data.size(),
+                    data_len = data.size() * sizeof(LightData);
             glBindBuffer(GL_UNIFORM_BUFFER, buffer);
             {
                 glBufferSubData(GL_UNIFORM_BUFFER, 0, data_len, &data[0]);
@@ -113,15 +115,13 @@ namespace GL3Engine {
 
         // ---- PointLight
         PointLight::PointLight() {
-            cube = new CubeTexture( { 32, 32 },
-                    TextureFlags { GL_RED, GL_FLOAT,
+            cube = new CubeTexture( { 256, 256 },
+                    TextureFlags { GL_RGBA, GL_UNSIGNED_BYTE,
                             Texture::CLAMP_TO_EDGE | Texture::NEAREST,
-                            GL_TEXTURE_CUBE_MAP });
-            shadow_fbo.attachTex(GL_COLOR_ATTACHMENT0,
-                    cube,
-                    GL_TEXTURE_CUBE_MAP_POSITIVE_X);
+                            GL_TEXTURE_CUBE_MAP
+                    });
             shadow_fbo.setSize(cube->getSize());
-
+            shadow_fbo.attachDepthTex();
             setType(LightData::ENABLED | LightData::POINT);
         }
         void PointLight::update() {
@@ -132,30 +132,22 @@ namespace GL3Engine {
                     1.f
             };
             Camera* cam = world->getActiveCamera();
-            Shader* shadow_effect = REQUIRE_RES(Shader, DEFAULT_SHADOW_SHADER);
-
             for (auto& side : std::make_pair(cube_cams,
                     cube_cams + CubeTexture::CUBE_TEX_FACES)) {
-                Camera cam = {
+                Camera _cam = {
                         pos + side.cam->getPos(),
                         pos + side.cam->getTarget()
                 };
-                world->setCam(&cam);
-                shadow_fbo.setRenderFace(GL_COLOR_ATTACHMENT0, side.face);
-
-                shadow_effect->begin();
-                shadow_effect->setUniform("light_pos", pos);
+                world->setCam(&_cam);
+                shadow_fbo.setRenderFace(GL_COLOR_ATTACHMENT0, cube, side.face);
                 for (auto& node : *scene) {
                     if (node->getHash() != CLASS_HASH(Mesh))
                         continue;
                     node->pushAttrib();
-                    {
-                        node->setAttrib(SceneObject::Mesh::Flags::NORMAL);
-                        node->draw();
-                    }
+                    node->setAttrib(SceneObject::Mesh::Flags::NORMAL);
+                    node->draw();
                     node->popAttrib();
                 }
-                shadow_effect->end();
             }
             world->setCam(cam);
         }
