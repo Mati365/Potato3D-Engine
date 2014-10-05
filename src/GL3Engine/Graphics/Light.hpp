@@ -21,10 +21,8 @@ namespace GL3Engine {
                 CoreType::POS pos = { 0.f, 0.f, 0.f };
                 GLfloat stride = 0.f; // randomowa liczba
 
-                CoreType::COL spec_col = {
-                        1.f, 1.f, 1.f, 1.f };
-                CoreType::COL diff_col = {
-                        1.f, 1.f, 1.f, 1.f };
+                CoreType::COL spec_col = { 1.f, 1.f, 1.f, 1.f };
+                CoreType::COL diff_col = { 1.f, 1.f, 1.f, 1.f };
 
                 GLfloat ambient_intensity = 1.f;
                 GLfloat diffuse_intensity = 1.f;
@@ -142,13 +140,8 @@ namespace GL3Engine {
                 GLuint buffer;
 
             public:
-                LightBatch() {
-                    createBuffer();
-                }
+                LightBatch();
                 void update() override;
-
-            private:
-                void createBuffer();
         };
     }
 }

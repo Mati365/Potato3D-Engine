@@ -15,12 +15,10 @@
 #include "StockUtils.hpp"
 
 namespace std {
-    template<typename T> inline T* begin(const pair<T*, T*>& p)
-            {
+    template<typename T> inline T* begin(const pair<T*, T*>& p) {
         return p.first;
     }
-    template<typename T> inline T* end(const pair<T*, T*>& p)
-            {
+    template<typename T> inline T* end(const pair<T*, T*>& p) {
         return p.second;
     }
 }
@@ -28,30 +26,13 @@ namespace GL3Engine {
     GLuint operator*(GLuint, std::function<void(void)>);
 
     namespace CoreInterface {
-        template<typename T> class MemAlloc {
-            public:
-                virtual T* createObject() = 0;
-                virtual void releaseMemory() = 0;
-                virtual ~MemAlloc() {
-                }
-        };
-        template<typename T> class Singleton {
-            protected:
-                Singleton() {
-                }
-
-            public:
-                static inline T& getInstance() {
-                    static T t;
-                    return t;
-                }
-        };
         class NonCopyable {
             public:
                 NonCopyable() {
                 }
                 virtual ~NonCopyable() {
                 }
+
             private:
                 NonCopyable& operator=(const NonCopyable&) {
                     return *this;
@@ -59,7 +40,21 @@ namespace GL3Engine {
                 NonCopyable(const NonCopyable&) {
                 }
         };
-
+        template<typename T> class MemAlloc {
+            public:
+                virtual T* createObject() = 0;
+                virtual void releaseMemory() = 0;
+                virtual ~MemAlloc() {
+                }
+        };
+        template<typename T> class Singleton :
+                                               public CoreInterface::NonCopyable {
+            public:
+                static inline T& getInstance() {
+                    static T t;
+                    return t;
+                }
+        };
         template<typename T> class ContainerManager :
                                                       public NonCopyable,
                                                       public Singleton<

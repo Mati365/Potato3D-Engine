@@ -2,11 +2,8 @@
 
 namespace GL3Engine {
     namespace GPU {
-        GLuint Allocator::allocBuffer(
-                const BufferData& data,
-                GLboolean bind) {
+        GLuint Allocator::allocBuffer(const BufferData& data, GLboolean bind) {
             GLuint buffer = 0;
-
             glGenBuffers(1, &buffer);
             glBindBuffer(data.type, buffer);
             glBufferData(data.type, data.len, data.data, data.vbo_draw_type);
@@ -27,7 +24,7 @@ namespace GL3Engine {
         }
         Allocator::~Allocator() {
             for (auto& el : mem_map)
-                deallocBuffer({ el.first });
+                deallocBuffer( { el.first });
         }
     }
 }

@@ -1,5 +1,7 @@
 #ifndef ATTRIBCONTAINER_HPP_
 #define ATTRIBCONTAINER_HPP_
+#include <ctime>
+
 #include "../Tools.hpp"
 
 namespace GL3Engine {
@@ -57,6 +59,25 @@ namespace GL3Engine {
                 }
 
                 virtual ~AttribContainer() {
+                }
+        };
+    }
+    namespace CoreUtils {
+        class Profiler :
+                         public CoreAttrib::ScopedContainer,
+                         public CoreInterface::Singleton<Profiler> {
+            private:
+                std::clock_t time;
+
+            public:
+                void begin() override {
+                    time = std::clock();
+                }
+                void end() override {
+                    LOG(WARNING,
+                            "Profiler:" +
+                            std::to_string((std::clock() - time) / (GLdouble)(CLOCKS_PER_SEC / 1000))
+                            + "ms");
                 }
         };
     }

@@ -25,6 +25,7 @@ namespace GL3Engine {
         }
 
         void MatrixStack::switchMode(GLuint mode) {
+            glClearColor(0.f, 0.f, 0.f, 1.f);
             switch (mode) {
                 case Mode::_3D: {
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -33,7 +34,8 @@ namespace GL3Engine {
                     glEnable(GL_DEPTH_TEST);
                     {
                         attrib.proj = MatMatrix::perspective(45.f,
-                                resolution[0] / resolution[1], .1f, 100.f);
+                                resolution[0] / resolution[1],
+                                .1f, 100.f);
                         MatMatrix::identity(1, &attrib.model);
                         updateCameraCoords();
                     }
@@ -48,11 +50,17 @@ namespace GL3Engine {
                         attrib.proj =
                                 MatMatrix::orthof(
                                         {
-                                                Vec2 { -resolution[0] / 2.f, resolution[0]
-                                                        / 2.f },
-                                                Vec2 { -resolution[1] / 2.f, resolution[1]
-                                                        / 2.f },
-                                                Vec2 { 0.f, 1.f },
+                                                Vec2 {
+                                                        -resolution[0] / 2.f,
+                                                        resolution[0] / 2.f
+                                                },
+                                                Vec2 {
+                                                        -resolution[1] / 2.f,
+                                                        resolution[1] / 2.f
+                                                },
+                                                Vec2 {
+                                                        0.f, 1.f
+                                                },
                                         });
                         attrib.vp_matrix = attrib.proj;
                         MatMatrix::identity(2, &attrib.view, &attrib.model);

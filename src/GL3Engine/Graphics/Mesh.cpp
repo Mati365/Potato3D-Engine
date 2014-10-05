@@ -31,7 +31,7 @@ namespace GL3Engine {
                         GET_SCENE_FLAG(scene, MATERIAL_BUFFER_BINDING),
                         GL_STREAM_DRAW,
                         nullptr,
-                        &material_cache[0],
+                        nullptr,
                         "MaterialBlock");
             } catch (const GLint&) {
                 material_cache.clear();

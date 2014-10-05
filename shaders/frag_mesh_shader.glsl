@@ -115,8 +115,7 @@ void calcLight(in Light light, in int index) {
 								dist_prop *
 								light.specular_col * 
 								light.specular_intensity).rgb;
-	}
-							
+	}						
 	// Całość	
 	color += vec4(MATERIAL.col[AMBIENT].rgb * light.ambient_intensity, 0.f);
 	if(IS_MATERIAL_USED(DIFFUSE)) {

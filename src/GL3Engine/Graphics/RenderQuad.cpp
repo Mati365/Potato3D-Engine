@@ -94,10 +94,6 @@ namespace GL3Engine {
 
         void RenderQuad::begin() {
             glBindFramebuffer(GL_FRAMEBUFFER, handle);
-            {
-                glViewport(0, 0, size[0], size[1]);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            }
         }
         void RenderQuad::draw() {
             assert(effect);
@@ -110,7 +106,6 @@ namespace GL3Engine {
         }
         void RenderQuad::end() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glViewport(0, 0, size[0], size[1]);
         }
 
         RenderQuad& RenderQuad::setSize(const Vec2i& size) {

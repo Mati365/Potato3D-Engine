@@ -1,6 +1,7 @@
 #include <stdarg.h>
 
 #include "Matrix.hpp"
+#include "AttribContainer.hpp"
 
 namespace GL3Engine {
     namespace CoreMatrix {
@@ -207,6 +208,21 @@ namespace GL3Engine {
             return _v;
         }
 
+        GLfloat MatMatrix::length(const Vec3& v) {
+            __m128 a = _mm_set_ps(1.f, v.matrix[2], v.matrix[1], v.matrix[0]);
+            return _mm_cvtss_f32(_mm_sqrt_ss(_mm_dp_ps(a, a, 0x71)));
+        }
+        GLfloat MatMatrix::dot(
+                const Vec3& a, const Vec3& b) {
+            return _mm_cvtss_f32(
+                    _mm_dp_ps(
+                            _mm_set_ps(1.f, a.matrix[2], a.matrix[1],
+                                    a.matrix[0]),
+                            _mm_set_ps(1.f, b.matrix[2], b.matrix[1],
+                                    b.matrix[0]),
+                            0x71)
+                            );
+        }
         Vec4 MatMatrix::cross(const Vec3& a, const Vec3& b) {
             return {
                 a.Y() * b.Z() - a.Z() * b.Y(),
@@ -214,10 +230,6 @@ namespace GL3Engine {
                 a.X() * b.Y() - a.Y() * b.X(),
                 1.f
             };
-        }
-        GLfloat MatMatrix::dot(
-                const Vec3& a, const Vec3& b) {
-            return a.X() * b.X() + a.Y() * b.Y() + a.Z() * b.Z();
         }
         GLfloat MatMatrix::distance(const Vec3& a, const Vec3& b) {
             return sqrt((a.X() - b.X()) * (a.X() - b.X()) +

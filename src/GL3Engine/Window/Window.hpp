@@ -3,7 +3,6 @@
 #include <SDL2/SDL.h>
 
 #include "../GL3Engine.hpp"
-#include "../Graphics/Primitives.hpp"
 
 namespace GL3Engine {
     namespace CoreWindow {
@@ -43,10 +42,10 @@ namespace GL3Engine {
                 void setRenderer(Renderer* renderer) {
                     this->renderer = renderer;
                 }
+
                 Renderer* getRenderer() {
                     return renderer;
                 }
-
                 const CoreMatrix::Vec2i& getBounds() const {
                     return bounds;
                 }

@@ -15,6 +15,7 @@ namespace GL3Engine {
         TYPE_IMPORT(CoreMaterial, TextureFlags);
         TYPE_IMPORT(CoreMaterial, Texture);
         TYPE_IMPORT(GPU, Allocator);
+        TYPE_IMPORT(CoreEffect, UniformBufferManager);
 
         TYPE_IMPORT(std, unique_ptr);
         TYPE_IMPORT(std, string);
@@ -41,21 +42,16 @@ namespace GL3Engine {
                 DEF_FACE(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0.f, 0.f, 1.f, 0.f, -1.f, 0.f),
                 DEF_FACE(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0.f, 0.f, -1.f, 0.f, -1.f, 0.f),
                 };
-
-        void LightBatch::createBuffer() {
-            buffer = Allocator::getInstance().allocBuffer(
-                    {
-                            nullptr, sizeof(Light) * MAX_LIGHTS,
-                            GL_UNIFORM_BUFFER, 0,
-                            GL_STREAM_DRAW
-                    },
-                    false);
-            glBindBufferBase(GL_UNIFORM_BUFFER, BINDING_POINT, buffer);
+        LightBatch::LightBatch() {
+            buffer = UniformBufferManager::getInstance().regBuffer(
+                    nullptr,
+                    GL_STREAM_DRAW,
+                    sizeof(LightData) * MAX_LIGHTS + sizeof(GLfloat),
+                    BINDING_POINT);
         }
         void LightBatch::update() {
             if (objects.empty())
                 return;
-
             // Wysyłanie bloku informacji o pozycji dir itp
             std::vector<LightData> data(objects.size() - 1);
             Shader *mesh_shader = REQUIRE_RES(Shader, DEFAULT_MESH_SHADER),
@@ -82,18 +78,13 @@ namespace GL3Engine {
                 data.push_back(light->getData());
             }
             shadow_shader->end();
-
             // Wysyłanie pozycji świateł
-            GLfloat size = data.size(),
-                    data_len = data.size() * sizeof(LightData);
-            glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-            {
-                glBufferSubData(GL_UNIFORM_BUFFER, 0, data_len, &data[0]);
-                glBufferSubData(GL_UNIFORM_BUFFER,
-                        MAX_LIGHTS * sizeof(LightData),
-                        sizeof(GLfloat), &size);
-            }
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            GLfloat size = data.size();
+            UniformBufferManager::getInstance()
+                    .changeBufferData(BINDING_POINT, &data[0],
+                    data.size() * sizeof(LightData))
+                    .changeBufferData(BINDING_POINT, &size, sizeof(GLfloat),
+                    MAX_LIGHTS * sizeof(LightData));
             SET_SCENE_FLAG(scene, LIGHT_SHADER_BINDING, BINDING_POINT);
         }
 
@@ -102,7 +93,8 @@ namespace GL3Engine {
             tex = new Texture(CoreMatrix::Vec2i { 256, 256 },
                     TextureFlags { GL_RED, GL_FLOAT,
                             Texture::CLAMP_TO_EDGE | Texture::NEAREST,
-                            GL_TEXTURE_2D });
+                            GL_TEXTURE_2D
+                    });
 
             shadow_fbo.attachTex(GL_COLOR_ATTACHMENT0,
                     tex,

@@ -29,7 +29,7 @@ namespace Game {
         scene.createSceneNode<FPSCamera>()
                 .setPos( { 0.f, .5f, 1.f, 1.f })
                 .setTarget( { 0.f, .5f, .99f, 1.f });
-        scene.createSceneNode<AxisMesh>();
+//        scene.createSceneNode<AxisMesh>();
         scene.createSceneNode<GL3Engine::CoreLighting::LightBatch>()
                 .regObject(
                 scene.createSceneNode<GL3Engine::CoreLighting::PointLight>()

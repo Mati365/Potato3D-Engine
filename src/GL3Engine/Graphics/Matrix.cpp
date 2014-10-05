@@ -1,4 +1,5 @@
 #include "Matrix.hpp"
+#include "AttribContainer.hpp"
 
 namespace GL3Engine {
     namespace CoreMatrix {
@@ -36,20 +37,44 @@ namespace GL3Engine {
         }
         template<typename T> Matrix<T>& Matrix<T>::operator*=(
                 const Matrix<T>& matrix) {
-            T* temp = new T[rows * matrix.cols];
-            for (GLuint i = 0; i < matrix.cols; ++i)
-                for (GLuint j = 0; j < rows; ++j) {
-                    T sum = 0;
-                    for (GLuint k = 0; k < cols; ++k)
-                        sum += this->matrix[j * cols + k]
-                                * matrix.matrix[k * matrix.cols + i];
-                    temp[j * matrix.cols + i] = sum;
+            if (rows == 4 && cols == 4 &&
+                    matrix.cols == 4 && matrix.rows == 4) {
+                GLfloat temp[16];
+                __m128 row1 = _mm_load_ps((const GLfloat*) &matrix.matrix[0]);
+                __m128 row2 = _mm_load_ps((const GLfloat*) &matrix.matrix[4]);
+                __m128 row3 = _mm_load_ps((const GLfloat*) &matrix.matrix[8]);
+                __m128 row4 = _mm_load_ps((const GLfloat*) &matrix.matrix[12]);
+                for (GLint i = 0; i < 4; i++) {
+                    __m128 brod1 = _mm_set1_ps(this->matrix[4 * i + 0]);
+                    __m128 brod2 = _mm_set1_ps(this->matrix[4 * i + 1]);
+                    __m128 brod3 = _mm_set1_ps(this->matrix[4 * i + 2]);
+                    __m128 brod4 = _mm_set1_ps(this->matrix[4 * i + 3]);
+                    __m128 row = _mm_add_ps(
+                            _mm_add_ps(
+                                    _mm_mul_ps(brod1, row1),
+                                    _mm_mul_ps(brod2, row2)),
+                            _mm_add_ps(
+                                    _mm_mul_ps(brod3, row3),
+                                    _mm_mul_ps(brod4, row4)));
+                    _mm_store_ps(&temp[4 * i], row);
                 }
-            cols = matrix.cols;
-            
-            Tools::safeDelete(this->matrix, true);
-            this->matrix = temp;
+                memcpy(this->matrix, temp, 16 * sizeof(GLfloat));
+            } else {
+                T* temp = new T[rows * matrix.cols];
+                for (GLuint i = 0; i < matrix.cols; ++i)
+                    for (GLuint j = 0; j < rows; ++j) {
+                        // Sumacja
+                        T sum = 0;
+                        for (GLuint k = 0; k < cols; ++k)
+                            sum += this->matrix[j * cols + k]
+                                    * matrix.matrix[k * matrix.cols + i];
+                        temp[j * matrix.cols + i] = sum;
+                    }
+                cols = matrix.cols;
 
+                delete[] this->matrix;
+                this->matrix = temp;
+            }
             return *this;
         }
 

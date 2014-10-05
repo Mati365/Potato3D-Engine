@@ -76,9 +76,7 @@ namespace GL3Engine {
             public:
                 static GLint compileShader(c_str, GLint);
         };
-
         class UniformBufferManager :
-                                     public CoreInterface::NonCopyable,
                                      public CoreInterface::Singleton<
                                              UniformBufferManager> {
             private:
@@ -90,7 +88,8 @@ namespace GL3Engine {
 
                 void delBuffer(GLuint);
                 GLuint regBuffer(void*, GLuint, GLint, GLuint);
-                void changeBufferData(GLuint, void*, size_t);
+                UniformBufferManager& changeBufferData(GLuint, void*, size_t,
+                        size_t offset = 0);
 
                 ~UniformBufferManager() {
                     for (auto& handle : ubo)

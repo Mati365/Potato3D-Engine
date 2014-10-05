@@ -6,6 +6,8 @@
 #include <array>
 #include <utility>
 #include <GL/glew.h>
+#include <xmmintrin.h> // SSE
+#include <smmintrin.h> // SSE4
 
 #include "../Tools.hpp"
 
@@ -202,9 +204,7 @@ namespace GL3Engine {
                 static void inverse(Mat3*);
                 static Mat3 inverse(const Mat3&);
 
-                static inline GLfloat length(const Vec3& v) {
-                    return sqrt(v.X() * v.X() + v.Y() * v.Y() + v.Z() * v.Z());
-                }
+                static GLfloat length(const Vec3&);
                 static GLfloat distance(const Vec3&, const Vec3&);
 
                 static void normalize(Vec4&);

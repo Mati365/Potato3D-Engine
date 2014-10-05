@@ -33,6 +33,8 @@ namespace GL3Engine {
 
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
+
+            glClearColor(0.f, 0.f, 0.f, 1.f);
         }
         void Window::run() {
             if (!renderer)
@@ -64,11 +66,8 @@ namespace GL3Engine {
                             flags = Flags::STOP;
                             break;
                     }
-                glClearColor(0, 0, 0, 1);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
                 renderer->draw();
-
                 SDL_GL_SwapWindow(window);
             }
             SDL_GL_DeleteContext(gl);

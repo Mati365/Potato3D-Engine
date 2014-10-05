@@ -42,16 +42,17 @@ namespace GL3Engine {
             ubo[binding_point] = handle;
             return handle;
         }
-        void UniformBufferManager::changeBufferData(GLuint binding_slot,
-                void* data,
-                size_t size) {
+        UniformBufferManager& UniformBufferManager::changeBufferData(
+                GLuint binding_slot, void* data,
+                size_t size, size_t offset) {
             if (!IS_IN_MAP(ubo, binding_slot) || !size || !data)
-                return;
+                return *this;
             glBindBuffer(GL_UNIFORM_BUFFER, ubo[binding_slot]);
             {
-                glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
             }
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
+            return *this;
         }
     }
 }
